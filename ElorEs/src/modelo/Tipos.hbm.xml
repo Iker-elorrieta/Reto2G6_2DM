@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generated 8 ene 2026, 12:20:55 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class catalog="elorserv" name="modelo.Tipos" optimistic-lock="none" table="tipos">
+        <id name="id" type="java.lang.Integer">
+            <column name="id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="name" type="string">
+            <column length="50" name="name" not-null="true" unique="true"/>
+        </property>
+        <property name="nameEu" type="string">
+            <column length="50" name="name_eu"/>
+        </property>
+        <set fetch="select" inverse="true" lazy="true" name="userses" table="users">
+            <key>
+                <column name="tipo_id" not-null="true"/>
+            </key>
+            <one-to-many class="modelo.Users"/>
+        </set>
+    </class>
+</hibernate-mapping>
