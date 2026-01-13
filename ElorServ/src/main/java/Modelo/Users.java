@@ -1,5 +1,5 @@
-package modelo;
-// Generated 8 ene 2026, 12:20:55 by Hibernate Tools 6.5.1.Final
+package Modelo;
+// Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -28,10 +28,10 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
-	private Set matriculacioneses = new HashSet(0);
-	private Set reunionesesForAlumnoId = new HashSet(0);
-	private Set horarioses = new HashSet(0);
-	private Set reunionesesForProfesorId = new HashSet(0);
+	private Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
+	private Set<Reuniones> reunionesesForAlumnoId = new HashSet<Reuniones>(0);
+	private Set<Horarios> horarioses = new HashSet<Horarios>(0);
+	private Set<Reuniones> reunionesesForProfesorId = new HashSet<Reuniones>(0);
 
 	public Users() {
 	}
@@ -45,8 +45,8 @@ public class Users implements java.io.Serializable {
 
 	public Users(Tipos tipos, String email, String username, String password, String nombre, String apellidos,
 			String dni, String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
-			Timestamp updatedAt, Set matriculacioneses, Set reunionesesForAlumnoId, Set horarioses,
-			Set reunionesesForProfesorId) {
+			Timestamp updatedAt, Set<Matriculaciones>  matriculacioneses, Set<Reuniones> reunionesesForAlumnoId, Set<Horarios> horarioses,
+			Set<Reuniones>  reunionesesForProfesorId) {
 		this.tipos = tipos;
 		this.email = email;
 		this.username = username;
@@ -178,35 +178,35 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public Set getMatriculacioneses() {
+	public Set<Matriculaciones> getMatriculacioneses() {
 		return this.matriculacioneses;
 	}
 
-	public void setMatriculacioneses(Set matriculacioneses) {
+	public void setMatriculacioneses(Set<Matriculaciones> matriculacioneses) {
 		this.matriculacioneses = matriculacioneses;
 	}
 
-	public Set getReunionesesForAlumnoId() {
+	public Set<Reuniones> getReunionesesForAlumnoId() {
 		return this.reunionesesForAlumnoId;
 	}
 
-	public void setReunionesesForAlumnoId(Set reunionesesForAlumnoId) {
+	public void setReunionesesForAlumnoId(Set<Reuniones> reunionesesForAlumnoId) {
 		this.reunionesesForAlumnoId = reunionesesForAlumnoId;
 	}
 
-	public Set getHorarioses() {
+	public Set<Horarios> getHorarioses() {
 		return this.horarioses;
 	}
 
-	public void setHorarioses(Set horarioses) {
+	public void setHorarioses(Set<Horarios> horarioses) {
 		this.horarioses = horarioses;
 	}
 
-	public Set getReunionesesForProfesorId() {
+	public Set<Reuniones>  getReunionesesForProfesorId() {
 		return this.reunionesesForProfesorId;
 	}
 
-	public void setReunionesesForProfesorId(Set reunionesesForProfesorId) {
+	public void setReunionesesForProfesorId(Set<Reuniones>  reunionesesForProfesorId) {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 

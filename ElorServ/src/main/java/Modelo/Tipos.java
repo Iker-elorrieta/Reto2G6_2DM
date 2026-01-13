@@ -1,5 +1,5 @@
-package modelo;
-// Generated 8 ene 2026, 12:20:55 by Hibernate Tools 6.5.1.Final
+package Modelo;
+// Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +16,7 @@ public class Tipos implements java.io.Serializable {
 	private Integer id;
 	private String name;
 	private String nameEu;
-	private Set userses = new HashSet(0);
+	private Set<Users> userses = new HashSet<Users>(0);
 
 	public Tipos() {
 	}
@@ -25,7 +25,7 @@ public class Tipos implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public Tipos(String name, String nameEu, Set userses) {
+	public Tipos(String name, String nameEu, Set<Users> userses) {
 		this.name = name;
 		this.nameEu = nameEu;
 		this.userses = userses;
@@ -55,11 +55,11 @@ public class Tipos implements java.io.Serializable {
 		this.nameEu = nameEu;
 	}
 
-	public Set getUserses() {
+	public Set<Users>  getUserses() {
 		return this.userses;
 	}
 
-	public void setUserses(Set userses) {
+	public void setUserses(Set<Users> userses) {
 		this.userses = userses;
 	}
 

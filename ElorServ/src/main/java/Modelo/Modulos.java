@@ -1,5 +1,5 @@
-package modelo;
-// Generated 8 ene 2026, 12:20:55 by Hibernate Tools 6.5.1.Final
+package Modelo;
+// Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class Modulos implements java.io.Serializable {
 	private String nombreEus;
 	private int horas;
 	private byte curso;
-	private Set horarioses = new HashSet(0);
+	private Set<Horarios> horarioses = new HashSet<Horarios>(0);
 
 	public Modulos() {
 	}
@@ -31,7 +31,7 @@ public class Modulos implements java.io.Serializable {
 		this.curso = curso;
 	}
 
-	public Modulos(Ciclos ciclos, String nombre, String nombreEus, int horas, byte curso, Set horarioses) {
+	public Modulos(Ciclos ciclos, String nombre, String nombreEus, int horas, byte curso, Set<Horarios> horarioses) {
 		this.ciclos = ciclos;
 		this.nombre = nombre;
 		this.nombreEus = nombreEus;
@@ -88,11 +88,11 @@ public class Modulos implements java.io.Serializable {
 		this.curso = curso;
 	}
 
-	public Set getHorarioses() {
+	public Set<Horarios> getHorarioses() {
 		return this.horarioses;
 	}
 
-	public void setHorarioses(Set horarioses) {
+	public void setHorarioses(Set<Horarios> horarioses) {
 		this.horarioses = horarioses;
 	}
 
