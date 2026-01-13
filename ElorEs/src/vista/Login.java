@@ -5,9 +5,15 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import controlador.Controlador;
+
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class Login extends JFrame {
 
@@ -17,6 +23,7 @@ public class Login extends JFrame {
 	private JLabel lblContrasena;
 	private JLabel lblUsuario;
 	private JPasswordField passwordField;
+	private Controlador controlador = new Controlador();
 
 	/**
 	 * Launch the application.
@@ -61,6 +68,18 @@ public class Login extends JFrame {
 		passwordField = new JPasswordField();
 		passwordField.setBounds(293, 186, 148, 20);
 		contentPane.add(passwordField);
+		
+		JButton btnLogin = new JButton("Prueba Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String usuario = txtUsuario.getText();
+				char[] contrasena = passwordField.getPassword();
+				String contrasenaStr = new String(contrasena);
+				controlador.mandarDatos(usuario, contrasenaStr);
+			}
+		});
+		btnLogin.setBounds(328, 245, 89, 23);
+		contentPane.add(btnLogin);
 
 	}
 }
