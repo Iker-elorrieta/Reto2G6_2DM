@@ -23,23 +23,7 @@ public class Login extends JFrame {
 	private JLabel lblContrasena;
 	private JLabel lblUsuario;
 	private JPasswordField passwordField;
-	private Controlador controlador = new Controlador();
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Login frame = new Login();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	private JButton btnLogin;
 
 	/**
 	 * Create the frame.
@@ -69,17 +53,36 @@ public class Login extends JFrame {
 		passwordField.setBounds(293, 186, 148, 20);
 		contentPane.add(passwordField);
 		
-		JButton btnLogin = new JButton("Prueba Login");
-		btnLogin.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String usuario = txtUsuario.getText();
-				char[] contrasena = passwordField.getPassword();
-				String contrasenaStr = new String(contrasena);
-				controlador.mandarDatos(usuario, contrasenaStr);
-			}
-		});
+		btnLogin = new JButton("Prueba Login");
+	
 		btnLogin.setBounds(328, 245, 89, 23);
 		contentPane.add(btnLogin);
 
 	}
+
+	public JTextField getTxtUsuario() {
+		return txtUsuario;
+	}
+
+	public void setTxtUsuario(JTextField txtUsuario) {
+		this.txtUsuario = txtUsuario;
+	}
+
+	public JTextField getPasswordField() {
+		return passwordField;
+	}
+
+	public void setPasswordField(JPasswordField passwordField) {
+		this.passwordField = passwordField;
+	}
+
+	public JButton getBtnLogin() {
+		return btnLogin;
+	}
+
+	public void setBtnLogin(JButton btnLogin) {
+		this.btnLogin = btnLogin;
+	}
+	
+	
 }

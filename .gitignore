@@ -1,0 +1,11 @@
+/.metadata/
+# For Java projects
+.mtj.tmp/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+.settings/
