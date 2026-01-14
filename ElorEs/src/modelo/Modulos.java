@@ -19,7 +19,6 @@ public class Modulos implements java.io.Serializable {
 	private String nombreEus;
 	private int horas;
 	private byte curso;
-	private Set horarioses = new HashSet(0);
 
 	public Modulos() {
 	}
@@ -31,13 +30,12 @@ public class Modulos implements java.io.Serializable {
 		this.curso = curso;
 	}
 
-	public Modulos(Ciclos ciclos, String nombre, String nombreEus, int horas, byte curso, Set horarioses) {
+	public Modulos(Ciclos ciclos, String nombre, String nombreEus, int horas, byte curso) {
 		this.ciclos = ciclos;
 		this.nombre = nombre;
 		this.nombreEus = nombreEus;
 		this.horas = horas;
 		this.curso = curso;
-		this.horarioses = horarioses;
 	}
 
 	public Integer getId() {
@@ -88,12 +86,5 @@ public class Modulos implements java.io.Serializable {
 		this.curso = curso;
 	}
 
-	public Set getHorarioses() {
-		return this.horarioses;
-	}
-
-	public void setHorarioses(Set horarioses) {
-		this.horarioses = horarioses;
-	}
 
 }

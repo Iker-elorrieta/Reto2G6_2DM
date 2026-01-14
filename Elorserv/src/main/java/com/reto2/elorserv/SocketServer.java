@@ -38,13 +38,12 @@ public class SocketServer extends Thread {
 		case "login":
 			return login(request);
 		case "get_usuario":
-			Request ok = new Request("ok");
-			ok.addDato("usuario", usuario.getUsuarioLogged());
-			return ok;	
+			return new Request("ok","usuario", usuario.getUsuarioLogged());	
+		case "logout":
+			usuario.cerrarSesion();
+			return new Request("ok","mensaje", "Sesión cerrada correctamente");
 		default:
-			Request r = new Request("error");
-			r.addDato("mensaje", "Request no reconocido");
-			return r;
+			return new Request("error","mensaje", "Request no reconocido");
 		}
 	}
 
@@ -54,23 +53,15 @@ public class SocketServer extends Thread {
 		try {
 			Users user = usuario.iniciarSesion(u, p);
 			if (user != null) {
-				Request ok = new Request("login_correcto");
-				ok.addDato("usuario", user);
-				return ok;
+				return new Request("login_correcto","usuario",user);
 			} else {
-				Request err = new Request("error");
-				err.addDato("mensaje", "Usuario o contraseña incorrectos");
-				return err;
+				return new Request("error","mensaje","Usuario o contraseña incorrectos");
 			}
 		} catch (IllegalArgumentException e) {
-			Request err = new Request("error");
-			err.addDato("mensaje", e.getMessage());
-			return err;
+			return new Request("error","mensaje", e.getMessage());
 
 		} catch (RuntimeException e) {
-			Request err = new Request("error");
-			err.addDato("mensaje", e.getMessage());
-			return err;
+			return new Request("error","mensaje", e.getMessage());
 		}
 
 	}

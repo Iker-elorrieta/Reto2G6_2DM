@@ -30,10 +30,6 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
-	private Set matriculacioneses = new HashSet(0);
-	private Set reunionesesForAlumnoId = new HashSet(0);
-	private Set horarioses = new HashSet(0);
-	private Set reunionesesForProfesorId = new HashSet(0);
 
 	public Users() {
 	}
@@ -47,8 +43,7 @@ public class Users implements java.io.Serializable {
 
 	public Users(Tipos tipos, String email, String username, String password, String nombre, String apellidos,
 			String dni, String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
-			Timestamp updatedAt, Set matriculacioneses, Set reunionesesForAlumnoId, Set horarioses,
-			Set reunionesesForProfesorId) {
+			Timestamp updatedAt) {
 		this.tipos = tipos;
 		this.email = email;
 		this.username = username;
@@ -62,10 +57,6 @@ public class Users implements java.io.Serializable {
 		this.argazkiaUrl = argazkiaUrl;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
-		this.matriculacioneses = matriculacioneses;
-		this.reunionesesForAlumnoId = reunionesesForAlumnoId;
-		this.horarioses = horarioses;
-		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
 	public Integer getId() {
@@ -178,38 +169,6 @@ public class Users implements java.io.Serializable {
 
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
-	}
-
-	public Set getMatriculacioneses() {
-		return this.matriculacioneses;
-	}
-
-	public void setMatriculacioneses(Set matriculacioneses) {
-		this.matriculacioneses = matriculacioneses;
-	}
-
-	public Set getReunionesesForAlumnoId() {
-		return this.reunionesesForAlumnoId;
-	}
-
-	public void setReunionesesForAlumnoId(Set reunionesesForAlumnoId) {
-		this.reunionesesForAlumnoId = reunionesesForAlumnoId;
-	}
-
-	public Set getHorarioses() {
-		return this.horarioses;
-	}
-
-	public void setHorarioses(Set horarioses) {
-		this.horarioses = horarioses;
-	}
-
-	public Set getReunionesesForProfesorId() {
-		return this.reunionesesForProfesorId;
-	}
-
-	public void setReunionesesForProfesorId(Set reunionesesForProfesorId) {
-		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 	
 	public Users getUsuarioLogged(Cliente cliente) {

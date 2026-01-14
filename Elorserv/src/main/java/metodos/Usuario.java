@@ -15,6 +15,11 @@ public class Usuario {
 	public Users getUsuarioPorID(int id) {
 		return Users.getUsuarioPorID(id);
 	}
+	
+	public boolean cerrarSesion() {
+		usuario = null;
+		return true;
+	}
 
 	public Users iniciarSesion(String username, String contrasena) {
         if (username == null || username.trim().isEmpty()
