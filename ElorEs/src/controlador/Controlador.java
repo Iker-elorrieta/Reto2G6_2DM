@@ -8,7 +8,6 @@ import javax.swing.JOptionPane;
 
 import cliente.Cliente;
 import modelo.Request;
-import modelo.Response;
 import modelo.Users;
 import vista.Login;
 import vista.PantallaMenu;
@@ -57,16 +56,18 @@ public class Controlador implements ActionListener {
 
 	public void login() {
 		Request r = new Request("login");
-		r.addParametro("username", vistaLogin.getTxtUsuario().getText());
-		r.addParametro("password", vistaLogin.getPasswordField().getText());
+		r.addDato("username", vistaLogin.getTxtUsuario().getText());
+		r.addDato("password", vistaLogin.getPasswordField().getText());
 		try {
-			Response response = cliente.enviarRequest(r);
+			Request response = cliente.enviarRequest(r);
 			if (response.getHeader().equals("login_correcto")) {
-				usuario = new Users();
-				usuario = usuario.getUsuarioLogged(cliente);
+				usuario =  (Users) response.getDato("usuario");
 				JOptionPane.showMessageDialog(null, "Bienvenido. " + usuario.getNombre());
 				vistaLogin.setVisible(false);
 				vistaMenu.setVisible(true);
+			}else {
+				String mensajeError = (String) response.getDato("mensaje");
+				JOptionPane.showMessageDialog(null, "Error al iniciar sesión: " + mensajeError);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -5,7 +5,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import modelo.Request;
-import modelo.Response;
 
 public class Cliente {
 
@@ -21,10 +20,10 @@ public class Cliente {
         entrada = new ObjectInputStream(socket.getInputStream());
     }
 
-    public synchronized Response enviarRequest(Request request) throws Exception {
+    public synchronized Request enviarRequest(Request request) throws Exception {
         salida.writeObject(request);
         salida.flush();
-        return (Response) entrada.readObject();
+        return (Request) entrada.readObject();
     }
 
     public void cerrar() throws Exception {

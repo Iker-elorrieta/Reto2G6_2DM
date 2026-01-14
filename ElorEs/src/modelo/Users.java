@@ -214,7 +214,7 @@ public class Users implements java.io.Serializable {
 	
 	public Users getUsuarioLogged(Cliente cliente) {
 		Request r = new Request("get_usuario");
-		Response response;
+		Request response;
 		try {
 			response = cliente.enviarRequest(r);
 			if (response.getHeader().equals("ok")) {

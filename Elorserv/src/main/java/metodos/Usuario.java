@@ -4,46 +4,54 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import modelo.Users;
 
-@RestController
-@RequestMapping("/usuarios")
 public class Usuario {
 	public Users usuario;
 
-	public Users getUsuario() {
-		return usuario;
+	public Users getUsuarioLogged() {
+		return Users.getUsuarioPorID(this.usuario.getId());
+	} 
+	public Users getUsuarioPorID(int id) {
+		return Users.getUsuarioPorID(id);
 	}
 
-	@PostMapping
-	public String iniciarSesion(String username, String contrasena) {
-		String respuesta = "";
-		if (username.trim().isEmpty() || contrasena.trim().isEmpty()) {
-			respuesta = "Error: Usuario o contraseña incorrectos.";
-		} else {
-			SessionFactory sesion = HibernateUtil.getSessionFactory();
-			Session session = sesion.openSession();
-			// contrasena = hashearContrasena(contrasena);
-			String hql = "from Users where username = ?1 and password = ?2";
-			Query<Users> q = session.createQuery(hql, Users.class);
-			q.setParameter(1, username);
-			q.setParameter(2, contrasena);
-			Users fila = q.uniqueResult();
-			if (fila == null) {
-				respuesta = "Error: Usuario o contraseña incorrectos.";
-			} else {
-				usuario = fila;
-				respuesta = "login_correcto";
-			}
-		}
-		return respuesta;
-	}
+	public Users iniciarSesion(String username, String contrasena) {
+        if (username == null || username.trim().isEmpty()
+                || contrasena == null || contrasena.trim().isEmpty()) {
+            throw new IllegalArgumentException("Usuario o contraseña incorrectos");
+        }
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            Users user = Users.getUsuarioUsernameContraseña(username, contrasena);
+            if (user == null) {
+                throw new RuntimeException("Credenciales inválidas");
+            }
+            return user;
 
+        } finally {
+            session.close();
+        }
+    }
+	
+	public Users registrarUsuario(String username, String contrasena, String email) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		session.beginTransaction();
+		
+		Users nuevoUsuario = new Users();
+		nuevoUsuario.setUsername(username);
+		// contrasena = hashearContrasena(contrasena);
+		nuevoUsuario.setPassword(contrasena);
+		nuevoUsuario.setEmail(email);
+		
+		session.persist(nuevoUsuario);
+		session.getTransaction().commit();
+		session.close();
+		sesion.close();
+		return nuevoUsuario;
+	}
+	
 	public String hashearContrasena(String contrasena) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA");

@@ -10,26 +10,35 @@ public class Request implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private String header;
-    private Map<String, String> parametros;
+    private Map<String, Object> datos;
     
     public Request(String header) {
         this.header = header;
-        this.parametros = new HashMap<>();
+        this.datos = new HashMap<>();
     }
     
-    public void addParametro(String clave, String valor) {
-        parametros.put(clave, valor);
+    public Request(String header, String clave1, Object valor1) {
+		this.header = header;
+        this.datos = new HashMap<>();
+		this.addDato(clave1, valor1);
+	}
+    public void addDato(String clave, Object valor) {
+        datos.put(clave, valor);
     }
     
     public String getHeader() {
         return header;
     }
     
-    public Map<String, String> getParametros() {
-        return parametros;
+    public Map<String, Object> getDatos() {
+        return datos;
+    }
+    public Object getParametro(String clave) {
+        return datos.get(clave);
     }
     
-    public String getParametro(String clave) {
-        return parametros.get(clave);
+    public Object getDato(String clave) {
+        return datos.get(clave);
     }
+    
 }
