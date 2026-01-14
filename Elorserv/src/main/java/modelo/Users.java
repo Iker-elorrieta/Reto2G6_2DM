@@ -21,7 +21,6 @@ public class Users implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Integer id;
-	@JsonIgnore
 	private Tipos tipos;
 	private String email;
 	private String username;

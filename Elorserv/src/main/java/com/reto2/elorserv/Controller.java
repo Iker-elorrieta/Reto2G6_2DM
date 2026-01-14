@@ -45,6 +45,17 @@ public class Controller implements WebMvcConfigurer {
 		q.setParameter(1, id);
 		return q.uniqueResult();
 	}
+	@GetMapping("/usuarios/alumnos/")
+	public List<Users> getAlumnos(@PathVariable int tipo_id) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Users";
+		Query<Users> q = session.createQuery(hql, Users.class);
+		q.setParameter("tipo", tipo_id);
+		List<Users> usuarios = q.list();
+		return usuarios;
+		
+	}
 	@GetMapping("/usuarios/alumnos/{tipo_id}")
 	public List<Users> getAlumnos(@PathVariable int tipo_id) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
