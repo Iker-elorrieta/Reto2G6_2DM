@@ -14,7 +14,7 @@ public class HibernateUtil {
                 new StandardServiceRegistryBuilder().configure().build() );
      }
      catch (Throwable ex) {
-       
+ 
         System.err.println("Initial SessionFactory creation failed." + ex);
         throw new ExceptionInInitializerError(ex);
      }

@@ -232,8 +232,6 @@ public class Users implements java.io.Serializable {
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, username);
 		q.setParameter(2, password);
-		session.close();
-		sesion.close();
 		return q.uniqueResult();
 	}
 	public static Users getUsuarioPorID(int id) {
@@ -242,9 +240,6 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users where id = ?1";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, id);
-
-		session.close();
-		sesion.close();
 		return q.uniqueResult();
 	}
 

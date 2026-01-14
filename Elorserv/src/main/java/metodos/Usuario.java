@@ -47,8 +47,6 @@ public class Usuario {
 		
 		session.persist(nuevoUsuario);
 		session.getTransaction().commit();
-		session.close();
-		sesion.close();
 		return nuevoUsuario;
 	}
 	

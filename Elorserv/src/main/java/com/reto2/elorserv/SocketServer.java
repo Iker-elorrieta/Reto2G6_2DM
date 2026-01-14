@@ -2,9 +2,6 @@ package com.reto2.elorserv;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import metodos.Usuario;
 import modelo.Request;
 import modelo.Users;
@@ -39,11 +36,11 @@ public class SocketServer extends Thread {
 	private Request procesarRequest(Request request) {
 		switch (request.getHeader()) {
 		case "login":
-			login(request);
+			return login(request);
 		case "get_usuario":
 			Request ok = new Request("ok");
 			ok.addDato("usuario", usuario.getUsuarioLogged());
-			return ok;
+			return ok;	
 		default:
 			Request r = new Request("error");
 			r.addDato("mensaje", "Request no reconocido");
@@ -56,9 +53,15 @@ public class SocketServer extends Thread {
 		String p = (String) request.getParametro("password");
 		try {
 			Users user = usuario.iniciarSesion(u, p);
-			Request ok = new Request("login_correcto");
-			ok.addDato("usuario", user);
-			return ok;
+			if (user != null) {
+				Request ok = new Request("login_correcto");
+				ok.addDato("usuario", user);
+				return ok;
+			} else {
+				Request err = new Request("error");
+				err.addDato("mensaje", "Usuario o contraseña incorrectos");
+				return err;
+			}
 		} catch (IllegalArgumentException e) {
 			Request err = new Request("error");
 			err.addDato("mensaje", e.getMessage());
