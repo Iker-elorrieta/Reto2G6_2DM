@@ -1,5 +1,7 @@
 package com.reto2.elorserv;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -42,6 +44,27 @@ public class Controller implements WebMvcConfigurer {
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, id);
 		return q.uniqueResult();
+	}
+	@GetMapping("/usuarios/alumnos/{tipo_id}")
+	public List<Users> getAlumnos(@PathVariable int tipo_id) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Users where tipos.id = :tipo";
+		Query<Users> q = session.createQuery(hql, Users.class);
+		q.setParameter("tipo", tipo_id);
+		List<Users> usuarios = q.list();
+		return usuarios;
+		
+	}
+	@GetMapping("/usuarios/profesores/{tipo_id}")
+	public List<Users> getProfesores(@PathVariable int tipo_id) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Users where tipos.id = :tipo";
+		Query<Users> q = session.createQuery(hql, Users.class);
+		q.setParameter("tipo", tipo_id);
+		List<Users> usuarios = q.list();
+		return usuarios;
 	}
 
 	@PostMapping("/login")
