@@ -10,6 +10,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import metodos.HibernateUtil;
 
 /**
@@ -22,6 +24,7 @@ public class Users implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Integer id;
+	@JsonIgnore
 	private Tipos tipos;
 	private String email;
 	private String username;
@@ -35,9 +38,13 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
+	@JsonIgnore
 	private Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
+	@JsonIgnore
 	private Set<Reuniones> reunionesesForAlumnoId = new HashSet<Reuniones>(0);
+	@JsonIgnore
 	private Set<Horarios> horarioses = new HashSet<Horarios>(0);
+	@JsonIgnore
 	private Set<Reuniones> reunionesesForProfesorId = new HashSet<Reuniones>(0);
 
 	

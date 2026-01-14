@@ -23,7 +23,7 @@ import modelo.Users;
 
 public class Controller implements WebMvcConfigurer {
 	private Usuario 
-	usuario;
+	usuario= new Usuario();
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
@@ -41,9 +41,6 @@ public class Controller implements WebMvcConfigurer {
 		String hql = "from Users where id = ?1";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, id);
-
-		session.close();
-		sesion.close();
 		return q.uniqueResult();
 	}
 
