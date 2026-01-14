@@ -17,7 +17,7 @@ public class ElorservApplication {
 		SpringApplication.run(ElorservApplication.class, args);
 		
 		// Iniciar el servidor de sockets
-		try (ServerSocket serverSocket = new ServerSocket(5000)) {
+		try (ServerSocket serverSocket = new ServerSocket(5001)) {
 			System.out.println("SOCKET SERVER: Servidor iniciado (P: 5000)");
 			while (true) {
 				Socket socket = serverSocket.accept();
