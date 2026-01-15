@@ -3,6 +3,7 @@ package com.reto2.elorserv;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import metodos.Usuario;
 import modelo.Users;
 
@@ -35,28 +36,30 @@ public class SocketServer extends Thread {
 	}
 
 	private Object procesarRequest(String header) {
+		Object response = null;
 		try {
 			switch (header) {
 			case "login":
 				String username = (String) entrada.readObject();
 				String contrasena = (String) entrada.readObject();
-				return login(username, contrasena);
+				response = login(username, contrasena);
+				break;
 			case "get_usuario":
-				return usuario.getUsuarioLogged();
+				response = usuario.getUsuarioLogged();
+				break;
 			case "logout":
 				usuario.cerrarSesion();
-				return "Sesión cerrada correctamente";
+				response = "Sesión cerrada correctamente";
+				break;
 			default:
-				return "Request no reconocido";
+				response = "Request no reconocido";
 			}
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return response;
 	}
 
 	private Object login(String username, String contrasena) {

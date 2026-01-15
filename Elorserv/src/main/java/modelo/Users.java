@@ -44,8 +44,6 @@ public class Users implements java.io.Serializable {
 	@JsonIgnore
 	private Set<Reuniones> reunionesesForProfesorId = new HashSet<Reuniones>(0);
 
-	
-	
 	public Users() {
 		super();
 	}
@@ -65,8 +63,8 @@ public class Users implements java.io.Serializable {
 
 	public Users(Tipos tipos, String email, String username, String password, String nombre, String apellidos,
 			String dni, String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
-			Timestamp updatedAt, Set<Matriculaciones>  matriculacioneses, Set<Reuniones> reunionesesForAlumnoId, Set<Horarios> horarioses,
-			Set<Reuniones>  reunionesesForProfesorId) {
+			Timestamp updatedAt, Set<Matriculaciones> matriculacioneses, Set<Reuniones> reunionesesForAlumnoId,
+			Set<Horarios> horarioses, Set<Reuniones> reunionesesForProfesorId) {
 		this.tipos = tipos;
 		this.email = email;
 		this.username = username;
@@ -84,6 +82,24 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForAlumnoId = reunionesesForAlumnoId;
 		this.horarioses = horarioses;
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
+	}
+
+	public Users(String email, String username, String password, String nombre, String apellidos, String dni,
+			String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
+			Timestamp updatedAt, Tipos tipos) {
+		this.email = email;
+		this.username = username;
+		this.password = password;
+		this.nombre = nombre;
+		this.apellidos = apellidos;
+		this.dni = dni;
+		this.direccion = direccion;
+		this.telefono1 = telefono1;
+		this.telefono2 = telefono2;
+		this.argazkiaUrl = argazkiaUrl;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.tipos = tipos;
 	}
 
 	public Integer getId() {
@@ -222,13 +238,14 @@ public class Users implements java.io.Serializable {
 		this.horarioses = horarioses;
 	}
 
-	public Set<Reuniones>  getReunionesesForProfesorId() {
+	public Set<Reuniones> getReunionesesForProfesorId() {
 		return this.reunionesesForProfesorId;
 	}
 
-	public void setReunionesesForProfesorId(Set<Reuniones>  reunionesesForProfesorId) {
+	public void setReunionesesForProfesorId(Set<Reuniones> reunionesesForProfesorId) {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
+
 	public static Users getUsuarioUsernameContraseña(String username, String password) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -238,17 +255,34 @@ public class Users implements java.io.Serializable {
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, username);
 		q.setParameter(2, password);
-		return q.uniqueResult();
+		Users u = q.uniqueResult();
+		if (u == null) {
+			return null;
+		} else {
+			Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
+			return new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
+					u.getUpdatedAt(),t);
+		}
 	}
+
 	public static Users getUsuarioPorID(int id) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Users where id = ?1";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, id);
-		return q.uniqueResult();
+		Users u = q.uniqueResult();
+		if (u == null) {
+			return null;
+		} else {
+			Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
+			return new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
+					u.getUpdatedAt(),t);
+		}
 	}
-	
+
 	public static ArrayList<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();

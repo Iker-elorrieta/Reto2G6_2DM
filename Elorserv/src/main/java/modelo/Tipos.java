@@ -33,6 +33,11 @@ public class Tipos implements java.io.Serializable {
 		this.nameEu = nameEu;
 		this.userses = userses;
 	}
+	public Tipos(Integer id,String name, String nameEu) {
+		this.id = id;
+		this.name = name;
+		this.nameEu = nameEu;
+	}
 
 	public Integer getId() {
 		return this.id;

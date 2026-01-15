@@ -71,12 +71,16 @@ public class Controlador implements ActionListener {
 			Object response = cliente.enviarRequest("login",datos);
 			if (response instanceof Users && response != null) {
 				usuario = (Users) response;
+				
 				if (usuario.getTipos().getId() != 3) {
 					vistaLogin.getPanelLogin().getLblError().setText("Usuario no autorizado para usar la aplicación.");
 				} else {
 					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre()+"!");
 					vistaLogin.setVisible(false);
 					vistaMenu.setVisible(true);
+					vistaMenu.getLblNombreUsuario().setText(usuario.getNombre()+" "+usuario.getApellidos());
+					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
+					vistaMenu.cargarAvatar(usuario.getArgazkiaUrl());
 				}
 			} else {
 				String mensajeError = (String) response;
@@ -89,7 +93,7 @@ public class Controlador implements ActionListener {
 	}
 	public void desconectar() {
 		try {
-			String r = (String) cliente.enviarRequest("logout",new ArrayList<>());
+			cliente.enviarRequest("logout",new ArrayList<>());
 
 			vistaMenu.setVisible(false);
 			vistaLogin.setVisible(true);
