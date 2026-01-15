@@ -63,7 +63,7 @@ public class Usuario {
 	        user.setUpdatedAt(now);
 	        Users u = user;
 	        Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
-	        session.persist(new Users(u.getId(),u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+	        session.persist(new Users(null,u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
 					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
 					u.getUpdatedAt(),t));
 	        tx.commit();
