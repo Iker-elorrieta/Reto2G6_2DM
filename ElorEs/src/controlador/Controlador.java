@@ -1,15 +1,12 @@
 package controlador;
 
-import java.awt.Menu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
 import cliente.Cliente;
-import modelo.Request;
 import modelo.Users;
 import vista.Inicio;
 import vista.PantallaMenu;
@@ -27,6 +24,9 @@ public class Controlador implements ActionListener {
 		try {
 			cliente = new Cliente("localhost", 5000);
 		} catch (Exception e) {
+			vistaLogin.dispose();
+			vistaMenu.dispose();
+			JOptionPane.showMessageDialog(null, "Error al conectar con el servidor: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -63,41 +63,38 @@ public class Controlador implements ActionListener {
 	}
 
 	public void login() {
-		Request r = new Request("login");
-		r.addDato("username", vistaLogin.getPanelLogin().getTextFieldUsuario().getText());
-		r.addDato("password", vistaLogin.getPanelLogin().getTextFieldContrasena().getText());
+		ArrayList<Object> datos = new ArrayList<>();
+		datos.add(vistaLogin.getPanelLogin().getTextFieldUsuario().getText());
+		datos.add(vistaLogin.getPanelLogin().getTextFieldContrasena().getText());
+
 		try {
-			Request response = cliente.enviarRequest(r);
-			if (response.getHeader().equals("login_correcto")) {
-				usuario = (Users) response.getDato("usuario");
+			Object response = cliente.enviarRequest("login",datos);
+			if (response instanceof Users && response != null) {
+				usuario = (Users) response;
 				if (usuario.getTipos().getId() != 3) {
 					vistaLogin.getPanelLogin().getLblError().setText("Usuario no autorizado para usar la aplicación.");
 				} else {
-					JOptionPane.showMessageDialog(null, "Bienvenido. " + usuario.getNombre());
+					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre()+"!");
 					vistaLogin.setVisible(false);
 					vistaMenu.setVisible(true);
 				}
 			} else {
-				String mensajeError = (String) response.getDato("mensaje");
+				String mensajeError = (String) response;
 				vistaLogin.getPanelLogin().getLblError().setText("Error: " + mensajeError);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 	public void desconectar() {
 		try {
-			Request r = cliente.enviarRequest(new Request("logout"));
-			String mensajeError = (String) r.getDato("mensaje");
+			String r = (String) cliente.enviarRequest("logout",new ArrayList<>());
 
-			JOptionPane.showMessageDialog(null, r);
 			vistaMenu.setVisible(false);
 			vistaLogin.setVisible(true);
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

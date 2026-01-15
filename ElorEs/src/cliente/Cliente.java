@@ -3,8 +3,8 @@ package cliente;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
-import modelo.Request;
 
 public class Cliente {
 
@@ -16,14 +16,17 @@ public class Cliente {
         socket = new Socket(host, puerto);
         salida = new ObjectOutputStream(socket.getOutputStream());
         salida.flush();
-
         entrada = new ObjectInputStream(socket.getInputStream());
     }
 
-    public synchronized Request enviarRequest(Request request) throws Exception {
-        salida.writeObject(request);
+    public synchronized Object enviarRequest(String header, ArrayList<Object> datos) throws Exception {
+        salida.writeObject(header);
         salida.flush();
-        return (Request) entrada.readObject();
+        for (Object dato : datos) {
+			salida.writeObject(dato);
+			salida.flush();
+		}
+        return (Object) entrada.readObject();
     }
 
     public void cerrar() throws Exception {

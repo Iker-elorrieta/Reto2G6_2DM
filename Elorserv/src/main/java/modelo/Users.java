@@ -1,17 +1,16 @@
 package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import metodos.HibernateUtil;
@@ -233,6 +232,8 @@ public class Users implements java.io.Serializable {
 	public static Users getUsuarioUsernameContraseña(String username, String password) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
+		username = hashear(username);
+		password = hashear(password);
 		String hql = "from Users where username = ?1 and password = ?2";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, username);
@@ -256,5 +257,18 @@ public class Users implements java.io.Serializable {
 		return new ArrayList<Users>(q.list());
 	}
 
+	public static String hashear(String c) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA");
+			byte bytes[] = c.getBytes();
+			md.update(bytes);
+
+			byte resumenBytes[] = md.digest();
+			c = new String(resumenBytes);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return c;
+	}
 
 }

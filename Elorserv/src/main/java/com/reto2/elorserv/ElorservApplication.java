@@ -27,7 +27,7 @@ public class ElorservApplication {
 				new SocketServer(entrada, salida).start();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

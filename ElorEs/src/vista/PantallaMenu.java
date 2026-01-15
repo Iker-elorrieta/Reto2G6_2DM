@@ -16,6 +16,8 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
+import javax.swing.JComboBox;
 
 public class PantallaMenu extends JFrame {
 
@@ -27,6 +29,7 @@ public class PantallaMenu extends JFrame {
 	private JButton btnAlumnos;
 	private JButton btnPerfil;
 	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
+	private PanelHorario panelHorarios;
 
 
 	/**
@@ -42,15 +45,15 @@ public class PantallaMenu extends JFrame {
 		contentPane.setLayout(null);
 		
 		btnPerfil = new JButton("Consultar perfil");
-		btnPerfil.setBounds(556, 112, 148, 23);
+		btnPerfil.setBounds(334, 482, 148, 23);
 		contentPane.add(btnPerfil);
 		
 		btnAlumnos = new JButton("Consultar alumnos");
-		btnAlumnos.setBounds(556, 146, 148, 23);
+		btnAlumnos.setBounds(334, 494, 148, 23);
 		contentPane.add(btnAlumnos);
 		
 		btnHorarios = new JButton("Consultar horarios");
-		btnHorarios.setBounds(556, 180, 148, 23);
+		btnHorarios.setBounds(484, 494, 148, 23);
 		contentPane.add(btnHorarios);
 		
 		btnReuniones = new JButton("Reuniones");
@@ -58,7 +61,7 @@ public class PantallaMenu extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnReuniones.setBounds(556, 214, 148, 23);
+		btnReuniones.setBounds(685, 494, 148, 23);
 		contentPane.add(btnReuniones);
 		
 		JPanel panelIzquierda = new JPanel() {
@@ -118,7 +121,28 @@ public class PantallaMenu extends JFrame {
 		panelLogo.setBounds(30, 10, 230, 95);
 		panelLogo.setOpaque(false);
 		panelIzquierda.add(panelLogo);
-
+		panelHorarios = new PanelHorario();
+		panelHorarios.setLocation(334, 71);
+		panelHorarios.setSize(637, 262);
+		contentPane.add(panelHorarios);
+		
+		JLabel lblMiHorario = new JLabel("Mi horario");
+		lblMiHorario.setFont(new Font("Dialog", Font.PLAIN, 30));
+		lblMiHorario.setBounds(337, 10, 160, 51);
+		contentPane.add(lblMiHorario);
+		
+		JButton btnEmpezarWorkout = new JButton("Empezar workout");
+		btnEmpezarWorkout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+			}
+		});
+		btnEmpezarWorkout.setForeground(Color.BLACK);
+		btnEmpezarWorkout.setFont(fuenteBold);
+		btnEmpezarWorkout.setBackground(new Color(128, 255, 0));
+		btnEmpezarWorkout.setBounds(759, 341, 215, 38);
+		contentPane.add(btnEmpezarWorkout);
 	}
 
 
@@ -130,6 +154,4 @@ public class PantallaMenu extends JFrame {
 	public void setBtnDesconectar(JButton btnDesconectar) {
 		this.btnDesconectar = btnDesconectar;
 	}
-	
-	
 }

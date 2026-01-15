@@ -2,9 +2,6 @@ package com.reto2.elorserv;
 
 import java.util.List;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import metodos.HibernateUtil;
 import metodos.Usuario;
 import modelo.Reuniones;
+import modelo.Centros;
 import modelo.Users;
 
 @RestController
@@ -65,6 +62,18 @@ public class Controller implements WebMvcConfigurer {
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
+	}
+	
+	@GetMapping("/centros")
+	public ResponseEntity<?> getAllCentros() {
+		return  ResponseEntity.ok(Centros.getAllCentros());
+
+	}
+	@GetMapping("/centros/{id}")
+	public ResponseEntity<?> getAllCentrosById(@PathVariable Integer id) {
+		Centros c = new Centros();
+		c.setCCEN(id);
+		return ResponseEntity.ok(c.getCentroById());
 	}
 
 }

@@ -1,9 +1,9 @@
 package com.reto2.elorserv;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import metodos.Usuario;
-import modelo.Request;
 import modelo.Users;
 
 public class SocketServer extends Thread {
@@ -20,49 +20,58 @@ public class SocketServer extends Thread {
 	@Override
 	public void run() {
 		try {
+			System.out.println("Usuario conectado");
 			while (true) {
-				Request request = (Request) entrada.readObject();
-				Request response = procesarRequest(request);
+				String request = (String) entrada.readObject();
+				System.out.println("REQ: " + request);
+				Object response = procesarRequest(request);
 				salida.writeObject(response);
 				salida.flush();
 			}
 		} catch (Exception e) {
-			System.out.println("Cliente desconectado");
+			System.out.println("Usuario desconectado");
 			e.printStackTrace();
-
 		}
 	}
 
-	private Request procesarRequest(Request request) {
-		switch (request.getHeader()) {
-		case "login":
-			return login(request);
-		case "get_usuario":
-			return new Request("ok","usuario", usuario.getUsuarioLogged());	
-		case "logout":
-			usuario.cerrarSesion();
-			return new Request("ok","mensaje", "Sesión cerrada correctamente");
-		default:
-			return new Request("error","mensaje", "Request no reconocido");
-		}
-	}
-
-	private Request login(Request request) {
-		String u = (String) request.getParametro("username");
-		String p = (String) request.getParametro("password");
+	private Object procesarRequest(String header) {
 		try {
-			Users user = usuario.iniciarSesion(u, p);
-			if (user != null) {
-				return new Request("login_correcto","usuario",user);
-			} else {
-				return new Request("error","mensaje","Usuario o contraseña incorrectos");
+			switch (header) {
+			case "login":
+				String username = (String) entrada.readObject();
+				String contrasena = (String) entrada.readObject();
+				return login(username, contrasena);
+			case "get_usuario":
+				return usuario.getUsuarioLogged();
+			case "logout":
+				usuario.cerrarSesion();
+				return "Sesión cerrada correctamente";
+			default:
+				return "Request no reconocido";
 			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private Object login(String username, String contrasena) {
+
+		try {
+			Users u = usuario.iniciarSesion(username, contrasena);
+			if (u == null) {
+				return "Credenciales inválidas";
+			}
+			return u;
 		} catch (IllegalArgumentException e) {
-			return new Request("error","mensaje", e.getMessage());
+			return e.getMessage();
 
 		} catch (RuntimeException e) {
-			return new Request("error","mensaje", e.getMessage());
+			return e.getMessage();
 		}
-
 	}
 }
