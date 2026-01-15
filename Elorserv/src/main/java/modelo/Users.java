@@ -84,9 +84,10 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
-	public Users(String email, String username, String password, String nombre, String apellidos, String dni,
+	public Users(Integer id,String email, String username, String password, String nombre, String apellidos, String dni,
 			String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
 			Timestamp updatedAt, Tipos tipos) {
+		this.id = id;
 		this.email = email;
 		this.username = username;
 		this.password = password;
@@ -268,7 +269,7 @@ public class Users implements java.io.Serializable {
 			return null;
 		} else {
 			Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
-			return new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+			return new Users(u.getId(),u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
 					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
 					u.getUpdatedAt(),t);
 		}
@@ -285,7 +286,7 @@ public class Users implements java.io.Serializable {
 			return null;
 		} else {
 			Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
-			return new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+			return new Users(u.getId(),u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
 					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
 					u.getUpdatedAt(),t);
 		}
@@ -296,7 +297,8 @@ public class Users implements java.io.Serializable {
 		Session session = sesion.openSession();
 		String hql = "from Users";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		return new ArrayList<Users>(q.list());
+		ArrayList<Users> a = new ArrayList<Users>(q.list());
+		return a;
 	}
 
 	public static String hashear(String c) {

@@ -47,22 +47,6 @@ public class Usuario {
             session.close();
         }
     }
-	
-	public Users registrarUsuario(String username, String contrasena, String email) {
-		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		session.beginTransaction();
-		
-		Users nuevoUsuario = new Users();
-		nuevoUsuario.setUsername(username);
-		// contrasena = hashearContrasena(contrasena);
-		nuevoUsuario.setPassword(contrasena);
-		nuevoUsuario.setEmail(email);
-		
-		session.persist(nuevoUsuario);
-		session.getTransaction().commit();
-		return nuevoUsuario;
-	}
 	// Tipos tipo,String email, String username, String contrasena,String nombre, String apellidos, String dni, String direccion, String telefono1, String telefono2
 	public Users crearUsuario(Users user) {
 	    SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -79,7 +63,7 @@ public class Usuario {
 	        user.setUpdatedAt(now);
 	        Users u = user;
 	        Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
-	        session.persist(new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+	        session.persist(new Users(u.getId(),u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
 					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
 					u.getUpdatedAt(),t));
 	        tx.commit();
@@ -88,20 +72,6 @@ public class Usuario {
 	        e.printStackTrace();  // <--- Mira exactamente el error aquí
 	        throw e;
 	    }
-	}
-
-	public String hashearContrasena(String contrasena) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA");
-			byte bytes[] = contrasena.getBytes();
-			md.update(bytes);
-
-			byte resumenBytes[] = md.digest();
-			contrasena = new String(resumenBytes);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		return contrasena;
 	}
 
 }
