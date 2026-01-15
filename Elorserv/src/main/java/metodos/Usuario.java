@@ -2,10 +2,14 @@ package metodos;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+
+import modelo.Tipos;
 import modelo.Users;
 
 public class Usuario {
@@ -59,7 +63,33 @@ public class Usuario {
 		session.getTransaction().commit();
 		return nuevoUsuario;
 	}
-	
+	// Tipos tipo,String email, String username, String contrasena,String nombre, String apellidos, String dni, String direccion, String telefono1, String telefono2
+	public Users crearUsuario(Users user) {
+	    SessionFactory sesion = HibernateUtil.getSessionFactory();
+	    try (Session session = sesion.openSession()) {
+	        Transaction tx = session.beginTransaction();
+
+	     
+	        // Hash de contraseña
+	        user.setUsername(Users.hashear(user.getUsername()));
+	        user.setPassword(Users.hashear(user.getPassword()));
+	        // Timestamps
+	        Timestamp now = new Timestamp(System.currentTimeMillis());
+	        user.setCreatedAt(now);
+	        user.setUpdatedAt(now);
+	        Users u = user;
+	        Tipos t = new Tipos(u.getTipos().getId(), u.getTipos().getName(),u.getTipos().getNameEu());
+	        session.persist(new Users(u.getEmail(), u.getUsername(), u.getPassword(), u.getNombre(), u.getApellidos(), u.getDni(),
+					u.getDireccion(), u.getTelefono1(), u.getTelefono2(), u.getArgazkiaUrl(), u.getCreatedAt(),
+					u.getUpdatedAt(),t));
+	        tx.commit();
+	        return user;
+	    } catch (Exception e) {
+	        e.printStackTrace();  // <--- Mira exactamente el error aquí
+	        throw e;
+	    }
+	}
+
 	public String hashearContrasena(String contrasena) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA");

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -20,7 +22,6 @@ import modelo.Users;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-
 public class Controller implements WebMvcConfigurer {
 	private Usuario 
 	usuario= new Usuario();
@@ -63,7 +64,17 @@ public class Controller implements WebMvcConfigurer {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
 		}
 	}
-	
+	@PostMapping("/usuarios/crear")
+	public ResponseEntity<String> crearUsuario(@RequestBody Users user) {
+		try {
+			usuario.crearUsuario(user);
+			return ResponseEntity.status(HttpStatus.CREATED).body("Usuario creado exitosamente.");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
 	@GetMapping("/centros")
 	public ResponseEntity<?> getAllCentros() {
 		return  ResponseEntity.ok(Centros.getAllCentros());

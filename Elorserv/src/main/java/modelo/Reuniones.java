@@ -8,6 +8,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import metodos.HibernateUtil;
 
 /**
@@ -20,7 +22,9 @@ public class Reuniones implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Integer idReunion;
+	@JsonIgnore
 	private Users usersByAlumnoId;
+	@JsonIgnore
 	private Users usersByProfesorId;
 	private String estado;
 	private String estadoEus;
