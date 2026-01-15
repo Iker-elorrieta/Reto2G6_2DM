@@ -2,6 +2,8 @@ package metodos;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import modelo.Users;
@@ -14,6 +16,9 @@ public class Usuario {
 	} 
 	public Users getUsuarioPorID(int id) {
 		return Users.getUsuarioPorID(id);
+	}
+	public ArrayList<Users> getAllUsuarios() {
+		return Users.getAllUsuarios();
 	}
 	
 	public boolean cerrarSesion() {

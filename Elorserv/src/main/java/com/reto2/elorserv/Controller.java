@@ -38,44 +38,14 @@ public class Controller implements WebMvcConfigurer {
 
 	@GetMapping("/usuarios/{id}")
 	public Users getUsuarioPorID(@PathVariable int id) {
-		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users where id = ?1";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter(1, id);
-		return q.uniqueResult();
+		return usuario.getUsuarioPorID(id);
 	}
+	
 	@GetMapping("/usuarios/")
 	public List<Users> getUsuarios() {
-		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		List<Users> usuarios = q.list();
-		return usuarios;
-		
+		return usuario.getAllUsuarios();
 	}
-	@GetMapping("/usuarios/alumnos/{tipo_id}")
-	public List<Users> getAlumnos(@PathVariable int tipo_id) {
-		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users where tipos.id = :tipo";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter("tipo", tipo_id);
-		List<Users> usuarios = q.list();
-		return usuarios;
-		
-	}
-	@GetMapping("/usuarios/profesores/{tipo_id}")
-	public List<Users> getProfesores(@PathVariable int tipo_id) {
-		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users where tipos.id = :tipo";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter("tipo", tipo_id);
-		List<Users> usuarios = q.list();
-		return usuarios;
-	}
+
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestParam String username, @RequestParam String contrasena) {

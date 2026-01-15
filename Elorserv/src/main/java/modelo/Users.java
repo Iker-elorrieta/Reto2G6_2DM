@@ -2,7 +2,9 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -244,6 +246,14 @@ public class Users implements java.io.Serializable {
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, id);
 		return q.uniqueResult();
+	}
+	
+	public static ArrayList<Users> getAllUsuarios() {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Users";
+		Query<Users> q = session.createQuery(hql, Users.class);
+		return new ArrayList<Users>(q.list());
 	}
 
 
