@@ -18,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import metodos.HibernateUtil;
 import metodos.Usuario;
+import modelo.Reuniones;
 import modelo.Users;
 
 @RestController
@@ -26,6 +27,7 @@ import modelo.Users;
 public class Controller implements WebMvcConfigurer {
 	private Usuario 
 	usuario= new Usuario();
+
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
@@ -44,6 +46,10 @@ public class Controller implements WebMvcConfigurer {
 	@GetMapping("/usuarios/")
 	public List<Users> getUsuarios() {
 		return usuario.getAllUsuarios();
+	}
+	@GetMapping("/reuniones/")
+	public List<Reuniones> getReuniones() {
+		return Reuniones.getAllReuniones();
 	}
 
 
