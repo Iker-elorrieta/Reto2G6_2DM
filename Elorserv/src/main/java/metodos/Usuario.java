@@ -73,5 +73,24 @@ public class Usuario {
 	        throw e;
 	    }
 	}
+	public void borrarUsuario(int id) {
+	    SessionFactory sesion = HibernateUtil.getSessionFactory();
+	    try (Session session = sesion.openSession()) {
+	        Transaction tx = null;
+	        try {
+	            tx = session.beginTransaction();
+	            Users u = session.get(Users.class, id);
+	            if (u == null) {
+	                throw new RuntimeException("Usuario no encontrado con id: " + id);
+	            }
+	            session.remove(u);
+	            tx.commit();
+	        } catch (Exception e) {
+	            if (tx != null) tx.rollback();
+	            throw e;
+	        }
+	    }
+	}
+
 
 }
