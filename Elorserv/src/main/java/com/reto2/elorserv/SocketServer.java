@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import com.reto2.elorserv.modelo.Centros;
+import com.reto2.elorserv.modelo.Horarios;
+import com.reto2.elorserv.modelo.Reuniones;
 import com.reto2.elorserv.modelo.Users;
-
 
 public class SocketServer extends Thread {
 
@@ -42,7 +44,7 @@ public class SocketServer extends Thread {
 			case "login":
 				String username = (String) entrada.readObject();
 				String contrasena = (String) entrada.readObject();
-				response = login(username, contrasena);
+				response = new Users(username, contrasena).iniciarSesion();
 				break;
 			case "get_usuario":
 				response = usuario.getUsuarioPorID();
@@ -51,6 +53,29 @@ public class SocketServer extends Thread {
 				usuario = null;
 				response = "Sesión cerrada correctamente";
 				break;
+			case "get_reuniones":
+				response = Reuniones.getReunionesByUserID(usuario.getId());
+				break;
+			case "update_reunion":
+				int reunionId = (int) entrada.readObject();
+				String nuevoEstado = (String) entrada.readObject();
+				response = new Reuniones(reunionId).cambiarEstadoReunion(Reuniones.EstadoReunion.valueOf(nuevoEstado));
+				break;
+			case "crear_reunion":
+				Reuniones nuevaReunion = (Reuniones) entrada.readObject();
+				nuevaReunion.setUsersByAlumnoId(usuario);
+				response = nuevaReunion.crearReunion();
+				break;
+			case "get_centros":
+				response = Centros.getAllCentros();
+				break;
+			case "get_horarios":
+				response = Horarios.getHorariosByUserId(usuario.getId());
+				break;
+			case "get_horarios_id":
+				int userId = (int) entrada.readObject();
+				response = Horarios.getHorariosByUserId(userId);
+				break;
 			default:
 				response = "Request no reconocido";
 			}
@@ -58,24 +83,12 @@ public class SocketServer extends Thread {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		return response;
-	}
-
-	private Object login(String username, String contrasena) {
-
-		try {
-			
-			Users u = new Users(username,contrasena).iniciarSesion();
-			if (u == null) {
-				return "Credenciales inválidas";
-			}
-			return u;
 		} catch (IllegalArgumentException e) {
-			return e.getMessage();
+			response = e.getMessage();
 
 		} catch (RuntimeException e) {
-			return e.getMessage();
+			response = e.getMessage();
 		}
+		return response;
 	}
 }

@@ -18,6 +18,7 @@ public class Reuniones implements java.io.Serializable {
 	private Timestamp fecha;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
+	private Centros centro;
 
 	public Reuniones() {
 	}
@@ -133,4 +134,11 @@ public class Reuniones implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
+	public Centros getCentro() {
+		return centro;
+	}
+
+	public void setCentro(Centros centro) {
+		this.centro = centro;
+	}
 }

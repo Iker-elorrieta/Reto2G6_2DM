@@ -92,5 +92,43 @@ public class Controller implements WebMvcConfigurer {
 	public List<Reuniones> getReuniones() {
 		return Reuniones.getAllReuniones();
 	}
+	@GetMapping("/reuniones/{id}")
+	public List<Reuniones> getReunionesByUserID(@PathVariable Integer id) {
+		return Reuniones.getReunionesByUserID(id);
+	}
+	@PostMapping("/reuniones/{id}")
+	public ResponseEntity<?> cambiarEstadoReunion(@PathVariable Integer id, @RequestParam String nuevoEstado) {
+		try {
+			Reuniones reunion = new Reuniones(id).cambiarEstadoReunion(Reuniones.EstadoReunion.valueOf(nuevoEstado));
+			return ResponseEntity.ok(reunion);
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
+	@PostMapping("/reuniones/")
+	public ResponseEntity<?> crearReunion(@RequestBody Reuniones reunion) {
+		try {
+			Reuniones nuevaReunion = reunion.crearReunion();
+			return ResponseEntity.status(HttpStatus.CREATED).body(nuevaReunion);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+	
+	/* HORARIOS */
+	@GetMapping("/horarios/{id}")
+	public ResponseEntity<?> getHorariosByUserID(@PathVariable Integer id) {
+		try {
+			return ResponseEntity.ok(Horarios.getHorariosByUserId(id));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
 
 }

@@ -99,4 +99,15 @@ public class Modulos implements java.io.Serializable {
 		this.horarioses = horarioses;
 	}
 
+	@JsonIgnore
+	public Modulos convertirModulo() {
+		Ciclos cicloConvertido = null;
+		if (ciclos != null) {
+			cicloConvertido = new Ciclos(ciclos.getNombre());
+			cicloConvertido.setId(ciclos.getId());
+		}
+
+		return new Modulos(cicloConvertido, getNombre(), getNombreEus(), getHoras(), getCurso(), null);
+	}
+
 }

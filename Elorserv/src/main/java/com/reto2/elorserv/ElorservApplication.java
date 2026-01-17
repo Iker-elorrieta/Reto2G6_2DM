@@ -23,8 +23,8 @@ public class ElorservApplication {
 		    Map.of("server.port", API_PORT)
 		);
 		app.run(args);
-		// Iniciar el servidor de sockets
 		
+		// Iniciar el servidor de sockets
 		try (ServerSocket serverSocket = new ServerSocket(SOCKET_PORT)) {
 			System.out.println("SOCKET SERVER: Servidor iniciado P:"+SOCKET_PORT);
 			while (true) {

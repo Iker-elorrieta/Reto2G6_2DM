@@ -51,6 +51,10 @@ public class Centros implements Serializable {
 	public Centros() {
 		super();
 	}
+	public Centros(int cCEN) {
+		super();
+		CCEN = cCEN;
+	}
 
 	public Integer getCCEN() {
 		return CCEN;
@@ -61,7 +65,7 @@ public class Centros implements Serializable {
 	}
 
 
-
+	@JsonIgnore
 	public static ArrayList<Centros> getAllCentros(){
 		ArrayList<Centros> listaCentros = new ArrayList<>();
 		File file = new File("files/"+JSON_PATH);
