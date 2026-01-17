@@ -22,7 +22,7 @@ public class Controlador implements ActionListener {
 		vistaMenu = new PantallaMenu();
 		inicializarControlador();
 		try {
-			cliente = new Cliente("localhost", 5000);
+			cliente = new Cliente("localhost", 5001);
 		} catch (Exception e) {
 			vistaLogin.dispose();
 			vistaMenu.dispose();

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class catalog="elorserv" name="modelo.Users" optimistic-lock="none" table="users">
+    <class catalog="elorserv" name="com.reto2.elorserv.modelo.Users" optimistic-lock="none" table="users">
         <id name="id" type="java.lang.Integer">
             <column name="id"/>
             <generator class="identity"/>
         </id>
-        <many-to-one class="modelo.Tipos" fetch="select" name="tipos">
+        <many-to-one class="com.reto2.elorserv.modelo.Tipos" fetch="select" name="tipos">
             <column name="tipo_id" not-null="true"/>
         </many-to-one>
         <property name="email" type="string">
@@ -49,25 +49,25 @@
             <key>
                 <column name="alum_id" not-null="true"/>
             </key>
-            <one-to-many class="modelo.Matriculaciones"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Matriculaciones"/>
         </set>
         <set fetch="select" inverse="true" lazy="true" name="reunionesesForAlumnoId" table="reuniones">
             <key>
                 <column name="alumno_id"/>
             </key>
-            <one-to-many class="modelo.Reuniones"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Reuniones"/>
         </set>
         <set fetch="select" inverse="true" lazy="true" name="horarioses" table="horarios">
             <key>
                 <column name="profe_id" not-null="true"/>
             </key>
-            <one-to-many class="modelo.Horarios"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Horarios"/>
         </set>
         <set fetch="select" inverse="true" lazy="true" name="reunionesesForProfesorId" table="reuniones">
             <key>
                 <column name="profesor_id"/>
             </key>
-            <one-to-many class="modelo.Reuniones"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Reuniones"/>
         </set>
     </class>
 </hibernate-mapping>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class catalog="elorserv" name="modelo.Ciclos" optimistic-lock="none" table="ciclos">
+    <class catalog="elorserv" name="com.reto2.elorserv.modelo.Ciclos" optimistic-lock="none" table="ciclos">
         <id name="id" type="java.lang.Integer">
             <column name="id"/>
             <generator class="identity"/>
@@ -13,13 +13,13 @@
             <key>
                 <column name="ciclo_id" not-null="true"/>
             </key>
-            <one-to-many class="modelo.Modulos"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Modulos"/>
         </set>
         <set fetch="select" inverse="true" lazy="true" name="matriculacioneses" table="matriculaciones">
             <key>
                 <column name="ciclo_id" not-null="true"/>
             </key>
-            <one-to-many class="modelo.Matriculaciones"/>
+            <one-to-many class="com.reto2.elorserv.modelo.Matriculaciones"/>
         </set>
     </class>
 </hibernate-mapping>

@@ -14,6 +14,7 @@ public class Cliente {
 
     public Cliente(String host, int puerto) throws Exception {
         socket = new Socket(host, puerto);
+        System.out.println("Conectado al servidor por socket");
         salida = new ObjectOutputStream(socket.getOutputStream());
         salida.flush();
         entrada = new ObjectInputStream(socket.getInputStream());

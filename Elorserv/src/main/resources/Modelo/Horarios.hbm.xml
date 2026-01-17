@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class catalog="elorserv" name="modelo.Horarios" optimistic-lock="none" table="horarios">
+    <class catalog="elorserv" name="com.reto2.elorserv.modelo.Horarios" optimistic-lock="none" table="horarios">
         <id name="id" type="java.lang.Integer">
             <column name="id"/>
             <generator class="identity"/>
         </id>
-        <many-to-one class="modelo.Users" fetch="select" name="users">
+        <many-to-one class="com.reto2.elorserv.modelo.Users" fetch="select" name="users">
             <column name="profe_id" not-null="true"/>
         </many-to-one>
-        <many-to-one class="modelo.Modulos" fetch="select" name="modulos">
+        <many-to-one class="com.reto2.elorserv.modelo.Modulos" fetch="select" name="modulos">
             <column name="modulo_id" not-null="true"/>
         </many-to-one>
         <property name="dia" type="string">

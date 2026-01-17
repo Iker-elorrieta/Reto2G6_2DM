@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,14 +12,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ElorservApplication {
 
+	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT","5000"));
+	private static int API_PORT = Integer.parseInt(System.getenv().getOrDefault("API_PORT","8080"));
+	
 	public static void main(String[] args) {
 		
 		// iniciar la aplicacion de spring
-		SpringApplication.run(ElorservApplication.class, args);
-		
+		SpringApplication app = new SpringApplication(ElorservApplication.class);
+		app.setDefaultProperties(
+		    Map.of("server.port", API_PORT)
+		);
+		app.run(args);
 		// Iniciar el servidor de sockets
-		try (ServerSocket serverSocket = new ServerSocket(5000)) {
-			System.out.println("SOCKET SERVER: Servidor iniciado (P: 5000)");
+		
+		try (ServerSocket serverSocket = new ServerSocket(SOCKET_PORT)) {
+			System.out.println("SOCKET SERVER: Servidor iniciado P:"+SOCKET_PORT);
 			while (true) {
 				Socket socket = serverSocket.accept();
 				ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
@@ -30,6 +38,7 @@ public class ElorservApplication {
 			//e.printStackTrace();
 		}
 	}
+
 
 }
 

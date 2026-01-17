@@ -1,4 +1,4 @@
-package modelo;
+package com.reto2.elorserv.modelo;
 
 import java.io.File;
 import java.io.FileNotFoundException;

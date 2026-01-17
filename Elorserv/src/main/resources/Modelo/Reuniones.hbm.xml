@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class catalog="elorserv" name="modelo.Reuniones" optimistic-lock="none" table="reuniones">
+    <class catalog="elorserv" name="com.reto2.elorserv.modelo.Reuniones" optimistic-lock="none" table="reuniones">
         <id name="idReunion" type="java.lang.Integer">
             <column name="id_reunion"/>
             <generator class="identity"/>
         </id>
-        <many-to-one class="modelo.Users" fetch="select" name="usersByAlumnoId">
+        <many-to-one class="com.reto2.elorserv.modelo.Users" fetch="select" name="usersByAlumnoId">
             <column name="alumno_id"/>
         </many-to-one>
-        <many-to-one class="modelo.Users" fetch="select" name="usersByProfesorId">
+        <many-to-one class="com.reto2.elorserv.modelo.Users" fetch="select" name="usersByProfesorId">
             <column name="profesor_id"/>
         </many-to-one>
         <property name="estado" type="string">

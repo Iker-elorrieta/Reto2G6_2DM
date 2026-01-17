@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import metodos.Usuario;
-import modelo.Users;
+import com.reto2.elorserv.modelo.Users;
+
 
 public class SocketServer extends Thread {
 
 	private ObjectInputStream entrada;
 	private ObjectOutputStream salida;
-	private Usuario usuario = new Usuario();
+	private Users usuario = null;
 
 	public SocketServer(ObjectInputStream entrada, ObjectOutputStream salida) {
 		this.entrada = entrada;
@@ -45,10 +45,10 @@ public class SocketServer extends Thread {
 				response = login(username, contrasena);
 				break;
 			case "get_usuario":
-				response = usuario.getUsuarioLogged();
+				response = usuario.getUsuarioPorID();
 				break;
 			case "logout":
-				usuario.cerrarSesion();
+				usuario = null;
 				response = "Sesión cerrada correctamente";
 				break;
 			default:
@@ -65,7 +65,8 @@ public class SocketServer extends Thread {
 	private Object login(String username, String contrasena) {
 
 		try {
-			Users u = usuario.iniciarSesion(username, contrasena);
+			
+			Users u = new Users(username,contrasena).iniciarSesion();
 			if (u == null) {
 				return "Credenciales inválidas";
 			}
