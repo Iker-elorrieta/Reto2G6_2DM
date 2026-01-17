@@ -1,12 +1,15 @@
 package com.reto2.elorserv.modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,6 +23,10 @@ import com.reto2.elorserv.HibernateUtil;
  */
 public class Users implements java.io.Serializable {
 
+	private static final String AES_TRANSFORMATION = "AES/ECB/PKCS5Padding";
+	private static final int AES_KEY_LENGTH = 16;
+	private static final String ENV_KEY = System.getenv().getOrDefault("ELOR_AES_KEY","ELORG6RETO2");
+	
 	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Tipos tipos;
@@ -263,7 +270,8 @@ public class Users implements java.io.Serializable {
 	}
 	public Users convertirUsuario() {
 		Tipos t = new Tipos(getTipos().getId(), getTipos().getName(),getTipos().getNameEu());
-		return new Users(getId(),getEmail(), getUsername(), getPassword(), getNombre(), getApellidos(), getDni(),
+		String usernameDescifrado = descifrar(getUsername());
+		return new Users(getId(),getEmail(), usernameDescifrado, getPassword(), getNombre(), getApellidos(), getDni(),
 				getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(), getCreatedAt(),
 				getUpdatedAt(),t);
 	}
@@ -286,19 +294,20 @@ public class Users implements java.io.Serializable {
             throw new RuntimeException("Credenciales inválidas");
         }
     }
-	
+	@JsonIgnore
 	public Users getUsuarioUsernameContraseña() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		username = hashear(username);
-		password = hashear(password);
+		String usernameCifrado = cifrar(username);
+		String passwordCifrado = cifrar(password);
 		String hql = "from Users where username = ?1 and password = ?2";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter(1, username);
-		q.setParameter(2, password);
-		return q.uniqueResult().convertirUsuario();
+		q.setParameter(1, usernameCifrado);
+		q.setParameter(2, passwordCifrado);
+		Users resultado = q.uniqueResult();
+		return resultado != null ? resultado.convertirUsuario() : null;
 	}
-
+	@JsonIgnore
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -315,27 +324,93 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		ArrayList<Users> a = new ArrayList<Users>(q.list());
-		return a;
+		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
+		for (Users usuario : a) {
+			usuariosConvertidos.add(usuario.convertirUsuario());
+		}
+		return usuariosConvertidos;
 	}
 	
 	public Users crearUsuario() {
-	    SessionFactory sesion = HibernateUtil.getSessionFactory();
-	    try (Session session = sesion.openSession()) {
-	        Transaction tx = session.beginTransaction();
-	        // Hash de contraseña
-	        setUsername(hashear(getUsername()));
-	        setPassword(hashear(getPassword()));
-	        // Timestamps
-	        Timestamp now = new Timestamp(System.currentTimeMillis());
-	        setCreatedAt(now);
-	        setUpdatedAt(now);
-	        session.persist(convertirUsuario());
-	        tx.commit();
-	        return this;
-	    } catch (Exception e) {
-	        e.printStackTrace(); 
-	        throw e;
-	    }
+ 	    SessionFactory sesion = HibernateUtil.getSessionFactory();
+ 	    try (Session session = sesion.openSession()) {
+ 	        Transaction tx = session.beginTransaction();
+	        String usernameNormalizado = getUsername().trim().toLowerCase();
+	        asegurarUsernameDisponible(usernameNormalizado, null);
+	        // Cifrado simétrico
+	        setUsername(cifrar(usernameNormalizado));
+ 	        setPassword(cifrar(getPassword()));
+ 	        // Timestamps
+ 	        Timestamp now = new Timestamp(System.currentTimeMillis());
+ 	        setCreatedAt(now);
+ 	        setUpdatedAt(now);
+ 	        session.persist(this);
+ 	        tx.commit();
+ 	        return convertirUsuario();
+ 	    } catch (Exception e) {
+ 	        e.printStackTrace(); 
+ 	        throw e;
+ 	    }
+ 	}
+
+	public Users actualizarUsuario() {
+		if (getId() == null) {
+			throw new IllegalArgumentException("Id obligatorio para actualizar usuario");
+		}
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			Transaction tx = session.beginTransaction();
+			Users existente = session.get(Users.class, getId());
+			if (existente == null) {
+				throw new RuntimeException("Usuario no encontrado con id: " + getId());
+			}
+			String usernameNormalizado = getUsername().trim().toLowerCase();
+			asegurarUsernameDisponible(usernameNormalizado, existente.getId());
+ 			if (getTipos() != null) {
+ 				Tipos tipoGestionado = session.get(Tipos.class, getTipos().getId());
+ 				existente.setTipos(tipoGestionado);
+ 			}
+ 			existente.setEmail(getEmail());
+			existente.setUsername(cifrar(getUsername()));
+			existente.setUsername(cifrar(usernameNormalizado));
+ 			existente.setNombre(getNombre());
+ 			existente.setApellidos(getApellidos());
+ 			existente.setDni(getDni());
+ 			existente.setDireccion(getDireccion());
+ 			existente.setTelefono1(getTelefono1());
+ 			existente.setTelefono2(getTelefono2());
+ 			existente.setArgazkiaUrl(getArgazkiaUrl());
+ 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+ 			session.merge(existente);
+ 			tx.commit();
+ 			return existente.convertirUsuario();
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public Users cambiarPassword(String nuevaPassword) {
+		if (getId() == null) {
+			throw new IllegalArgumentException("Id obligatorio para cambiar la contraseña");
+		}
+		if (nuevaPassword == null || nuevaPassword.isBlank()) {
+			throw new IllegalArgumentException("La nueva contraseña no puede estar vacía");
+		}
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			Transaction tx = session.beginTransaction();
+			Users existente = session.get(Users.class, getId());
+			if (existente == null) {
+				throw new RuntimeException("Usuario no encontrado con id: " + getId());
+			}
+			existente.setPassword(cifrar(nuevaPassword));
+			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+			session.merge(existente);
+			tx.commit();
+			return existente.convertirUsuario();
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 	public void borrarUsuario() {
 	    SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -353,20 +428,73 @@ public class Users implements java.io.Serializable {
 	            if (tx != null) tx.rollback();
 	            throw e;
 	        }
+	    } catch (Exception e) {
+	        
 	    }
-	}
-	public String hashear(String c) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA");
-			byte bytes[] = c.getBytes();
-			md.update(bytes);
 
-			byte resumenBytes[] = md.digest();
-			c = new String(resumenBytes);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+	}
+
+	private static void asegurarUsernameDisponible(String username, Integer excluirId) {
+		if (usernameExiste(username, excluirId)) {
+			throw new IllegalArgumentException("El nombre de usuario ya está en uso");
 		}
-		return c;
 	}
 
-}
+	public static boolean usernameExiste(String username, Integer excluirId) {
+		String usernameNormalizado = username.trim().toLowerCase();
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			String hql = "select count(u.id) from Users u where u.username = :username";
+			if (excluirId != null) {
+				hql= hql+" and u.id <> :excluirId";
+			}
+			Query<Long> q = session.createQuery(hql.toString(), Long.class);
+			q.setParameter("username", cifrar(usernameNormalizado));
+			if (excluirId != null) {
+				q.setParameter("excluirId", excluirId);
+			}
+			Long count = q.uniqueResult();
+			return count != null && count > 0;
+		}
+	}
+
+
+ 	public static String cifrar(String valor) {
+ 		if (valor == null) {
+ 			return null;
+ 		}
+ 		try {
+ 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+ 			cipher.init(Cipher.ENCRYPT_MODE, key());
+ 			byte[] cifrado = cipher.doFinal(valor.getBytes(StandardCharsets.UTF_8));
+ 			return Base64.getEncoder().encodeToString(cifrado);
+ 		} catch (Exception e) {
+ 			throw new RuntimeException("Error cifrando valor", e);
+ 		}
+ 	}
+ 
+ 	public static String descifrar(String valor) {
+ 		if (valor == null) {
+ 			return null;
+ 		}
+ 		try {
+ 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+ 			cipher.init(Cipher.DECRYPT_MODE, key());
+ 			byte[] decodificado = Base64.getDecoder().decode(valor);
+ 			byte[] descifrado = cipher.doFinal(decodificado);
+ 			return new String(descifrado, StandardCharsets.UTF_8);
+ 		} catch (Exception e) {
+ 			throw new RuntimeException("Error descifrando valor", e);
+ 		}
+ 	}
+ 
+ 	@JsonIgnore
+ 	private static SecretKeySpec key() {
+		byte[] keyBytes = ENV_KEY.getBytes(StandardCharsets.UTF_8);
+		byte[] normalized = new byte[AES_KEY_LENGTH];
+		for (int i = 0; i < AES_KEY_LENGTH; i++) {
+			normalized[i] = i < keyBytes.length ? keyBytes[i] : 0;
+		}
+		return new SecretKeySpec(normalized, "AES");
+	}
+ }

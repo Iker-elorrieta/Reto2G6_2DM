@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,7 +53,7 @@ public class Controller implements WebMvcConfigurer {
 		}
 	}
 
-	@PostMapping("/usuarios/crear")
+	@PostMapping("/usuarios/")
 	public ResponseEntity<String> crearUsuario(@RequestBody Users user) {
 		try {
 			user.crearUsuario();
@@ -61,6 +62,30 @@ public class Controller implements WebMvcConfigurer {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+	@PutMapping("/usuarios/{id}")
+	public ResponseEntity<?> actualizarUsuario(@PathVariable int id, @RequestBody Users user) {
+		try {
+			user.setId(id);
+			Users usuarioActualizado = user.actualizarUsuario();
+			return ResponseEntity.ok(usuarioActualizado);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		}
+	}
+	@PutMapping("/usuarios/{id}/contrasena")
+	public ResponseEntity<?> cambiarContrasena(@PathVariable int id, @RequestParam String nuevaContrasena) {
+		try {
+			Users user = new Users(id);
+			user.cambiarPassword(nuevaContrasena);
+			return ResponseEntity.ok("Contraseña cambiada exitosamente.");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		}
 	}
 
@@ -73,6 +98,23 @@ public class Controller implements WebMvcConfigurer {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al borrar el usuario");
+		}
+	}
+	@GetMapping("/usuarios/{username}/exists")
+	public ResponseEntity<?> verificarUsername(@PathVariable String username) {
+		try {
+			boolean exists = Users.usernameExiste(username,null);
+			return ResponseEntity.ok(exists);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}	}
+	@GetMapping("/usuarios/{id}/{username}/exists")
+	public ResponseEntity<?> verificarUsername(@PathVariable String username, @PathVariable Integer id) {
+		try {
+			boolean exists = Users.usernameExiste(username,id);
+			return ResponseEntity.ok(exists);
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
 	/* CENTROS */

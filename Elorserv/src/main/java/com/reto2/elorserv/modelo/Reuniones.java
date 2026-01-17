@@ -9,6 +9,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.Transaction;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.reto2.elorserv.HibernateUtil;
 
 /**
@@ -206,7 +207,15 @@ public class Reuniones implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+	public Centros getCentro() {
+		return this.centro;
+	}
 
+	public void setCentro(Centros centro) {
+		this.centro = centro;
+	}
+
+	@JsonIgnore
 	public Reuniones convertirReunion() {
 	    Users alumnoConvertido = null;
 	    Users profesorConvertido = null;
@@ -223,7 +232,7 @@ public class Reuniones implements java.io.Serializable {
 	            getEstadoEus(), getIdCentro(), getTitulo(), getAsunto(), getAula(), getFecha(), getCreatedAt(),
 	            getUpdatedAt(),centro);
 	}
-
+	@JsonIgnore
 	public static ArrayList<Reuniones> getAllReuniones() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -252,7 +261,6 @@ public class Reuniones implements java.io.Serializable {
 		}
 		return reunionesConvertidas;
 	}
-
 	public Reuniones crearReunion() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Transaction tx = null;
