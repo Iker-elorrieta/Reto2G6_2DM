@@ -341,6 +341,7 @@ public class Users implements java.io.Serializable {
 	        setUsername(cifrar(usernameNormalizado));
  	        setPassword(cifrar(getPassword()));
  	        setId(null);
+ 	        
  	        // Timestamps
  	        Timestamp now = new Timestamp(System.currentTimeMillis());
  	        setCreatedAt(now);
