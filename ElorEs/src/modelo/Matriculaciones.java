@@ -1,0 +1,64 @@
+package modelo;
+
+import java.sql.Date;
+
+public class Matriculaciones implements java.io.Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private Integer id;
+	private Ciclos ciclos;
+	private Users users;
+	private byte curso;
+	private Date fecha;
+
+	public Matriculaciones() {
+	}
+
+	public Matriculaciones(Ciclos ciclos, Users users, byte curso, Date fecha) {
+		this.ciclos = ciclos;
+		this.users = users;
+		this.curso = curso;
+		this.fecha = fecha;
+	}
+
+	public Integer getId() {
+		return this.id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Ciclos getCiclos() {
+		return this.ciclos;
+	}
+
+	public void setCiclos(Ciclos ciclos) {
+		this.ciclos = ciclos;
+	}
+
+	public Users getUsers() {
+		return this.users;
+	}
+
+	public void setUsers(Users users) {
+		this.users = users;
+	}
+
+	public byte getCurso() {
+		return this.curso;
+	}
+
+	public void setCurso(byte curso) {
+		this.curso = curso;
+	}
+
+	public Date getFecha() {
+		return this.fecha;
+	}
+
+	public void setFecha(Date fecha) {
+		this.fecha = fecha;
+	}
+
+}

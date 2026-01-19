@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class catalog="elorserv" name="modelo.Reuniones" optimistic-lock="none" table="reuniones">
+        <id name="idReunion" type="java.lang.Integer">
+            <column name="id_reunion"/>
+            <generator class="identity"/>
+        </id>
+        <many-to-one class="modelo.Users" fetch="select" name="usersByAlumnoId">
+            <column name="alumno_id"/>
+        </many-to-one>
+        <many-to-one class="modelo.Users" fetch="select" name="usersByProfesorId">
+            <column name="profesor_id"/>
+        </many-to-one>
+        <property name="estado" type="string">
+            <column length="10" name="estado"/>
+        </property>
+        <property name="estadoEus" type="string">
+            <column length="10" name="estado_eus"/>
+        </property>
+        <property name="idCentro" type="string">
+            <column length="20" name="id_centro"/>
+        </property>
+        <property name="titulo" type="string">
+            <column length="150" name="titulo"/>
+        </property>
+        <property name="asunto" type="string">
+            <column length="200" name="asunto"/>
+        </property>
+        <property name="aula" type="string">
+            <column length="20" name="aula"/>
+        </property>
+        <property name="fecha" type="timestamp">
+            <column length="19" name="fecha"/>
+        </property>
+        <property name="createdAt" type="timestamp">
+            <column length="19" name="created_at"/>
+        </property>
+        <property name="updatedAt" type="timestamp">
+            <column length="19" name="updated_at"/>
+        </property>
+    </class>
+</hibernate-mapping>

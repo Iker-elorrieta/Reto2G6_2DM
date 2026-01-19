@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final --><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class catalog="elorserv" name="Modelo.Matriculaciones" optimistic-lock="none" table="matriculaciones">
+        <id name="id" type="java.lang.Integer">
+            <column name="id"/>
+            <generator class="identity"/>
+        </id>
+        <many-to-one class="Modelo.Ciclos" fetch="select" name="ciclos">
+            <column name="ciclo_id" not-null="true"/>
+        </many-to-one>
+        <many-to-one class="Modelo.Users" fetch="select" name="users">
+            <column name="alum_id" not-null="true"/>
+        </many-to-one>
+        <property name="curso" type="byte">
+            <column name="curso" not-null="true"/>
+        </property>
+        <property name="fecha" type="date">
+            <column length="10" name="fecha" not-null="true"/>
+        </property>
+    </class>
+</hibernate-mapping>
