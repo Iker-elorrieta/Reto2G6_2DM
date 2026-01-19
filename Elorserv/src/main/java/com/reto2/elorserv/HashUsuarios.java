@@ -6,7 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import com.reto2.elorserv.modelo.Users;
+import modelo.Users;
 
 
 // EJECUTAR UNA SOLA VEZ PARA HASHEAR USUARIOS AL IMPORTAR BD
@@ -19,8 +19,8 @@ public class HashUsuarios {
 		String hql = "from Users";
 		List<Users> u = session.createQuery(hql, Users.class).list();
 		for (Users usuario : u) {
-			usuario.setUsername(usuario.cifrar(usuario.getUsername()));
-			usuario.setPassword(usuario.cifrar(usuario.getPassword()));
+			usuario.setUsername(Users.cifrar(usuario.getUsername()));
+			usuario.setPassword(Users.cifrar(usuario.getPassword()));
 			session.merge(usuario);
 		}
 		tx.commit();

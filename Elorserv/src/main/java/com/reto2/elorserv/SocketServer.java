@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import com.reto2.elorserv.modelo.Centros;
-import com.reto2.elorserv.modelo.Horarios;
-import com.reto2.elorserv.modelo.Reuniones;
-import com.reto2.elorserv.modelo.Users;
+import modelo.Centros;
+import modelo.Horarios;
+import modelo.Reuniones;
+import modelo.Users;
 
 public class SocketServer extends Thread {
 

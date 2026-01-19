@@ -2,6 +2,8 @@ package controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -10,19 +12,25 @@ import cliente.Cliente;
 import modelo.Users;
 import vista.Inicio;
 import vista.PantallaMenu;
+import vista.VerAlumnos;
+import vista.VerPerfil;
 
-public class Controlador implements ActionListener {
+public class Controlador extends MouseAdapter implements ActionListener {
 	private Inicio vistaLogin;
 	private Cliente cliente;
 	private Users usuario;
 	private PantallaMenu vistaMenu;
+	private VerAlumnos vistaAlumnos;
+	private VerPerfil vistaPerfil;
 
 	public Controlador(Inicio vistaLogin) {
 		this.vistaLogin = vistaLogin;
 		vistaMenu = new PantallaMenu();
+		vistaAlumnos = new VerAlumnos();
+		vistaPerfil = new VerPerfil();
 		inicializarControlador();
 		try {
-			cliente = new Cliente("localhost", 5001);
+			cliente = new Cliente("localhost", 5000);
 		} catch (Exception e) {
 			vistaLogin.dispose();
 			vistaMenu.dispose();
@@ -41,8 +49,28 @@ public class Controlador implements ActionListener {
 		
 		vistaMenu.getBtnDesconectar().setActionCommand("DESCONECTAR");
 		vistaMenu.getBtnDesconectar().addActionListener(this);
-
+		
+		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().setActionCommand("VOLVER_MENU");
+		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().addActionListener(this);
+		
+		vistaMenu.getPanelVerHorarios().getBtnVolver().setActionCommand("VOLVER_MENU");
+		vistaMenu.getPanelVerHorarios().getBtnVolver().addActionListener(this);
+		
+		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().setActionCommand("VER_HORARIOS");
+		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().addActionListener(this);
+		
+		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().setActionCommand("ORGANIZAR_REUNIONES");
+		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().addActionListener(this);
+		
+		vistaAlumnos.getBtnVolver().setActionCommand("VOLVER_MENUPAGINA");
+		vistaAlumnos.getBtnVolver().addActionListener(this);
+		
+		vistaMenu.getBtnConsultarAlumnos().setActionCommand("CONSULTAR_ALUMNOS");
+		vistaMenu.getBtnConsultarAlumnos().addActionListener(this);
+		
+		vistaMenu.getPanelPerfil().addMouseListener(this);
 	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -56,12 +84,46 @@ public class Controlador implements ActionListener {
 			vistaMenu.setVisible(false);
 			vistaLogin.setVisible(true);
 			break;
+		case "VOLVER_MENU":
+			vistaMenu.getPanelVerHorarios().setVisible(false);
+			vistaMenu.getPanelOrganizarReuniones().setVisible(false);
+			vistaMenu.getPanelGeneral().setVisible(true);
+			break;
+		case "VOLVER_MENUPAGINA":
+			vistaAlumnos.setVisible(false);
+			vistaPerfil.setVisible(false);
+			vistaMenu.setVisible(true);
+			break;
+		case "CONSULTAR_ALUMNOS":
+			vistaMenu.setVisible(false);
+			vistaAlumnos.setVisible(true);
+			break;
+		case "VER_HORARIOS":
+			vistaMenu.getPanelGeneral().setVisible(false);
+			vistaMenu.getPanelVerHorarios().setVisible(true);
+			break;
+		case "ORGANIZAR_REUNIONES":
+			vistaMenu.getPanelGeneral().setVisible(false);
+			vistaMenu.getPanelOrganizarReuniones().setVisible(true);
+			break;
+		case "ABRIR_PERFIL":
+			System.out.println("Abriendo perfil de usuario...");
+			cargarDatosUsuario(usuario);
+			vistaPerfil.setVisible(true);
+			break;
 		default:
 			break;
 		}
 
 	}
-
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getSource() == vistaMenu.getPanelPerfil() ) {
+			actionPerformed(new ActionEvent(vistaMenu.getPanelAvatar(), ActionEvent.ACTION_PERFORMED,
+					"ABRIR_PERFIL"));
+		} 
+	}
+	
 	public void login() {
 		ArrayList<Object> datos = new ArrayList<>();
 		datos.add(vistaLogin.getPanelLogin().getTextFieldUsuario().getText());
@@ -102,5 +164,17 @@ public class Controlador implements ActionListener {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public void cargarDatosUsuario(Users usuario) {
+		vistaPerfil.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
+		vistaPerfil.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
+		vistaPerfil.getLblEmail().setText(usuario.getEmail());
+		vistaPerfil.getLblTelefono1().setText(usuario.getTelefono1());
+		vistaPerfil.getLblTelefono2().setText(usuario.getTelefono2());
+		vistaPerfil.getLblDireccion().setText(usuario.getDireccion());
+		vistaPerfil.getLblDNI().setText(usuario.getDni());		
+		
+		vistaPerfil.cargarAvatar(usuario.getArgazkiaUrl());
 	}
 }

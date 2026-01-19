@@ -14,9 +14,14 @@ public class ElorservApplication {
 
 	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT","5000"));
 	private static int API_PORT = Integer.parseInt(System.getenv().getOrDefault("API_PORT","8080"));
-	
+
+	/*
+	 * IMPORTANTE:
+	 * TRAS IMPORTAR LA BD POR PRIMERA VEZ, HAY QUE EJECUTAR HASHUSUARIOS PARA HASHEAR LOS USUARIOS
+	 * 
+	*/
+
 	public static void main(String[] args) {
-		
 		// iniciar la aplicacion de spring
 		SpringApplication app = new SpringApplication(ElorservApplication.class);
 		app.setDefaultProperties(

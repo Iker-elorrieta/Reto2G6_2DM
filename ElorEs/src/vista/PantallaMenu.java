@@ -13,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import java.awt.Cursor;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URI;
 import java.net.URL;
@@ -23,13 +24,16 @@ public class PantallaMenu extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JButton btnDesconectar;
-	private JButton btnPerfil;
 	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
-	private PanelHorario panelHorarios;
 	private JLabel lblNombreUsuario;
 	private JLabel lblRolUsuario;
 	private JPanel panelAvatar;
 	private JPanel panelIzquierda;
+	private PanelGeneral panelGeneral;
+	private PanelVerHorarios panelVerHorarios;
+	private PanelOrganizarReuniones panelOrganizarReuniones;
+	private JPanel panelPerfil;
+	private JButton btnConsultarAlumnos;
 
 
 	/**
@@ -44,6 +48,7 @@ public class PantallaMenu extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		panelPerfil = new JPanel();
 		panelIzquierda = new JPanel() {
 			private static final long serialVersionUID = 1L;
 			private Image backgroundImage;
@@ -72,12 +77,16 @@ public class PantallaMenu extends JFrame {
 				}
 			}
 		};
-
 		panelIzquierda.setBorder(null);
 		panelIzquierda.setBounds(10, 10, 304, 657);
 		panelIzquierda.setLayout(null);
 		panelIzquierda.setOpaque(false);
 		contentPane.add(panelIzquierda);
+		
+		panelPerfil.setOpaque(false);
+		panelPerfil.setBounds(0, 492, 304, 56);
+		panelPerfil.setLayout(null);
+		panelIzquierda.add(panelPerfil);
 		
 		btnDesconectar = new JButton("Desconectar");
 		btnDesconectar.setForeground(new Color(0, 0, 0));
@@ -100,61 +109,73 @@ public class PantallaMenu extends JFrame {
 		panelLogo.setOpaque(false);
 		panelIzquierda.add(panelLogo);
 		
-		btnPerfil = new JButton("Consultar perfil");
-		btnPerfil.setBounds(104, 268, 148, 23);
-		panelIzquierda.add(btnPerfil);
-		
-		JButton btnConsultarAlumnos = new JButton("Consultar alumnos");
+		btnConsultarAlumnos = new JButton("Consultar alumnos");
 		btnConsultarAlumnos.setForeground(Color.BLACK);
 		btnConsultarAlumnos.setFont(new Font("Dialog", Font.BOLD, 20));
 		btnConsultarAlumnos.setBackground(Color.WHITE);
 		btnConsultarAlumnos.setBounds(10, 559, 284, 38);
 		panelIzquierda.add(btnConsultarAlumnos);
 		
+
+		
+		panelGeneral = new PanelGeneral();
+		panelGeneral.setBounds(324, 10, 650, 657);
+		contentPane.add(panelGeneral);
+		
+		panelVerHorarios = new PanelVerHorarios();
+		panelVerHorarios.setBounds(324, 10, 650, 657);
+		contentPane.add(panelVerHorarios);
+		
+		panelOrganizarReuniones = new PanelOrganizarReuniones();
+		panelOrganizarReuniones.setBounds(324, 10, 650, 657);
+		contentPane.add(panelOrganizarReuniones);
+		
+		
 		lblNombreUsuario = new JLabel("Nombre Usuario");
 		lblNombreUsuario.setForeground(new Color(255, 255, 255));
 		lblNombreUsuario.setFont(new Font("Dialog", Font.BOLD, 15));
-		lblNombreUsuario.setBounds(70, 498, 160, 23);
-		panelIzquierda.add(lblNombreUsuario);
+		lblNombreUsuario.setBounds(69, 11, 115, 20);
+		panelPerfil.add(lblNombreUsuario);
 		
 		lblRolUsuario = new JLabel("RolUsuario");
 		lblRolUsuario.setForeground(new Color(255, 255, 255));
 		lblRolUsuario.setFont(new Font("Dialog", Font.PLAIN, 15));
-		lblRolUsuario.setBounds(70, 521, 160, 23);
-		panelIzquierda.add(lblRolUsuario);
-		panelHorarios = new PanelHorario();
-		panelHorarios.setLocation(334, 71);
-		panelHorarios.setSize(637, 262);
-		contentPane.add(panelHorarios);
+		lblRolUsuario.setBounds(69, 31, 72, 20);
+		panelPerfil.add(lblRolUsuario);
 		
-		JLabel lblMiHorario = new JLabel("Mi horario");
-		lblMiHorario.setFont(new Font("Dialog", Font.PLAIN, 30));
-		lblMiHorario.setBounds(337, 10, 160, 51);
-		contentPane.add(lblMiHorario);
-		
-		JButton btnOrganizarReuniones = new JButton("Organizar reuniones");
 
-		btnOrganizarReuniones.setForeground(Color.WHITE);
-		btnOrganizarReuniones.setFont(fuenteBold);
-		btnOrganizarReuniones.setBackground(Color.decode("#0092A5"));
-		btnOrganizarReuniones.setBounds(720, 354, 251, 38);
-		contentPane.add(btnOrganizarReuniones);
-		
-		PanelReunionesTabla panelReunionesSemanal = new PanelReunionesTabla();
-		panelReunionesSemanal.setBounds(331, 405, 637, 262);
-		contentPane.add(panelReunionesSemanal);
-		
-		JLabel lblMiHorario_1 = new JLabel("Reuniones esta semana");
-		lblMiHorario_1.setFont(new Font("Dialog", Font.PLAIN, 30));
-		lblMiHorario_1.setBounds(334, 344, 361, 51);
-		contentPane.add(lblMiHorario_1);
-		
-		JButton btnVerOtrosHorarios = new JButton("Ver otros horarios");
-		btnVerOtrosHorarios.setForeground(Color.WHITE);
-		btnVerOtrosHorarios.setFont(new Font("Dialog", Font.BOLD, 20));
-		btnVerOtrosHorarios.setBackground(Color.decode("#0092A5"));
-		btnVerOtrosHorarios.setBounds(720, 20, 254, 38);
-		contentPane.add(btnVerOtrosHorarios);
+	}
+
+	public PanelGeneral getPanelGeneral() {
+		return panelGeneral;
+	}
+
+	public void setPanelGeneral(PanelGeneral panelGeneral) {
+		this.panelGeneral = panelGeneral;
+	}
+
+	public PanelVerHorarios getPanelVerHorarios() {
+		return panelVerHorarios;
+	}
+
+	public void setPanelVerHorarios(PanelVerHorarios panelVerHorarios) {
+		this.panelVerHorarios = panelVerHorarios;
+	}
+
+	public PanelOrganizarReuniones getPanelOrganizarReuniones() {
+		return panelOrganizarReuniones;
+	}
+	public void setPanelOrganizarReuniones(PanelOrganizarReuniones panelOrganizarReuniones) {
+		this.panelOrganizarReuniones = panelOrganizarReuniones;
+	}
+
+	public JPanel getPanelAvatar() {
+		return panelAvatar;
+	}
+
+
+	public void setPanelAvatar(JPanel panelAvatar) {
+		this.panelAvatar = panelAvatar;
 	}
 
 
@@ -187,15 +208,24 @@ public class PantallaMenu extends JFrame {
 		this.lblRolUsuario = lblRolUsuario;
 	}
 	
+	
+	
+	public JButton getBtnConsultarAlumnos() {
+		return btnConsultarAlumnos;
+	}
+
+	public void setBtnConsultarAlumnos(JButton btnConsultarAlumnos) {
+		this.btnConsultarAlumnos = btnConsultarAlumnos;
+	}
+
 	public void cargarAvatar(String argazkiaUrl) {
-		System.out.println("cargarAvatar: " + argazkiaUrl);
 		panelAvatar = new JPanel() {
 			    private static final long serialVersionUID = 1L;
 			    private Image backgroundImage;
 
 			    {
 			        try {
-			            if (argazkiaUrl  != null && !argazkiaUrl.isBlank()) {
+			            if (argazkiaUrl  != null && !argazkiaUrl.isBlank() && !argazkiaUrl.equals("null")) {
 			                URI uri = new URI(argazkiaUrl);
 			                URL url = uri.toURL();
 			                backgroundImage = ImageIO.read(url);		
@@ -230,9 +260,16 @@ public class PantallaMenu extends JFrame {
 			        }
 			    }
 			};
-			panelAvatar.setBounds(10, 498, 50, 50);
+			panelAvatar.setBounds(10, 7, 50, 50);
 			panelAvatar.setOpaque(false);
-			panelIzquierda.add(panelAvatar);
+			panelAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			panelPerfil.add(panelAvatar);
+		    panelPerfil.revalidate();
+		    panelPerfil.repaint();
 
+	}
+	
+	public JPanel getPanelPerfil() {
+		return panelPerfil;
 	}
 }
