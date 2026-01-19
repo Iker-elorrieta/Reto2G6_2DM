@@ -17,7 +17,7 @@ public class ElorservApplication {
 
 	/*
 	 * IMPORTANTE:
-	 * TRAS IMPORTAR LA BD POR PRIMERA VEZ, HAY QUE EJECUTAR HASHUSUARIOS PARA HASHEAR LOS USUARIOS
+	 * importa elorserv.sql
 	 * 
 	*/
 
