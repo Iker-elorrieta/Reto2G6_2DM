@@ -6,7 +6,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -17,7 +16,6 @@ import java.net.URI;
 import java.net.URL;
 
 import javax.swing.JLabel;
-import javax.swing.JButton;
 
 public class VerPerfil extends JFrame {
 

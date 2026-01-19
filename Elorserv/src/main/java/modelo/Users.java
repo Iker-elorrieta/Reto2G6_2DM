@@ -314,7 +314,6 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users where id = ?1";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, getId());
-		Users u = q.uniqueResult();
 		return q.uniqueResult().convertirUsuario();
 	}
 
