@@ -197,7 +197,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 				}
 				actualizarTablaHorarios(horarios);
 			} else if (response instanceof String) {
-				JOptionPane.showMessageDialog(vistaMenu, response);
+		//		JOptionPane.showMessageDialog(vistaMenu, response);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar el horario: " + e.getMessage());
