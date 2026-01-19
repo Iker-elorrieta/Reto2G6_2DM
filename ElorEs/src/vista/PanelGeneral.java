@@ -72,6 +72,10 @@ public class PanelGeneral extends JPanel {
 		this.btnOrganizarReuniones = btnOrganizarReuniones;
 	}
 	
+	public TablaHorario getPanelHorarios() {
+		return panelHorarios;
+	}
+
 	
 
 }

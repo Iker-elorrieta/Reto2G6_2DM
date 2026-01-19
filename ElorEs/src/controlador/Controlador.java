@@ -5,10 +5,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 import cliente.Cliente;
+import modelo.Horarios;
 import modelo.Users;
 import vista.Inicio;
 import vista.PantallaMenu;
@@ -143,6 +148,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 					vistaMenu.getLblNombreUsuario().setText(usuario.getNombre()+" "+usuario.getApellidos());
 					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
 					vistaMenu.cargarAvatar(usuario.getArgazkiaUrl());
+					cargarHorariosUsuario();
 				}
 			} else {
 				String mensajeError = (String) response;
@@ -169,6 +175,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	public void cargarDatosUsuario(Users usuario) {
 		vistaPerfil.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
 		vistaPerfil.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
+		vistaPerfil.getLblUsuario().setText(usuario.getUsername());
 		vistaPerfil.getLblEmail().setText(usuario.getEmail());
 		vistaPerfil.getLblTelefono1().setText(usuario.getTelefono1());
 		vistaPerfil.getLblTelefono2().setText(usuario.getTelefono2());
@@ -176,5 +183,113 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaPerfil.getLblDNI().setText(usuario.getDni());		
 		
 		vistaPerfil.cargarAvatar(usuario.getArgazkiaUrl());
+	}
+
+	private void cargarHorariosUsuario() {
+		try {
+			Object response = cliente.enviarRequest("get_horarios", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Horarios> horarios = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Horarios) {
+						horarios.add((Horarios) elemento);
+					}
+				}
+				actualizarTablaHorarios(horarios);
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(vistaMenu, response);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar el horario: " + e.getMessage());
+		}
+	}
+
+	private void actualizarTablaHorarios(ArrayList<Horarios> horarios) {
+		DefaultTableModel modeloTabla = vistaMenu.getPanelGeneral().getPanelHorarios().getModelo();
+		modeloTabla.setRowCount(0);
+		
+		if (horarios == null || horarios.isEmpty()) {
+			return;
+		}
+		
+		Map<Byte, String[]> filasPorHora = new TreeMap<>();
+		for (Horarios horario : horarios) {
+			if (horario == null) {
+				continue;
+			}
+			Byte bloque = Byte.valueOf(horario.getHora());
+			String[] fila = filasPorHora.computeIfAbsent(bloque, key -> crearFilaBase(key.byteValue()));
+			int columna = obtenerColumnaDia(horario.getDia());
+			if (columna == -1) {
+				continue;
+			}
+			fila[columna] = describirModulo(horario);
+		}
+		
+		for (String[] fila : filasPorHora.values()) {
+			modeloTabla.addRow(fila);
+		}
+	}
+
+	private String[] crearFilaBase(byte bloqueHora) {
+		String[] fila = new String[8];
+		fila[0] = formatearBloqueHoraria(bloqueHora);
+		return fila;
+	}
+
+	private String formatearBloqueHoraria(byte bloqueHora) {
+		return String.format(Locale.ROOT, "Tramo %d", bloqueHora);
+	}
+
+	private int obtenerColumnaDia(String dia) {
+		if (dia == null) {
+			return -1;
+		}
+		
+		String normalizado = dia.trim().toUpperCase(Locale.ROOT);
+		switch (normalizado) {
+		case "LUNES":
+			return 1;
+		case "MARTES":
+			return 2;
+		case "MIERCOLES":
+		case "MIÉRCOLES":
+			return 3;
+		case "JUEVES":
+			return 4;
+		case "VIERNES":
+			return 5;
+		case "SABADO":
+		case "SÁBADO":
+			return 6;
+		case "DOMINGO":
+			return 7;
+		default:
+			return -1;
+		}
+	}
+
+	private String describirModulo(Horarios horario) {
+		String nombreModulo = null;
+		if (horario.getModulos() != null) {
+			nombreModulo = horario.getModulos().getNombre();
+		}
+		String aula = horario.getAula();
+		boolean tieneModulo = nombreModulo != null && !nombreModulo.trim().isEmpty();
+		boolean tieneAula = aula != null && !aula.trim().isEmpty();
+		
+		if (tieneModulo && tieneAula) {
+			return nombreModulo.trim() + " - " + aula.trim();
+		}
+		
+		if (tieneModulo) {
+			return nombreModulo.trim();
+		}
+		
+		if (tieneAula) {
+			return aula.trim();
+		}
+		
+		return "Disponible";
 	}
 }

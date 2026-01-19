@@ -43,6 +43,7 @@ public class PantallaMenu extends JFrame {
 		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1000, 717);
+		setLayout(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

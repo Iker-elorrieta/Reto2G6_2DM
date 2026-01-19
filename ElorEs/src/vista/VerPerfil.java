@@ -38,6 +38,7 @@ public class VerPerfil extends JFrame {
 	private JLabel lblTelefono2Titulo;
 	private JLabel lblTelefono2;
 	private JPanel panel;
+	private JLabel lblUsuario;
 
 
 	public VerPerfil() {
@@ -83,7 +84,7 @@ public class VerPerfil extends JFrame {
 		lblUsuarioTitulo.setBounds(10, 89, 72, 20);
 		panel.add(lblUsuarioTitulo);
 		
-		JLabel lblUsuario = new JLabel("NOMBRE");
+		lblUsuario = new JLabel("NOMBRE");
 		lblUsuario.setFont(new Font("Dialog", Font.PLAIN, 15));
 		lblUsuario.setBounds(81, 89, 333, 20);
 		panel.add(lblUsuario);
@@ -190,6 +191,15 @@ public class VerPerfil extends JFrame {
 			panel.revalidate();
 			panel.repaint();
 
+	}
+	
+
+	public JLabel getLblUsuario() {
+		return lblUsuario;
+	}
+
+	public void setLblUsuario(JLabel lblUsuario) {
+		this.lblUsuario = lblUsuario;
 	}
 
 	public JLabel getLblNombreUsuario() {
