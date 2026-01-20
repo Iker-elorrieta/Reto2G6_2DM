@@ -1,7 +1,6 @@
 package modelo;
 
 import java.sql.Timestamp;
-import java.util.Locale;
 
 public class Horarios implements java.io.Serializable {
 
@@ -110,34 +109,33 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
 	public String describirModulo() {
-		String nombreModulo = prepararModulo(getModulos() != null ? getModulos().getNombre() : null);
-		String aula = limpiarTexto(getAula());
-		boolean tieneModulo = nombreModulo != null;
-		boolean tieneAula = aula != null;
-		
-		if (tieneModulo && tieneAula) {
-			return envolverEnHtml("<b>" + nombreModulo + "</b> " + aula);
+		String modulo = moduloTrim();
+		String aula = getAula().trim();
+		String contenido = "<html><div style='line-height:1.2;'>";
+		if (modulo != null && aula != null) {
+			contenido += "<b>" + modulo + "</b> " + aula;
+		} else if (modulo != null) {
+			contenido += "<b>" + modulo + "</b>";
+		} else if (aula != null) {
+			contenido += aula;
+		} else {
+			contenido += "<span style='color:#7A7A7A;'>Disponible</span>";
 		}
-		
-		if (tieneModulo) {
-			return envolverEnHtml("<b>" + nombreModulo + "</b>");
+		contenido += "</div></html>";
+		return contenido;
+	}
+	private String moduloTrim() {
+		String limpio = getModulos().getNombre().trim();
+		if (limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
+			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
 		}
-		
-		if (tieneAula) {
-			return envolverEnHtml(aula);
-		}
-		
-		return envolverEnHtml("<span style='color:#7A7A7A;'>Disponible</span>");
+		return limpio;
 	}
 
 	public int obtenerColumnaDia() {
-		if (dia == null) {
-			return -1;
-		}
-		
-		String normalizado = dia.trim().toUpperCase();
-		switch (normalizado) {
+		switch (dia.trim().toUpperCase()) {
 		case "LUNES":
 			return 1;
 		case "MARTES":
@@ -154,40 +152,6 @@ public class Horarios implements java.io.Serializable {
 		}
 	}
 
-	private String prepararModulo(String valor) {
-		if (valor == null) {
-			return null;
-		}
-		String limpio = valor.trim();
-		if (limpio.isEmpty()) {
-			return null;
-		}
-		if (limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
-			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
-		}
-		return escaparHtml(limpio);
-	}
 
-	private String limpiarTexto(String valor) {
-		if (valor == null) {
-			return null;
-		}
-		String limpio = valor.trim();
-		if (limpio.isEmpty()) {
-			return null;
-		}
-		return escaparHtml(limpio);
-	}
-
-	private String escaparHtml(String texto) {
-		return texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-	}
-
-	private String envolverEnHtml(String contenido) {
-		if (contenido == null || contenido.trim().isEmpty()) {
-			return "";
-		}
-		return "<html><div style='line-height:1.2;'>" + contenido + "</div></html>";
-	}
 
 }

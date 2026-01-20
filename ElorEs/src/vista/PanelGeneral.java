@@ -15,7 +15,6 @@ import javax.swing.JLabel;
 public class PanelGeneral extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 	private TablaHorario panelHorarios;
 	private TablaHorario panelReuniones;
 	private JButton btnVerOtrosHorarios;
@@ -54,7 +53,7 @@ public class PanelGeneral extends JPanel {
 		add(contenedorHorario);
 
 		JLabel lblMiHorario = new JLabel("Mi horario");
-		lblMiHorario.setFont(new Font("Dialog", Font.PLAIN, 26));
+		lblMiHorario.setFont(new Font("Raleway", Font.PLAIN, 26));
 		lblMiHorario.setBounds(15, 12, 250, 40);
 		contenedorHorario.add(lblMiHorario);
 
@@ -92,7 +91,7 @@ public class PanelGeneral extends JPanel {
 		add(contenedorReuniones);
 
 		JLabel lblMiHorario_1 = new JLabel("Reuniones esta semana");
-		lblMiHorario_1.setFont(new Font("Dialog", Font.PLAIN, 26));
+		lblMiHorario_1.setFont(new Font("Raleway", Font.PLAIN, 26));
 		lblMiHorario_1.setBounds(15, 12, 330, 40);
 		contenedorReuniones.add(lblMiHorario_1);
 

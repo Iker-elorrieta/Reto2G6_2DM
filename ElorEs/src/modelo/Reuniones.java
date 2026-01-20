@@ -1,6 +1,8 @@
 package modelo;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class Reuniones implements java.io.Serializable {
@@ -140,5 +142,51 @@ public class Reuniones implements java.io.Serializable {
 
 	public void setCentro(Centros centro) {
 		this.centro = centro;
+	}
+	
+	public String obtenerHora() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		LocalDateTime fecha = getFecha().toLocalDateTime();
+		return formatter.format(fecha);
+	}
+	
+	public int obtenerColumnaDia() {
+		switch (getFecha().toLocalDateTime().getDayOfWeek()) {
+		case MONDAY:
+			return 1;
+		case TUESDAY:
+			return 2;
+		case WEDNESDAY:
+			return 3;
+		case THURSDAY:
+			return 4;
+		case FRIDAY:
+			return 5;
+		default:
+			return -1;
+		}
+	}
+
+	public String describirReunion() {
+		String html = "<html><div style='line-height:1.2;'>";
+		if (titulo != null) {
+		    html += "<b>" + titulo + "</b>";
+		}
+		if (getUsersByProfesorId() != null) {
+		    html += "<br/>" + getUsersByProfesorId().getNombre() + " " + getUsersByProfesorId().getApellidos();;
+		}
+		if (estado != null) {
+		    if (getUsersByProfesorId() != null) {
+		        html += " · ";
+		    } else if (titulo != null) {
+		        html += "<br/>";
+		    }
+		    html += estado;
+		}
+		if (aula != null) {
+		    html += "<br/>" + aula;
+		}
+		html += "</div></html>";
+		return html;
 	}
 }

@@ -4,9 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -187,7 +184,6 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaPerfil.getLblTelefono2().setText(usuario.getTelefono2());
 		vistaPerfil.getLblDireccion().setText(usuario.getDireccion());
 		vistaPerfil.getLblDNI().setText(usuario.getDni());
-
 		vistaPerfil.cargarAvatar(usuario.getArgazkiaUrl());
 	}
 
@@ -232,7 +228,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private DefaultTableModel cargarModeloHorarios(ArrayList<Horarios> horarios) {
 		DefaultTableModel modeloTabla = new DefaultTableModel(
 				new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" }, 0);
-		if (horarios == null || horarios.isEmpty()) {
+		if (horarios == null) {
 			return null;
 		}
 		Map<Byte, String[]> filasPorHora = new TreeMap<>();
@@ -264,27 +260,23 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private DefaultTableModel cargarModeloReuniones(ArrayList<Reuniones> reuniones) {
 		DefaultTableModel modeloTabla = new DefaultTableModel(
 				new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" }, 0);
-		if (reuniones == null || reuniones.isEmpty()) {
+		if (reuniones == null) {
 			return null;
 		}
 		Map<String, String[]> filasPorHora = new TreeMap<>();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		for (Reuniones reunion : reuniones) {
-			if (reunion == null || reunion.getFecha() == null) {
-				continue;
-			}
-			LocalDateTime fecha = reunion.getFecha().toLocalDateTime();
-			String clave = formatter.format(fecha);
-			String[] fila = filasPorHora.computeIfAbsent(clave, key -> {
+			// Se obtiene la fila correspondiente a esa hora
+	        // Si no existe, se crea una nueva fila con 6 columnas
+			String[] fila = filasPorHora.computeIfAbsent(reunion.obtenerHora(), key -> {
 				String[] nuevaFila = new String[6];
 				nuevaFila[0] = key;
 				return nuevaFila;
 			});
-			int columna = obtenerColumnaDia(fecha.getDayOfWeek());
+			int columna = reunion.obtenerColumnaDia();
 			if (columna == -1) {
 				continue;
 			}
-			fila[columna] = describirReunion(reunion);
+			fila[columna] = reunion.describirReunion();
 		}
 
 		if (filasPorHora.isEmpty()) {
@@ -297,75 +289,5 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		return modeloTabla;
 	}
 
-	private int obtenerColumnaDia(DayOfWeek dia) {
-		switch (dia) {
-		case MONDAY:
-			return 1;
-		case TUESDAY:
-			return 2;
-		case WEDNESDAY:
-			return 3;
-		case THURSDAY:
-			return 4;
-		case FRIDAY:
-			return 5;
-		default:
-			return -1;
-		}
-	}
-
-	private String describirReunion(Reuniones reunion) {
-		String titulo = textoSeguro(reunion.getTitulo());
-		String estado = textoSeguro(reunion.getEstado());
-		String aula = textoSeguro(reunion.getAula());
-		String profesor = null;
-		if (reunion.getUsersByProfesorId() != null) {
-			String nombre = textoSeguro(reunion.getUsersByProfesorId().getNombre());
-			String apellidos = textoSeguro(reunion.getUsersByProfesorId().getApellidos());
-			StringBuilder nombreCompleto = new StringBuilder();
-			if (nombre != null) {
-				nombreCompleto.append(nombre);
-			}
-			if (apellidos != null) {
-				if (nombreCompleto.length() > 0) {
-					nombreCompleto.append(' ');
-				}
-				nombreCompleto.append(apellidos);
-			}
-			profesor = nombreCompleto.length() == 0 ? null : nombreCompleto.toString();
-		}
-
-		StringBuilder sb = new StringBuilder("<html><div style='line-height:1.2;'>");
-		if (titulo != null) {
-			sb.append("<b>").append(titulo).append("</b>");
-		}
-		if (profesor != null) {
-			sb.append("<br/>").append(profesor);
-		}
-		if (estado != null) {
-			if (profesor != null) {
-				sb.append(" · ");
-			} else if (titulo != null) {
-				sb.append("<br/>");
-			}
-			sb.append(estado);
-		}
-		if (aula != null) {
-			sb.append("<br/>").append(aula);
-		}
-		sb.append("</div></html>");
-		return sb.toString();
-	}
-
-	private String textoSeguro(String valor) {
-		if (valor == null) {
-			return null;
-		}
-		String limpio = valor.trim();
-		if (limpio.isEmpty()) {
-			return null;
-		}
-		return limpio.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-	}
 
 }
