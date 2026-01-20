@@ -21,10 +21,10 @@ public class Inicio extends JFrame {
 	 */
 	public Inicio() {
 		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
-		setLocationRelativeTo(null);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 460, 564);
+		setLocationRelativeTo(null);
 		contentPane =  crearPanelconImagen("/Fondo.png");
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);

@@ -44,7 +44,11 @@ public class SocketServer extends Thread {
 			case "login":
 				String username = (String) entrada.readObject();
 				String contrasena = (String) entrada.readObject();
-				response = new Users(username, contrasena).iniciarSesion();
+				Users usuarioAutenticado = new Users(username, contrasena).iniciarSesion();
+				if (usuarioAutenticado != null) {
+					this.usuario = usuarioAutenticado; // Asignar el usuario autenticado
+				}
+				response = usuarioAutenticado;
 				break;
 			case "get_usuario":
 				response = usuario.getUsuarioPorID();
@@ -70,6 +74,7 @@ public class SocketServer extends Thread {
 				response = Centros.getAllCentros();
 				break;
 			case "get_horarios":
+				System.out.println(usuario.getId());
 				response = Horarios.getHorariosByUserId(usuario.getId());
 				break;
 			case "get_horarios_id":

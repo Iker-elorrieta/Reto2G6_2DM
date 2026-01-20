@@ -1,39 +1,165 @@
 package vista;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.util.Locale;
+
+import javax.swing.BorderFactory;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import java.awt.Color;
-import java.awt.Font;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 public class TablaHorario extends JPanel {
 
+	public enum Mode {
+		HORARIO, REUNION
+	}
+
 	private static final long serialVersionUID = 1L;
+	private static final Font HEADER_FONT = new Font("Raleway", Font.BOLD, 16);
+	private static final Font CELL_FONT = new Font("Raleway", Font.PLAIN, 15);
+	private static final int BASE_ROW_HEIGHT = 56;
+	private static final int[] COLUMN_WIDTHS_HORARIO = { 60, 124, 124, 124, 124, 124 };
+	private static final int[] COLUMN_WIDTHS_REUNION = { 120, 112, 112, 112, 112, 112 };
+
 	private JTable table;
 	private DefaultTableModel modelo;
 	private JScrollPane scrollPane;
+	private Mode mode = Mode.HORARIO;
 
 	/**
 	 * Create the panel.
 	 */
 	public TablaHorario() {
-		setBackground(new Color(255, 128, 0));
-		setLayout(null);
-		modelo = new DefaultTableModel(new String[] { "Hora", "Lunes", "Martes", "Miercoles","Jueves","Viernes","Sábado","Domingo" }, 0);
+		setLayout(new BorderLayout());
+		setOpaque(false);
+		setPreferredSize(new Dimension(682, 365));
+		modelo = crearModeloBase();
 		table = new JTable(modelo);
-		table.setFont(new Font("Raleway", Font.PLAIN, 15));
-		table.getTableHeader().setFont(new Font("Raleway", Font.PLAIN, 15));
-		table.setRowHeight(25);
-		// Desactivar ediciones
-		table.setDefaultEditor(Object.class, null);
-		scrollPane = new JScrollPane();
-		scrollPane.setBounds(0, 0, 627, 341);
-		add(scrollPane);
-		scrollPane.setViewportView(table);
+		configurarTabla();
+		scrollPane = new JScrollPane(table);
+		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADCE0)));
 		scrollPane.getViewport().setBackground(Color.WHITE);
+		add(scrollPane, BorderLayout.CENTER);
 	}
+
+	private DefaultTableModel crearModeloBase() {
+		return new DefaultTableModel(new String[] { "Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" },
+				0);
+	}
+
+	private void configurarTabla() {
+		table.setFont(CELL_FONT);
+		table.setForeground(new Color(0x1F1F1F));
+		table.getTableHeader().setFont(HEADER_FONT);
+		table.getTableHeader().setBackground(new Color(0xF4F6F8));
+		table.getTableHeader().setReorderingAllowed(false);
+		table.setRowHeight(BASE_ROW_HEIGHT);
+		table.setFillsViewportHeight(true);
+		table.setShowGrid(true);
+		table.setGridColor(new Color(0xE0E0E0));
+		table.setSelectionBackground(new Color(0xD0D3D9));
+		table.setSelectionForeground(new Color(0x1F1F1F));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setDefaultEditor(Object.class, null);
+		table.setDefaultRenderer(Object.class, new MultiLineHtmlRenderer());
+		configurarColumnas();
+	}
+
+	private void configurarColumnas() {
+		for (int i = 0; i < table.getColumnCount(); i++) {
+			TableColumn column = table.getColumnModel().getColumn(i);
+			int width = obtenerAnchoColumna(i);
+			column.setPreferredWidth(width);
+			column.setMinWidth(width);
+			if (i == 0) {
+				column.setMaxWidth(width);
+			}
+		}
+	}
+
+	private void ajustarAlturaFilas() {
+		int rows = table.getRowCount();
+		if (rows <= 0) {
+			table.setRowHeight(BASE_ROW_HEIGHT);
+			return;
+		}
+		int headerHeight = table.getTableHeader().getPreferredSize().height;
+		int disponible = Math.max(120, getPreferredSize().height - headerHeight - 10);
+		int altura = Math.max(BASE_ROW_HEIGHT, disponible / rows);
+		for (int row = 0; row < rows; row++) {
+			table.setRowHeight(row, altura);
+		}
+	}
+
+	public JTable getTable() {
+		return table;
+	}
+
 	public DefaultTableModel getModelo() {
 		return modelo;
 	}
+
+	public void actualizarModelo(DefaultTableModel nuevoModelo) {
+		if (nuevoModelo == null) {
+			nuevoModelo = crearModeloBase();
+		}
+		modelo = nuevoModelo;
+		table.setModel(modelo);
+		configurarTabla();
+		ajustarAlturaFilas();
+	}
+
+	public void setModelo(DefaultTableModel modelo) {
+		actualizarModelo(modelo);
+	}
+
+	public void setMode(Mode mode) {
+		if (mode == null) {
+			return;
+		}
+		this.mode = mode;
+		configurarColumnas();
+		ajustarAlturaFilas();
+	}
+
+	private int obtenerAnchoColumna(int index) {
+		int[] widths = mode == Mode.REUNION ? COLUMN_WIDTHS_REUNION : COLUMN_WIDTHS_HORARIO;
+		return widths[Math.min(index, widths.length - 1)];
+	}
+
+	private static class MultiLineHtmlRenderer extends JEditorPane implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
+		MultiLineHtmlRenderer() {
+			setContentType("text/html");
+			putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+			setEditable(false);
+			setOpaque(true);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			String texto = value == null ? "" : value.toString();
+			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
+			if (!normalizado.startsWith("<html")) {
+				texto = "<html>" + texto.replace("\n", "<br/>") + "</html>";
+			}
+			setText(texto);
+			setFont(table.getFont());
+			setForeground(isSelected ? table.getSelectionForeground() : new Color(0x1F1F1F));
+			setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+			setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+			return this;
+		}
+	}
+
 }

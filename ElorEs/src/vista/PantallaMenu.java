@@ -19,11 +19,14 @@ import java.net.URI;
 import java.net.URL;
 import javax.swing.JLabel;
 
+import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
+import org.kordamp.ikonli.swing.FontIcon;
+
 public class PantallaMenu extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JButton btnDesconectar;
 	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 	private JLabel lblNombreUsuario;
 	private JLabel lblRolUsuario;
@@ -40,61 +43,51 @@ public class PantallaMenu extends JFrame {
 	 * Create the frame.
 	 */
 	public PantallaMenu() {
+		setResizable(false);
 		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 1000, 717);
-		setLayout(null);
+		setBounds(0, 0, 1429, 595);
+		setLocationRelativeTo(null);
+		getContentPane().setLayout(null);
+		setBackground(Color.WHITE);
 		contentPane = new JPanel();
+		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		panelPerfil = new JPanel();
-		panelIzquierda = new JPanel() {
+		panelPerfil = new JPanel() {
 			private static final long serialVersionUID = 1L;
-			private Image backgroundImage;
-			{
-				backgroundImage = new ImageIcon(Inicio.class.getResource("/Fondo.png")).getImage();
-				setOpaque(false); // hacer el panel transparente
-			}
-
+			
 			@Override
 			protected void paintComponent(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g.create();
 				try {
 					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-					int arc = 30;
-					RoundRectangle2D round = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
-					g2.setClip(round);
-					if (backgroundImage != null) {
-						g2.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
-					} else {
-						g2.setColor(getBackground());
-						g2.fill(round);
-					}
+					g2.setColor(new Color(255, 255, 255, 20));
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+					g2.setColor(new Color(255, 255, 255, 51));
+					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
 					super.paintComponent(g2);
 				} finally {
 					g2.dispose();
 				}
 			}
 		};
+		//panelIzquierda = new JPanel(); //   Inicio.crearPanelconImagen("/Fondo.png");
+		panelIzquierda =  Inicio.crearPanelconImagen("/Fondo.png");
+
 		panelIzquierda.setBorder(null);
-		panelIzquierda.setBounds(10, 10, 304, 657);
+		panelIzquierda.setBounds(0, 0, 1413, 100);
 		panelIzquierda.setLayout(null);
 		panelIzquierda.setOpaque(false);
 		contentPane.add(panelIzquierda);
 		
 		panelPerfil.setOpaque(false);
-		panelPerfil.setBounds(0, 492, 304, 56);
+		panelPerfil.setBounds(1180, 21, 215, 60);
 		panelPerfil.setLayout(null);
 		panelIzquierda.add(panelPerfil);
-		
-		btnDesconectar = new JButton("Desconectar");
-		btnDesconectar.setForeground(new Color(0, 0, 0));
-		btnDesconectar.setFont(fuenteBold);
-		btnDesconectar.setBackground(new Color(255, 255, 255));
-		btnDesconectar.setBounds(10, 608, 284, 38);
-		panelIzquierda.add(btnDesconectar);
+	
 
 		JPanel panelLogo = new JPanel() {
 			private static final long serialVersionUID = 1L;
@@ -106,29 +99,48 @@ public class PantallaMenu extends JFrame {
 				g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 			}
 		};
-		panelLogo.setBounds(30, 10, 230, 95);
+		panelLogo.setBounds(22, 21, 230, 60);
 		panelLogo.setOpaque(false);
 		panelIzquierda.add(panelLogo);
 		
-		btnConsultarAlumnos = new JButton("Consultar alumnos");
-		btnConsultarAlumnos.setForeground(Color.BLACK);
-		btnConsultarAlumnos.setFont(new Font("Dialog", Font.BOLD, 20));
-		btnConsultarAlumnos.setBackground(Color.WHITE);
-		btnConsultarAlumnos.setBounds(10, 559, 284, 38);
+		btnConsultarAlumnos = new JButton("Alumnos") {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				try {
+					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					g2.setColor(new Color(255, 255, 255, 20));
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
+					g2.setColor(new Color(255, 255, 255, 51));
+					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+				} finally {
+					g2.dispose();
+				}
+				super.paintComponent(g);
+			}
+		};
+		btnConsultarAlumnos.setContentAreaFilled(false);
+		btnConsultarAlumnos.setBorderPainted(false);
+		btnConsultarAlumnos.setFocusPainted(false);
+		btnConsultarAlumnos.setForeground(Color.WHITE);
+		btnConsultarAlumnos.setFont(new Font("Dialog", Font.BOLD, 16));
+		btnConsultarAlumnos.setBounds(275, 35, 200, 34);
 		panelIzquierda.add(btnConsultarAlumnos);
 		
 
 		
 		panelGeneral = new PanelGeneral();
-		panelGeneral.setBounds(324, 10, 650, 657);
+		panelGeneral.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelGeneral);
 		
 		panelVerHorarios = new PanelVerHorarios();
-		panelVerHorarios.setBounds(324, 10, 650, 657);
+		panelVerHorarios.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelVerHorarios);
 		
 		panelOrganizarReuniones = new PanelOrganizarReuniones();
-		panelOrganizarReuniones.setBounds(324, 10, 650, 657);
+		panelOrganizarReuniones.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelOrganizarReuniones);
 		
 		
@@ -143,6 +155,11 @@ public class PantallaMenu extends JFrame {
 		lblRolUsuario.setFont(new Font("Dialog", Font.PLAIN, 15));
 		lblRolUsuario.setBounds(69, 31, 72, 20);
 		panelPerfil.add(lblRolUsuario);
+		
+		JLabel lblIconoFlecha = new JLabel();
+		lblIconoFlecha.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_DOWN, 18, Color.WHITE));
+		lblIconoFlecha.setBounds(185, 21, 24, 24);
+		panelPerfil.add(lblIconoFlecha);
 		
 
 	}
@@ -179,16 +196,7 @@ public class PantallaMenu extends JFrame {
 		this.panelAvatar = panelAvatar;
 	}
 
-
-	public JButton getBtnDesconectar() {
-		return btnDesconectar;
-	}
-
-
-	public void setBtnDesconectar(JButton btnDesconectar) {
-		this.btnDesconectar = btnDesconectar;
-	}
-
+	
 
 	public JLabel getLblNombreUsuario() {
 		return lblNombreUsuario;

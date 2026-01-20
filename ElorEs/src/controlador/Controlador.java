@@ -4,8 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,6 +16,7 @@ import javax.swing.table.DefaultTableModel;
 
 import cliente.Cliente;
 import modelo.Horarios;
+import modelo.Reuniones;
 import modelo.Users;
 import vista.Inicio;
 import vista.PantallaMenu;
@@ -51,31 +54,30 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private void inicializarControlador() {
 		vistaLogin.getPanelLogin().getBtnIniciarSesion().setActionCommand("INICIAR_SESION");
 		vistaLogin.getPanelLogin().getBtnIniciarSesion().addActionListener(this);
-		
-		vistaMenu.getBtnDesconectar().setActionCommand("DESCONECTAR");
-		vistaMenu.getBtnDesconectar().addActionListener(this);
-		
+
+		vistaPerfil.getBtnDesconectar().setActionCommand("DESCONECTAR");
+		vistaPerfil.getBtnDesconectar().addActionListener(this);
+
 		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().setActionCommand("VOLVER_MENU");
 		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().addActionListener(this);
-		
+
 		vistaMenu.getPanelVerHorarios().getBtnVolver().setActionCommand("VOLVER_MENU");
 		vistaMenu.getPanelVerHorarios().getBtnVolver().addActionListener(this);
-		
+
 		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().setActionCommand("VER_HORARIOS");
 		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().addActionListener(this);
-		
+
 		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().setActionCommand("ORGANIZAR_REUNIONES");
 		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().addActionListener(this);
-		
+
 		vistaAlumnos.getBtnVolver().setActionCommand("VOLVER_MENUPAGINA");
 		vistaAlumnos.getBtnVolver().addActionListener(this);
-		
+
 		vistaMenu.getBtnConsultarAlumnos().setActionCommand("CONSULTAR_ALUMNOS");
 		vistaMenu.getBtnConsultarAlumnos().addActionListener(this);
-		
+
 		vistaMenu.getPanelPerfil().addMouseListener(this);
 	}
-	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -121,34 +123,36 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		}
 
 	}
+
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (e.getSource() == vistaMenu.getPanelPerfil() ) {
-			actionPerformed(new ActionEvent(vistaMenu.getPanelAvatar(), ActionEvent.ACTION_PERFORMED,
-					"ABRIR_PERFIL"));
-		} 
+		if (e.getSource() == vistaMenu.getPanelPerfil()) {
+			actionPerformed(new ActionEvent(vistaMenu.getPanelAvatar(), ActionEvent.ACTION_PERFORMED, "ABRIR_PERFIL"));
+		}
 	}
-	
+
 	public void login() {
 		ArrayList<Object> datos = new ArrayList<>();
 		datos.add(vistaLogin.getPanelLogin().getTextFieldUsuario().getText());
 		datos.add(vistaLogin.getPanelLogin().getTextFieldContrasena().getText());
 
 		try {
-			Object response = cliente.enviarRequest("login",datos);
+			Object response = cliente.enviarRequest("login", datos);
 			if (response instanceof Users && response != null) {
 				usuario = (Users) response;
-				
+
 				if (usuario.getTipos().getId() != 3) {
 					vistaLogin.getPanelLogin().getLblError().setText("Usuario no autorizado para usar la aplicación.");
 				} else {
-					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre()+"!");
+					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre() + "!");
 					vistaLogin.setVisible(false);
 					vistaMenu.setVisible(true);
-					vistaMenu.getLblNombreUsuario().setText(usuario.getNombre()+" "+usuario.getApellidos());
-					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
+					vistaMenu.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
+					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
+						+ usuario.getTipos().getName().substring(1).toLowerCase());
 					vistaMenu.cargarAvatar(usuario.getArgazkiaUrl());
 					cargarHorariosUsuario();
+					cargarReunionesUsuario();
 				}
 			} else {
 				String mensajeError = (String) response;
@@ -159,29 +163,31 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		}
 
 	}
+
 	public void desconectar() {
 		try {
-			cliente.enviarRequest("logout",new ArrayList<>());
+			cliente.enviarRequest("logout", new ArrayList<>());
 
 			vistaMenu.setVisible(false);
 			vistaLogin.setVisible(true);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	public void cargarDatosUsuario(Users usuario) {
 		vistaPerfil.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
-		vistaPerfil.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase() + usuario.getTipos().getName().substring(1).toLowerCase());
+		vistaPerfil.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
+				+ usuario.getTipos().getName().substring(1).toLowerCase());
 		vistaPerfil.getLblUsuario().setText(usuario.getUsername());
 		vistaPerfil.getLblEmail().setText(usuario.getEmail());
 		vistaPerfil.getLblTelefono1().setText(usuario.getTelefono1());
 		vistaPerfil.getLblTelefono2().setText(usuario.getTelefono2());
 		vistaPerfil.getLblDireccion().setText(usuario.getDireccion());
-		vistaPerfil.getLblDNI().setText(usuario.getDni());		
-		
+		vistaPerfil.getLblDNI().setText(usuario.getDni());
+
 		vistaPerfil.cargarAvatar(usuario.getArgazkiaUrl());
 	}
 
@@ -195,101 +201,171 @@ public class Controlador extends MouseAdapter implements ActionListener {
 						horarios.add((Horarios) elemento);
 					}
 				}
-				actualizarTablaHorarios(horarios);
+				vistaMenu.getPanelGeneral().getPanelHorarios().actualizarModelo(cargarModeloHorarios(horarios));
 			} else if (response instanceof String) {
-		//		JOptionPane.showMessageDialog(vistaMenu, response);
+				JOptionPane.showMessageDialog(vistaMenu, response);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar el horario: " + e.getMessage());
 		}
 	}
 
-	private void actualizarTablaHorarios(ArrayList<Horarios> horarios) {
-		DefaultTableModel modeloTabla = vistaMenu.getPanelGeneral().getPanelHorarios().getModelo();
-		modeloTabla.setRowCount(0);
-		
-		if (horarios == null || horarios.isEmpty()) {
-			return;
+	private void cargarReunionesUsuario() {
+		try {
+			Object response = cliente.enviarRequest("get_reuniones", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Reuniones> reuniones = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Reuniones) {
+						reuniones.add((Reuniones) elemento);
+					}
+				}
+				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(cargarModeloReuniones(reuniones));
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(vistaMenu, response);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "No se pudieron cargar las reuniones: " + e.getMessage());
 		}
-		
+	}
+
+	private DefaultTableModel cargarModeloHorarios(ArrayList<Horarios> horarios) {
+		DefaultTableModel modeloTabla = new DefaultTableModel(
+				new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" }, 0);
+		if (horarios == null || horarios.isEmpty()) {
+			return null;
+		}
 		Map<Byte, String[]> filasPorHora = new TreeMap<>();
 		for (Horarios horario : horarios) {
 			if (horario == null) {
 				continue;
 			}
-			Byte bloque = Byte.valueOf(horario.getHora());
-			String[] fila = filasPorHora.computeIfAbsent(bloque, key -> crearFilaBase(key.byteValue()));
-			int columna = obtenerColumnaDia(horario.getDia());
+			// Se obtiene la fila correspondiente a ese bloque horario
+	        // Si no existe, se crea una nueva fila con 6 columnas
+			String[] fila = filasPorHora.computeIfAbsent(Byte.valueOf(horario.getHora()), key -> {
+				String[] nuevaFila = new String[6];
+				nuevaFila[0] = key + "ª";
+				return nuevaFila;
+			});
+			int columna = horario.obtenerColumnaDia();
 			if (columna == -1) {
 				continue;
 			}
-			fila[columna] = describirModulo(horario);
+			fila[columna] = horario.describirModulo();
 		}
-		
+
 		for (String[] fila : filasPorHora.values()) {
 			modeloTabla.addRow(fila);
 		}
-	}
-
-	private String[] crearFilaBase(byte bloqueHora) {
-		String[] fila = new String[8];
-		fila[0] = formatearBloqueHoraria(bloqueHora);
-		return fila;
-	}
-
-	private String formatearBloqueHoraria(byte bloqueHora) {
-		return String.format(Locale.ROOT, "Tramo %d", bloqueHora);
-	}
-
-	private int obtenerColumnaDia(String dia) {
-		if (dia == null) {
-			return -1;
-		}
 		
-		String normalizado = dia.trim().toUpperCase(Locale.ROOT);
-		switch (normalizado) {
-		case "LUNES":
+		return modeloTabla;
+	}
+
+	private DefaultTableModel cargarModeloReuniones(ArrayList<Reuniones> reuniones) {
+		DefaultTableModel modeloTabla = new DefaultTableModel(
+				new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" }, 0);
+		if (reuniones == null || reuniones.isEmpty()) {
+			return null;
+		}
+		Map<String, String[]> filasPorHora = new TreeMap<>();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		for (Reuniones reunion : reuniones) {
+			if (reunion == null || reunion.getFecha() == null) {
+				continue;
+			}
+			LocalDateTime fecha = reunion.getFecha().toLocalDateTime();
+			String clave = formatter.format(fecha);
+			String[] fila = filasPorHora.computeIfAbsent(clave, key -> {
+				String[] nuevaFila = new String[6];
+				nuevaFila[0] = key;
+				return nuevaFila;
+			});
+			int columna = obtenerColumnaDia(fecha.getDayOfWeek());
+			if (columna == -1) {
+				continue;
+			}
+			fila[columna] = describirReunion(reunion);
+		}
+
+		if (filasPorHora.isEmpty()) {
+			return null;
+		}
+
+		for (String[] fila : filasPorHora.values()) {
+			modeloTabla.addRow(fila);
+		}
+		return modeloTabla;
+	}
+
+	private int obtenerColumnaDia(DayOfWeek dia) {
+		switch (dia) {
+		case MONDAY:
 			return 1;
-		case "MARTES":
+		case TUESDAY:
 			return 2;
-		case "MIERCOLES":
-		case "MIÉRCOLES":
+		case WEDNESDAY:
 			return 3;
-		case "JUEVES":
+		case THURSDAY:
 			return 4;
-		case "VIERNES":
+		case FRIDAY:
 			return 5;
-		case "SABADO":
-		case "SÁBADO":
-			return 6;
-		case "DOMINGO":
-			return 7;
 		default:
 			return -1;
 		}
 	}
 
-	private String describirModulo(Horarios horario) {
-		String nombreModulo = null;
-		if (horario.getModulos() != null) {
-			nombreModulo = horario.getModulos().getNombre();
+	private String describirReunion(Reuniones reunion) {
+		String titulo = textoSeguro(reunion.getTitulo());
+		String estado = textoSeguro(reunion.getEstado());
+		String aula = textoSeguro(reunion.getAula());
+		String profesor = null;
+		if (reunion.getUsersByProfesorId() != null) {
+			String nombre = textoSeguro(reunion.getUsersByProfesorId().getNombre());
+			String apellidos = textoSeguro(reunion.getUsersByProfesorId().getApellidos());
+			StringBuilder nombreCompleto = new StringBuilder();
+			if (nombre != null) {
+				nombreCompleto.append(nombre);
+			}
+			if (apellidos != null) {
+				if (nombreCompleto.length() > 0) {
+					nombreCompleto.append(' ');
+				}
+				nombreCompleto.append(apellidos);
+			}
+			profesor = nombreCompleto.length() == 0 ? null : nombreCompleto.toString();
 		}
-		String aula = horario.getAula();
-		boolean tieneModulo = nombreModulo != null && !nombreModulo.trim().isEmpty();
-		boolean tieneAula = aula != null && !aula.trim().isEmpty();
-		
-		if (tieneModulo && tieneAula) {
-			return nombreModulo.trim() + " - " + aula.trim();
+
+		StringBuilder sb = new StringBuilder("<html><div style='line-height:1.2;'>");
+		if (titulo != null) {
+			sb.append("<b>").append(titulo).append("</b>");
 		}
-		
-		if (tieneModulo) {
-			return nombreModulo.trim();
+		if (profesor != null) {
+			sb.append("<br/>").append(profesor);
 		}
-		
-		if (tieneAula) {
-			return aula.trim();
+		if (estado != null) {
+			if (profesor != null) {
+				sb.append(" · ");
+			} else if (titulo != null) {
+				sb.append("<br/>");
+			}
+			sb.append(estado);
 		}
-		
-		return "Disponible";
+		if (aula != null) {
+			sb.append("<br/>").append(aula);
+		}
+		sb.append("</div></html>");
+		return sb.toString();
 	}
+
+	private String textoSeguro(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		String limpio = valor.trim();
+		if (limpio.isEmpty()) {
+			return null;
+		}
+		return limpio.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+	}
+
 }
