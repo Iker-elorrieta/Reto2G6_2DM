@@ -171,9 +171,22 @@ public class TablaHorario extends JPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			Object renderValue = value;
+			Color backgroundColor = Color.WHITE;
+			
 			if (value instanceof Horarios) {
 				renderValue = ((Horarios) value).describirModulo();
+			} else if (value instanceof String && column > 0) {
+				// Check if this might be a reunion cell by looking for HTML content
+				String stringValue = (String) value;
+				if (stringValue.toLowerCase(Locale.ROOT).contains("<b>")) {
+					// Try to extract estado from the parent model to get color
+					// We need to access the original Reuniones object through the controller
+					// For now, we'll parse the estado from the HTML
+					String estadoLower = extractEstadoFromHtml(stringValue);
+					backgroundColor = getColorForEstado(estadoLower);
+				}
 			}
+			
 			String texto = renderValue == null ? "" : renderValue.toString();
 			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
 			if (!normalizado.startsWith("<html")) {
@@ -182,9 +195,34 @@ public class TablaHorario extends JPanel {
 			setText(texto);
 			setFont(table.getFont());
 			setForeground(isSelected ? table.getSelectionForeground() : new Color(0x1F1F1F));
-			setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+			setBackground(isSelected ? table.getSelectionBackground() : backgroundColor);
 			setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 			return this;
+		}
+		
+		private String extractEstadoFromHtml(String html) {
+			// Extract estado from HTML - it's the first line after the title
+			String[] parts = html.split("<br/>");
+			if (parts.length > 1) {
+				String estadoPart = parts[1].replaceAll("<[^>]+>", "").trim();
+				return estadoPart.toLowerCase();
+			}
+			return "";
+		}
+		
+		private Color getColorForEstado(String estadoLower) {
+			switch (estadoLower) {
+			case "aceptada":
+				return new Color(200, 230, 201); // Verde pastel
+			case "denegada":
+				return new Color(255, 205, 210); // Rojo pastel
+			case "pendiente":
+				return new Color(255, 224, 130); // Amarillo/Naranja pastel
+			case "conflicto":
+				return new Color(224, 224, 224); // Gris
+			default:
+				return Color.WHITE;
+			}
 		}
 	}
 

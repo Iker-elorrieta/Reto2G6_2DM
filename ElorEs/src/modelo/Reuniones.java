@@ -1,5 +1,6 @@
 package modelo;
 
+import java.awt.Color;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -168,25 +169,52 @@ public class Reuniones implements java.io.Serializable {
 	}
 
 	public String describirReunion() {
-		String html = "<html><div style='line-height:1.2;'>";
-		if (titulo != null) {
-		    html += "<b>" + titulo + "</b>";
+		String html = "<html><div style='line-height:1.2;'>";		
+		String tituloReunion = "";
+		if (asunto != null && !asunto.isEmpty()) {
+		    tituloReunion = asunto;
+		} else if (titulo != null && !titulo.isEmpty()) {
+		    tituloReunion = titulo;
 		}
-		if (getUsersByProfesorId() != null) {
-		    html += "<br/>" + getUsersByProfesorId().getNombre() + " " + getUsersByProfesorId().getApellidos();;
-		}
-		if (estado != null) {
-		    if (getUsersByProfesorId() != null) {
-		        html += " · ";
-		    } else if (titulo != null) {
-		        html += "<br/>";
+		
+		if (getUsersByAlumnoId() != null) {
+		    String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
+		    if (!tituloReunion.isEmpty()) {
+		        html += "<b>" + tituloReunion + " - " + nombreAlumno + "</b>";
+		    } else {
+		        html += "<b>" + nombreAlumno + "</b>";
 		    }
-		    html += estado;
+		} else if (!tituloReunion.isEmpty()) {
+		    html += "<b>" + tituloReunion + "</b>";
+		}
+		
+		if (estado != null && !estado.trim().isEmpty()) {
+		    String estadoCapitalizado = estado.substring(0, 1).toUpperCase() + estado.substring(1).toLowerCase();
+		    html += "<br/>" + estadoCapitalizado;
 		}
 		if (aula != null) {
 		    html += "<br/>" + aula;
 		}
 		html += "</div></html>";
 		return html;
+	}
+	
+	public Color obtenerColorEstado() {
+		if (estado == null || estado.trim().isEmpty()) {
+			return Color.WHITE;
+		}
+		String estadoLower = estado.toLowerCase().trim();
+		switch (estadoLower) {
+		case "aceptada":
+			return new Color(200, 230, 201); // Verde pastel
+		case "denegada":
+			return new Color(255, 205, 210); // Rojo pastel
+		case "pendiente":
+			return new Color(255, 224, 130); // Amarillo/Naranja pastel
+		case "conflicto":
+			return new Color(224, 224, 224); // Gris
+		default:
+			return Color.WHITE;
+		}
 	}
 }

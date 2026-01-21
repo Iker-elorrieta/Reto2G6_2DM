@@ -56,15 +56,15 @@ public class PanelOrganizarReuniones extends JPanel {
 		add(contenedorReuniones);
 
 		btnVolver = crearBotonVolver();
-		btnVolver.setBounds(15, 15, 48, 36);
+		btnVolver.setBounds(10, 11, 25, 38);
 		contenedorReuniones.add(btnVolver);
 
 		JLabel lblTitulo = new JLabel("Organizar reuniones");
 		lblTitulo.setFont(new Font("Raleway", Font.PLAIN, 26));
-		lblTitulo.setBounds(73, 15, 400, 36);
+		lblTitulo.setBounds(45, 11, 330, 40);
 		contenedorReuniones.add(lblTitulo);
 
-		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno", "Profesor",
+		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno",
 			"Estado", "Título", "Asunto", "Aula", "Creado", "Actualizado" }, 0) {
 			private static final long serialVersionUID = 1L;
 
@@ -89,7 +89,7 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		tableReuniones.setDefaultEditor(Object.class, null);
 
-		int[] columnWidths = { 0, 140, 180, 180, 120, 130, 200, 80, 140, 140 };
+		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140 };
 		for (int i = 0; i < columnWidths.length && i < tableReuniones.getColumnCount(); i++) {
 			tableReuniones.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
 		}
@@ -104,7 +104,7 @@ public class PanelOrganizarReuniones extends JPanel {
 
 	private JButton crearBotonVolver() {
 		JButton boton = new JButton();
-		boton.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 26, new Color(18, 26, 38)));
+		boton.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 28, new Color(18, 26, 38)));
 		boton.setContentAreaFilled(false);
 		boton.setBorderPainted(false);
 		boton.setFocusPainted(false);

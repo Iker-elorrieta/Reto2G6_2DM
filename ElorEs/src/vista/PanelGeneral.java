@@ -9,16 +9,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
+
+import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class PanelGeneral extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private TablaHorario panelHorarios;
 	private TablaHorario panelReuniones;
-	private JButton btnVerOtrosHorarios;
-	private JButton btnOrganizarReuniones;
+	private JLabel lblMensajeVacioReuniones;
 
 	/**
 	 * Create the panel.
@@ -52,14 +53,16 @@ public class PanelGeneral extends JPanel {
 		contenedorHorario.setBounds(10, 0, 682, 425);
 		add(contenedorHorario);
 
+		JLabel lblIconoHorario = new JLabel();
+		lblIconoHorario.setIcon(FontIcon.of(MaterialDesignC.CLOCK_OUTLINE, 28, new Color(255, 159, 64)));
+		lblIconoHorario.setBounds(15, 12, 32, 40);
+		contenedorHorario.add(lblIconoHorario);
+
 		JLabel lblMiHorario = new JLabel("Mi horario");
 		lblMiHorario.setFont(new Font("Raleway", Font.PLAIN, 26));
-		lblMiHorario.setBounds(15, 12, 250, 40);
+		lblMiHorario.setForeground(new Color(255, 159, 64));
+		lblMiHorario.setBounds(52, 12, 250, 40);
 		contenedorHorario.add(lblMiHorario);
-
-		btnVerOtrosHorarios = crearBotonOscuro("Ver otros horarios");
-		btnVerOtrosHorarios.setBounds(462, 15, 205, 38);
-		contenedorHorario.add(btnVerOtrosHorarios);
 
 		panelHorarios = new TablaHorario();
 		panelHorarios.setMode(TablaHorario.Mode.HORARIO);
@@ -90,35 +93,29 @@ public class PanelGeneral extends JPanel {
 		contenedorReuniones.setBounds(702, 0, 682, 425);
 		add(contenedorReuniones);
 
+		JLabel lblIconoReuniones = new JLabel();
+		lblIconoReuniones.setIcon(FontIcon.of(MaterialDesignC.CALENDAR_CLOCK, 28, new Color(153, 102, 255)));
+		lblIconoReuniones.setBounds(15, 12, 32, 40);
+		contenedorReuniones.add(lblIconoReuniones);
+
 		JLabel lblMiHorario_1 = new JLabel("Reuniones esta semana");
 		lblMiHorario_1.setFont(new Font("Raleway", Font.PLAIN, 26));
-		lblMiHorario_1.setBounds(15, 12, 330, 40);
+		lblMiHorario_1.setForeground(new Color(153, 102, 255));
+		lblMiHorario_1.setBounds(52, 12, 330, 40);
 		contenedorReuniones.add(lblMiHorario_1);
 
-		btnOrganizarReuniones = crearBotonOscuro("Organizar reuniones");
-		btnOrganizarReuniones.setBounds(462, 15, 205, 38);
-		contenedorReuniones.add(btnOrganizarReuniones);
+		lblMensajeVacioReuniones = new JLabel("No tienes reuniones esta semana");
+		lblMensajeVacioReuniones.setFont(new Font("Raleway", Font.PLAIN, 18));
+		lblMensajeVacioReuniones.setForeground(new Color(120, 120, 120));
+		lblMensajeVacioReuniones.setHorizontalAlignment(JLabel.CENTER);
+		lblMensajeVacioReuniones.setBounds(0, 150, 682, 100);
+		lblMensajeVacioReuniones.setVisible(false);
+		contenedorReuniones.add(lblMensajeVacioReuniones);
 
 		panelReuniones = new TablaHorario();
 		panelReuniones.setMode(TablaHorario.Mode.REUNION);
 		panelReuniones.setBounds(0, 60, 682, 365);
 		contenedorReuniones.add(panelReuniones);
-	}
-
-	public JButton getBtnVerOtrosHorarios() {
-		return btnVerOtrosHorarios;
-	}
-
-	public void setBtnVerOtrosHorarios(JButton btnVerOtrosHorarios) {
-		this.btnVerOtrosHorarios = btnVerOtrosHorarios;
-	}
-
-	public JButton getBtnOrganizarReuniones() {
-		return btnOrganizarReuniones;
-	}
-
-	public void setBtnOrganizarReuniones(JButton btnOrganizarReuniones) {
-		this.btnOrganizarReuniones = btnOrganizarReuniones;
 	}
 	
 	public TablaHorario getPanelHorarios() {
@@ -129,31 +126,8 @@ public class PanelGeneral extends JPanel {
 		return panelReuniones;
 	}
 
-	private JButton crearBotonOscuro(String texto) {
-		JButton boton = new JButton(texto) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void paintComponent(Graphics g) {
-				Graphics2D g2 = (Graphics2D) g.create();
-				try {
-					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-					g2.setColor(new Color(18, 26, 38, 35));
-					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
-					g2.setColor(new Color(18, 26, 38, 140));
-					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
-				} finally {
-					g2.dispose();
-				}
-				super.paintComponent(g);
-			}
-		};
-		boton.setFont(new Font("Raleway", Font.BOLD, 17));
-		boton.setForeground(new Color(12, 20, 32));
-		boton.setContentAreaFilled(false);
-		boton.setBorderPainted(false);
-		boton.setFocusPainted(false);
-		return boton;
+	public JLabel getLblMensajeVacioReuniones() {
+		return lblMensajeVacioReuniones;
 	}
 
 	

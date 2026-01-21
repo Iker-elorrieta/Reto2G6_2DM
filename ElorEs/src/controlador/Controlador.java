@@ -30,6 +30,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private PantallaMenu vistaMenu;
 	private VerAlumnos vistaAlumnos;
 	private VerPerfil vistaPerfil;
+	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT","5000"));
+	private static String SOCKET_HOST = System.getenv().getOrDefault("SOCKET_HOST","localhost");
 
 	public Controlador(Inicio vistaLogin) {
 		this.vistaLogin = vistaLogin;
@@ -38,7 +40,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaPerfil = new VerPerfil();
 		inicializarControlador();
 		try {
-			cliente = new Cliente("localhost", 5000);
+			cliente = new Cliente(SOCKET_HOST, SOCKET_PORT);
 		} catch (Exception e) {
 			vistaLogin.dispose();
 			vistaMenu.dispose();
@@ -64,11 +66,11 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaMenu.getPanelVerHorarios().getBtnVolver().setActionCommand("VOLVER_MENU");
 		vistaMenu.getPanelVerHorarios().getBtnVolver().addActionListener(this);
 
-		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().setActionCommand("VER_HORARIOS");
-		vistaMenu.getPanelGeneral().getBtnVerOtrosHorarios().addActionListener(this);
+		vistaMenu.getBtnVerOtrosHorarios().setActionCommand("VER_HORARIOS");
+		vistaMenu.getBtnVerOtrosHorarios().addActionListener(this);
 
-		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().setActionCommand("ORGANIZAR_REUNIONES");
-		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().addActionListener(this);
+		vistaMenu.getBtnOrganizarReuniones().setActionCommand("ORGANIZAR_REUNIONES");
+		vistaMenu.getBtnOrganizarReuniones().addActionListener(this);
 
 		vistaMenu.getPanelVerHorarios().getTableProfesores().getSelectionModel()
 		.addListSelectionListener(event -> {
@@ -84,6 +86,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaMenu.getBtnConsultarAlumnos().addActionListener(this);
 
 		vistaMenu.getPanelPerfil().addMouseListener(this);
+		vistaMenu.getPanelLogo().addMouseListener(this);
 	}
 
 	@Override
@@ -102,24 +105,31 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			vistaMenu.getPanelVerHorarios().setVisible(false);
 			vistaMenu.getPanelOrganizarReuniones().setVisible(false);
 			vistaMenu.getPanelGeneral().setVisible(true);
+			vistaMenu.setEstadoMenu("");
 			break;
 		case "VOLVER_MENUPAGINA":
 			vistaAlumnos.setVisible(false);
 			vistaPerfil.setVisible(false);
 			vistaMenu.setVisible(true);
+			vistaMenu.setEstadoMenu("");
 			break;
 		case "CONSULTAR_ALUMNOS":
 			vistaMenu.setVisible(false);
 			vistaAlumnos.setVisible(true);
+			vistaMenu.setEstadoMenu("ALUMNOS");
 			break;
 		case "VER_HORARIOS":
 			vistaMenu.getPanelGeneral().setVisible(false);
+			vistaMenu.getPanelOrganizarReuniones().setVisible(false);
 			vistaMenu.getPanelVerHorarios().setVisible(true);
+			vistaMenu.setEstadoMenu("HORARIOS");
 			cargarListaProfesores();
 			break;
 		case "ORGANIZAR_REUNIONES":
 			vistaMenu.getPanelGeneral().setVisible(false);
+			vistaMenu.getPanelVerHorarios().setVisible(false);
 			vistaMenu.getPanelOrganizarReuniones().setVisible(true);
+			vistaMenu.setEstadoMenu("REUNIONES");
 			cargarReunionesUsuario();
 			break;
 		case "ABRIR_PERFIL":
@@ -137,6 +147,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	public void mouseClicked(MouseEvent e) {
 		if (e.getSource() == vistaMenu.getPanelPerfil()) {
 			actionPerformed(new ActionEvent(vistaMenu.getPanelAvatar(), ActionEvent.ACTION_PERFORMED, "ABRIR_PERFIL"));
+		} else if (e.getSource() == vistaMenu.getPanelLogo()) {
+			actionPerformed(new ActionEvent(vistaMenu, ActionEvent.ACTION_PERFORMED, "VOLVER_MENU"));
 		}
 	}
 
@@ -156,6 +168,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre() + "!");
 					vistaLogin.setVisible(false);
 					vistaMenu.setVisible(true);
+					vistaMenu.setEstadoMenu("");
 					vistaMenu.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
 					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
 						+ usuario.getTipos().getName().substring(1).toLowerCase());
@@ -234,14 +247,23 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			Object response = cliente.enviarRequest("get_reuniones_semana", new ArrayList<>());
 			if (response instanceof ArrayList<?>) {
 				ArrayList<Reuniones> reuniones = convertirRespuestaReuniones(response);
-				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(cargarModeloReuniones(reuniones));
+				DefaultTableModel modelo = cargarModeloReuniones(reuniones);
+				if (modelo == null || modelo.getRowCount() == 0) {
+					vistaMenu.getPanelGeneral().getPanelReuniones().setVisible(false);
+					vistaMenu.getPanelGeneral().getLblMensajeVacioReuniones().setVisible(true);
+				} else {
+					vistaMenu.getPanelGeneral().getPanelReuniones().setVisible(true);
+					vistaMenu.getPanelGeneral().getLblMensajeVacioReuniones().setVisible(false);
+					vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(modelo);
+				}
 			} else if (response instanceof String) {
-				JOptionPane.showMessageDialog(vistaMenu, response);
-				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(null);
+				vistaMenu.getPanelGeneral().getPanelReuniones().setVisible(false);
+				vistaMenu.getPanelGeneral().getLblMensajeVacioReuniones().setVisible(true);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudieron cargar las reuniones de la semana: " + e.getMessage());
-			vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(null);
+			vistaMenu.getPanelGeneral().getPanelReuniones().setVisible(false);
+			vistaMenu.getPanelGeneral().getLblMensajeVacioReuniones().setVisible(true);
 		}
 	}
 
@@ -274,7 +296,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 			modelo.addRow(new Object[] { reunion.getIdReunion(), dtf.format(reunion.getFecha().toLocalDateTime()),
 					reunion.getUsersByAlumnoId().getNombre() + " " + reunion.getUsersByAlumnoId().getApellidos(),
-					reunion.getUsersByProfesorId().getNombre() + " " + reunion.getUsersByProfesorId().getApellidos(), reunion.getEstado(),
+					reunion.getEstado(),
 					reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(), dtf.format(reunion.getCreatedAt().toLocalDateTime()),
 					dtf.format(reunion.getUpdatedAt().toLocalDateTime()) });
 		}

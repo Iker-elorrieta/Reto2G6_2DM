@@ -35,7 +35,11 @@ public class PantallaMenu extends JFrame {
 	private PanelVerHorarios panelVerHorarios;
 	private PanelOrganizarReuniones panelOrganizarReuniones;
 	private JPanel panelPerfil;
+	private JPanel panelLogo;
 	private JButton btnConsultarAlumnos;
+	private JButton btnVerOtrosHorarios;
+	private JButton btnOrganizarReuniones;
+	private String estadoMenu = "";
 
 
 	/**
@@ -64,9 +68,9 @@ public class PantallaMenu extends JFrame {
 				try {
 					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 					g2.setColor(new Color(255, 255, 255, 20));
-					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-					g2.setColor(new Color(255, 255, 255, 51));
-					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
+				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+				g2.setColor(new Color(255, 255, 255, 51));
+				g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 25, 25);
 					super.paintComponent(g2);
 				} finally {
 					g2.dispose();
@@ -88,7 +92,7 @@ public class PantallaMenu extends JFrame {
 		panelIzquierda.add(panelPerfil);
 	
 
-		JPanel panelLogo = new JPanel() {
+		panelLogo = new JPanel() {
 			private static final long serialVersionUID = 1L;
 			private Image backgroundImage = new ImageIcon(Inicio.class.getResource("/Elorrieta_White.png")).getImage();
 
@@ -102,31 +106,17 @@ public class PantallaMenu extends JFrame {
 		panelLogo.setOpaque(false);
 		panelIzquierda.add(panelLogo);
 		
-		btnConsultarAlumnos = new JButton("Alumnos") {
-			private static final long serialVersionUID = 1L;
-			
-			@Override
-			protected void paintComponent(Graphics g) {
-				Graphics2D g2 = (Graphics2D) g.create();
-				try {
-					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-					g2.setColor(new Color(255, 255, 255, 20));
-					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-					g2.setColor(new Color(255, 255, 255, 51));
-					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 15, 15);
-				} finally {
-					g2.dispose();
-				}
-				super.paintComponent(g);
-			}
-		};
-		btnConsultarAlumnos.setContentAreaFilled(false);
-		btnConsultarAlumnos.setBorderPainted(false);
-		btnConsultarAlumnos.setFocusPainted(false);
-		btnConsultarAlumnos.setForeground(Color.WHITE);
-		btnConsultarAlumnos.setFont(new Font("Dialog", Font.BOLD, 16));
-		btnConsultarAlumnos.setBounds(275, 35, 200, 34);
+		btnConsultarAlumnos = crearBotonMenu("Alumnos", "ALUMNOS");
+		btnConsultarAlumnos.setBounds(275, 35, 150, 34);
 		panelIzquierda.add(btnConsultarAlumnos);
+
+		btnVerOtrosHorarios = crearBotonMenu("Horarios", "HORARIOS");
+		btnVerOtrosHorarios.setBounds(435, 35, 150, 34);
+		panelIzquierda.add(btnVerOtrosHorarios);
+
+		btnOrganizarReuniones = crearBotonMenu("Reuniones", "REUNIONES");
+		btnOrganizarReuniones.setBounds(595, 35, 150, 34);
+		panelIzquierda.add(btnOrganizarReuniones);
 		
 
 		
@@ -227,6 +217,18 @@ public class PantallaMenu extends JFrame {
 		this.btnConsultarAlumnos = btnConsultarAlumnos;
 	}
 
+	public JButton getBtnVerOtrosHorarios() {
+		return btnVerOtrosHorarios;
+	}
+
+	public JButton getBtnOrganizarReuniones() {
+		return btnOrganizarReuniones;
+	}
+
+	public JPanel getPanelLogo() {
+		return panelLogo;
+	}
+
 	public void cargarAvatar(String argazkiaUrl) {
 		panelAvatar = new JPanel() {
 			    private static final long serialVersionUID = 1L;
@@ -280,5 +282,61 @@ public class PantallaMenu extends JFrame {
 	
 	public JPanel getPanelPerfil() {
 		return panelPerfil;
+	}
+
+	public void setEstadoMenu(String estadoMenu) {
+		String nuevoEstado = estadoMenu == null ? "" : estadoMenu;
+		switch (nuevoEstado) {
+		case "ALUMNOS":
+		case "HORARIOS":
+		case "REUNIONES":
+			this.estadoMenu = nuevoEstado;
+			break;
+		default:
+			this.estadoMenu = "";
+			break;
+		}
+		if (btnConsultarAlumnos != null) {
+			btnConsultarAlumnos.repaint();
+		}
+		if (btnVerOtrosHorarios != null) {
+			btnVerOtrosHorarios.repaint();
+		}
+		if (btnOrganizarReuniones != null) {
+			btnOrganizarReuniones.repaint();
+		}
+	}
+
+	private JButton crearBotonMenu(String texto, String estadoAsociado) {
+		JButton boton = new JButton() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				try {
+					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					boolean activo = estadoAsociado.equals(estadoMenu);
+					Color colorFondo = activo ? new Color(242, 194, 35, 46) : new Color(255, 255, 255, 20);
+					Color colorBorde = activo ? new Color(242, 194, 35, 153) : new Color(255, 255, 255, 51);
+					g2.setColor(colorFondo);
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+					g2.setColor(colorBorde);
+					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 25, 25);
+
+				} finally {
+					g2.dispose();
+				}
+				super.paintComponent(g);
+			}
+		};
+		String textoMayusculas = texto.toUpperCase();
+		boton.setText("<html><span style='letter-spacing: 0.24em;'>" + textoMayusculas + "</span></html>");
+		boton.setContentAreaFilled(false);
+		boton.setBorderPainted(false);
+		boton.setFocusPainted(false);
+		boton.setForeground(Color.WHITE);
+		boton.setFont(new Font("Dialog", Font.PLAIN, 16));
+		return boton;
 	}
 }

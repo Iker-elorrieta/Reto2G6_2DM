@@ -131,6 +131,9 @@ public class Horarios implements java.io.Serializable {
 		return contenido;
 	}
 	private String moduloTrim() {
+		if (getModulos() == null || getModulos().getNombre() == null) {
+			return null;
+		}
 		String limpio = getModulos().getNombre().trim();
 		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
 			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
