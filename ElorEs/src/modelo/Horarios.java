@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 public class Horarios implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private static final int MAX_MODULO_LENGTH = 18;
+	private static final int MAX_MODULO_LENGTH = 13;
 	private Integer id;
 	private Users users;
 	private Modulos modulos;
@@ -112,7 +112,11 @@ public class Horarios implements java.io.Serializable {
 
 	public String describirModulo() {
 		String modulo = moduloTrim();
-		String aula = getAula().trim();
+		return construirDescripcion(modulo);
+	}
+
+	private String construirDescripcion(String modulo) {
+		String aula = (getAula() != null)? getAula().trim():null;
 		String contenido = "<html><div style='line-height:1.2;'>";
 		if (modulo != null && aula != null) {
 			contenido += "<b>" + modulo + "</b> " + aula;
@@ -128,11 +132,13 @@ public class Horarios implements java.io.Serializable {
 	}
 	private String moduloTrim() {
 		String limpio = getModulos().getNombre().trim();
-		if (limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
+		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
 			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
 		}
 		return limpio;
 	}
+
+
 
 	public int obtenerColumnaDia() {
 		switch (dia.trim().toUpperCase()) {

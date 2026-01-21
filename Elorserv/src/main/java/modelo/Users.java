@@ -316,6 +316,20 @@ public class Users implements java.io.Serializable {
 		q.setParameter(1, getId());
 		return q.uniqueResult().convertirUsuario();
 	}
+	@JsonIgnore
+	public static ArrayList<Users> getUsersByTipoID(int id) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Users where tipos.id = :tipoId";
+		Query<Users> q = session.createQuery(hql, Users.class);
+		q.setParameter("tipoId", id);
+		ArrayList<Users> a = new ArrayList<Users>(q.list());
+		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
+		for (Users usuario : a) {
+			usuariosConvertidos.add(usuario.convertirUsuario());
+		}
+		return usuariosConvertidos;
+	}
 
 	public static ArrayList<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -330,6 +344,24 @@ public class Users implements java.io.Serializable {
 		return usuariosConvertidos;
 	}
 	
+	public static ArrayList<Users> getAlumnosbyProfesorID(Integer profesorId) {
+		if (profesorId == null) {
+			throw new IllegalArgumentException("El id del profesor no puede ser nulo");
+		}
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			String hql = "select distinct mat.users from Matriculaciones mat "
+					+ "join Horarios h on h.modulos.ciclos = mat.ciclos and h.modulos.curso = mat.curso "
+					+ "where h.users.id = :profesorId and mat.users.tipos.id = 4";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			q.setParameter("profesorId", profesorId);
+			ArrayList<Users> alumnos = new ArrayList<>();
+			for (Users alumno : q.list()) {
+				alumnos.add(alumno.convertirUsuario());
+			}
+			return alumnos;
+		}
+	}	
 	public Users crearUsuario() {
  	    SessionFactory sesion = HibernateUtil.getSessionFactory();
  	    try (Session session = sesion.openSession()) {

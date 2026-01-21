@@ -19,7 +19,6 @@ import java.net.URI;
 import java.net.URL;
 import javax.swing.JLabel;
 
-import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -163,6 +162,7 @@ public class PantallaMenu extends JFrame {
 		
 
 	}
+	
 
 	public PanelGeneral getPanelGeneral() {
 		return panelGeneral;

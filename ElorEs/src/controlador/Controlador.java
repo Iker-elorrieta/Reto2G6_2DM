@@ -4,11 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import cliente.Cliente;
@@ -17,6 +21,7 @@ import modelo.Reuniones;
 import modelo.Users;
 import vista.Inicio;
 import vista.PantallaMenu;
+import vista.TablaHorario;
 import vista.VerAlumnos;
 import vista.VerPerfil;
 
@@ -67,6 +72,13 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().setActionCommand("ORGANIZAR_REUNIONES");
 		vistaMenu.getPanelGeneral().getBtnOrganizarReuniones().addActionListener(this);
 
+		vistaMenu.getPanelVerHorarios().getTableProfesores().getSelectionModel()
+		.addListSelectionListener(event -> {
+			if (event.getValueIsAdjusting()) {
+				return;
+			}
+			mostrarHorarioProfesorSeleccionado();
+		});
 		vistaAlumnos.getBtnVolver().setActionCommand("VOLVER_MENUPAGINA");
 		vistaAlumnos.getBtnVolver().addActionListener(this);
 
@@ -105,10 +117,12 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		case "VER_HORARIOS":
 			vistaMenu.getPanelGeneral().setVisible(false);
 			vistaMenu.getPanelVerHorarios().setVisible(true);
+			cargarListaProfesores();
 			break;
 		case "ORGANIZAR_REUNIONES":
 			vistaMenu.getPanelGeneral().setVisible(false);
 			vistaMenu.getPanelOrganizarReuniones().setVisible(true);
+			cargarReunionesUsuario();
 			break;
 		case "ABRIR_PERFIL":
 			System.out.println("Abriendo perfil de usuario...");
@@ -148,7 +162,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 					vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
 						+ usuario.getTipos().getName().substring(1).toLowerCase());
 					vistaMenu.cargarAvatar(usuario.getArgazkiaUrl());
-					cargarHorariosUsuario();
+					cargarHorariosPorUsuario(usuario.getId(), vistaMenu.getPanelGeneral().getPanelHorarios());
 					cargarReunionesUsuario();
 				}
 			} else {
@@ -187,9 +201,15 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaPerfil.cargarAvatar(usuario.getArgazkiaUrl());
 	}
 
-	private void cargarHorariosUsuario() {
+
+	private void cargarHorariosPorUsuario(int userId, TablaHorario tablaDestino) {
+		if (tablaDestino == null) {
+			return;
+		}
 		try {
-			Object response = cliente.enviarRequest("get_horarios", new ArrayList<>());
+			ArrayList<Object> datos = new ArrayList<>();
+			datos.add(userId);
+			Object response = cliente.enviarRequest("get_horarios_id", datos);
 			if (response instanceof ArrayList<?>) {
 				ArrayList<Horarios> horarios = new ArrayList<>();
 				for (Object elemento : (ArrayList<?>) response) {
@@ -197,7 +217,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 						horarios.add((Horarios) elemento);
 					}
 				}
-				vistaMenu.getPanelGeneral().getPanelHorarios().actualizarModelo(cargarModeloHorarios(horarios));
+				tablaDestino.actualizarModelo(cargarModeloHorarios(horarios));
 			} else if (response instanceof String) {
 				JOptionPane.showMessageDialog(vistaMenu, response);
 			}
@@ -217,13 +237,35 @@ public class Controlador extends MouseAdapter implements ActionListener {
 					}
 				}
 				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(cargarModeloReuniones(reuniones));
+				actualizarTablaReunionesOrganizador(reuniones);
 			} else if (response instanceof String) {
 				JOptionPane.showMessageDialog(vistaMenu, response);
+				actualizarTablaReunionesOrganizador(null);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudieron cargar las reuniones: " + e.getMessage());
+			actualizarTablaReunionesOrganizador(null);
 		}
 	}
+
+	private void actualizarTablaReunionesOrganizador(List<Reuniones> reuniones) {
+		DefaultTableModel modelo = vistaMenu.getPanelOrganizarReuniones().getModeloReuniones();
+		if (modelo == null) {
+			return;
+		}
+		modelo.setRowCount(0);
+		if (reuniones == null || reuniones.isEmpty()) {
+			return;
+		}
+		for (Reuniones reunion : reuniones) {
+			DateTimeFormatter dtf= DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			modelo.addRow(new Object[] { reunion.getIdReunion(),reunion.getUsersByAlumnoId().getNombre() + " " +reunion.getUsersByAlumnoId().getApellidos(),
+					reunion.getUsersByProfesorId().getNombre() + " " +reunion.getUsersByProfesorId().getApellidos(), reunion.getEstado(),
+					reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(), dtf.format(reunion.getFecha().toLocalDateTime()),
+					 dtf.format(reunion.getCreatedAt().toLocalDateTime()),  dtf.format(reunion.getUpdatedAt().toLocalDateTime())  });
+		}
+	}
+
 
 	private DefaultTableModel cargarModeloHorarios(ArrayList<Horarios> horarios) {
 		DefaultTableModel modeloTabla = new DefaultTableModel(
@@ -231,15 +273,15 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		if (horarios == null) {
 			return null;
 		}
-		Map<Byte, String[]> filasPorHora = new TreeMap<>();
+		Map<Byte, Object[]> filasPorHora = new TreeMap<>();
 		for (Horarios horario : horarios) {
 			if (horario == null) {
 				continue;
 			}
 			// Se obtiene la fila correspondiente a ese bloque horario
 	        // Si no existe, se crea una nueva fila con 6 columnas
-			String[] fila = filasPorHora.computeIfAbsent(Byte.valueOf(horario.getHora()), key -> {
-				String[] nuevaFila = new String[6];
+			Object[] fila = filasPorHora.computeIfAbsent(Byte.valueOf(horario.getHora()), key -> {
+				Object[] nuevaFila = new Object[6];
 				nuevaFila[0] = key + "ª";
 				return nuevaFila;
 			});
@@ -247,10 +289,10 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			if (columna == -1) {
 				continue;
 			}
-			fila[columna] = horario.describirModulo();
+				fila[columna] = horario;
 		}
 
-		for (String[] fila : filasPorHora.values()) {
+		for (Object[] fila : filasPorHora.values()) {
 			modeloTabla.addRow(fila);
 		}
 		
@@ -288,6 +330,41 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		}
 		return modeloTabla;
 	}
-
-
+	
+	private void cargarListaProfesores() {
+		try {
+			Object response = cliente.enviarRequest("get_profesores", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Users> profesores = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Users) {
+						profesores.add((Users) elemento);
+					}
+				}
+				vistaMenu.getPanelVerHorarios().getModeloProfesores().setRowCount(0);
+				for (Users profesor : profesores) {
+					vistaMenu.getPanelVerHorarios().getModeloProfesores()
+							.addRow(new Object[] { profesor.getId(),profesor.getNombre() + " " + profesor.getApellidos() });
+				}
+				vistaMenu.getPanelVerHorarios().getTableProfesores().clearSelection();
+				vistaMenu.getPanelVerHorarios().getPanelHorarios().actualizarModelo(null);
+				vistaMenu.getPanelVerHorarios().getTableProfesores().repaint();
+				vistaMenu.getPanelVerHorarios().getTableProfesores().revalidate();
+				
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(vistaMenu, response);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar la lista de profesores: " + e.getMessage());
+		}
+	}
+	private void mostrarHorarioProfesorSeleccionado() {
+		int selectedRow = vistaMenu.getPanelVerHorarios().getTableProfesores().getSelectedRow();
+		if (selectedRow < 0) {
+			return;
+		}
+		int modelRow = vistaMenu.getPanelVerHorarios().getTableProfesores().convertRowIndexToModel(selectedRow);
+		int profesorId = (int) vistaMenu.getPanelVerHorarios().getModeloProfesores().getValueAt(modelRow, 0);
+		cargarHorariosPorUsuario(profesorId, vistaMenu.getPanelVerHorarios().getPanelHorarios());
+	}
 }

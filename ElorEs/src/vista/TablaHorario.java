@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -15,6 +16,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+
+import modelo.Horarios;
 
 public class TablaHorario extends JPanel {
 
@@ -42,7 +45,26 @@ public class TablaHorario extends JPanel {
 		setOpaque(false);
 		setPreferredSize(new Dimension(682, 365));
 		modelo = crearModeloBase();
-		table = new JTable(modelo);
+		table = new JTable(modelo) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String getToolTipText(MouseEvent event) {
+				int row = rowAtPoint(event.getPoint());
+				int column = columnAtPoint(event.getPoint());
+				if (row < 0 || column < 0) {
+					return null;
+				}
+				Object value = getValueAt(row, column);
+				if (value instanceof Horarios) {
+					return ((Horarios) value).getModulos().getNombre().trim()+" "+ ((Horarios) value).getAula();
+				}
+				if (value == null) {
+					return null;
+				}
+				return limpiarHtml(value.toString());
+			}
+		};
 		configurarTabla();
 		scrollPane = new JScrollPane(table);
 		scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDADCE0)));
@@ -148,7 +170,11 @@ public class TablaHorario extends JPanel {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			String texto = value == null ? "" : value.toString();
+			Object renderValue = value;
+			if (value instanceof Horarios) {
+				renderValue = ((Horarios) value).describirModulo();
+			}
+			String texto = renderValue == null ? "" : renderValue.toString();
 			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
 			if (!normalizado.startsWith("<html")) {
 				texto = "<html>" + texto.replace("\n", "<br/>") + "</html>";
@@ -160,6 +186,14 @@ public class TablaHorario extends JPanel {
 			setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
 			return this;
 		}
+	}
+
+	private static String limpiarHtml(String texto) {
+		if (texto == null) {
+			return null;
+		}
+		String normalizado = texto.replace("<html>", "").replace("</html>", "");
+		return normalizado.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n").replaceAll("<[^>]+>", "").trim();
 	}
 
 }
