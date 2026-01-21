@@ -2,6 +2,8 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.hibernate.Session;
@@ -256,6 +258,30 @@ public class Reuniones implements java.io.Serializable {
 		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
+		for (Reuniones reunion : reuniones) {
+			reunionesConvertidas.add(reunion.convertirReunion());
+		}
+		return reunionesConvertidas;
+	}
+
+	public static ArrayList<Reuniones> getReunionesByUserIDSemanaActual(int idUser) {
+		LocalDate hoy = LocalDate.now();
+		LocalDate inicioSemana = hoy.with(DayOfWeek.MONDAY);
+		LocalDate finSemana = inicioSemana.plusDays(7);
+
+		Timestamp inicio = Timestamp.valueOf(inicioSemana.atStartOfDay());
+		Timestamp fin = Timestamp.valueOf(finSemana.atStartOfDay());
+
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Reuniones where (usersByAlumnoId.id = :userID or usersByProfesorId.id = :userID) "
+				+ "and fecha >= :inicioSemana and fecha < :finSemana order by fecha";
+		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
+		q.setParameter("userID", idUser);
+		q.setParameter("inicioSemana", inicio);
+		q.setParameter("finSemana", fin);
+		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
+		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones>();
 		for (Reuniones reunion : reuniones) {
 			reunionesConvertidas.add(reunion.convertirReunion());
 		}

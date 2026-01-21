@@ -60,6 +60,9 @@ public class SocketServer extends Thread {
 			case "get_reuniones":
 				response = Reuniones.getReunionesByUserID(usuario.getId());
 				break;
+			case "get_reuniones_semana":
+				response = Reuniones.getReunionesByUserIDSemanaActual(usuario.getId());
+				break;
 			case "update_reunion":
 				int reunionId = (int) entrada.readObject();
 				String nuevoEstado = (String) entrada.readObject();

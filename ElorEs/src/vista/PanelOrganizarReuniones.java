@@ -64,8 +64,8 @@ public class PanelOrganizarReuniones extends JPanel {
 		lblTitulo.setBounds(73, 15, 400, 36);
 		contenedorReuniones.add(lblTitulo);
 
-		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Alumno", "Profesor", "Estado",
-				 "Título", "Asunto", "Aula", "Fecha", "Creado", "Actualizado" }, 0) {
+		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno", "Profesor",
+			"Estado", "Título", "Asunto", "Aula", "Creado", "Actualizado" }, 0) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -89,10 +89,12 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		tableReuniones.setDefaultEditor(Object.class, null);
 
-		int[] columnWidths = { 60, 160, 160, 120, 120, 180, 220, 90, 140, 140, 140 };
+		int[] columnWidths = { 0, 140, 180, 180, 120, 130, 200, 80, 140, 140 };
 		for (int i = 0; i < columnWidths.length && i < tableReuniones.getColumnCount(); i++) {
 			tableReuniones.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
 		}
+		tableReuniones.getColumnModel().getColumn(0).setMinWidth(0);
+		tableReuniones.getColumnModel().getColumn(0).setMaxWidth(0);
 
 		JScrollPane scrollPane = new JScrollPane(tableReuniones);
 		scrollPane.setBounds(0, 70, 1374, 355);

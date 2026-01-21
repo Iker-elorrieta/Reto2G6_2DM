@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.TreeMap;
 import java.time.format.DateTimeFormatter;
 
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import cliente.Cliente;
@@ -227,16 +225,31 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	}
 
 	private void cargarReunionesUsuario() {
+		cargarReunionesPanelGeneral();
+		cargarReunionesOrganizador();
+	}
+
+	private void cargarReunionesPanelGeneral() {
+		try {
+			Object response = cliente.enviarRequest("get_reuniones_semana", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Reuniones> reuniones = convertirRespuestaReuniones(response);
+				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(cargarModeloReuniones(reuniones));
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(vistaMenu, response);
+				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(null);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "No se pudieron cargar las reuniones de la semana: " + e.getMessage());
+			vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(null);
+		}
+	}
+
+	private void cargarReunionesOrganizador() {
 		try {
 			Object response = cliente.enviarRequest("get_reuniones", new ArrayList<>());
 			if (response instanceof ArrayList<?>) {
-				ArrayList<Reuniones> reuniones = new ArrayList<>();
-				for (Object elemento : (ArrayList<?>) response) {
-					if (elemento instanceof Reuniones) {
-						reuniones.add((Reuniones) elemento);
-					}
-				}
-				vistaMenu.getPanelGeneral().getPanelReuniones().actualizarModelo(cargarModeloReuniones(reuniones));
+				ArrayList<Reuniones> reuniones = convertirRespuestaReuniones(response);
 				actualizarTablaReunionesOrganizador(reuniones);
 			} else if (response instanceof String) {
 				JOptionPane.showMessageDialog(vistaMenu, response);
@@ -258,14 +271,24 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			return;
 		}
 		for (Reuniones reunion : reuniones) {
-			DateTimeFormatter dtf= DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-			modelo.addRow(new Object[] { reunion.getIdReunion(),reunion.getUsersByAlumnoId().getNombre() + " " +reunion.getUsersByAlumnoId().getApellidos(),
-					reunion.getUsersByProfesorId().getNombre() + " " +reunion.getUsersByProfesorId().getApellidos(), reunion.getEstado(),
-					reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(), dtf.format(reunion.getFecha().toLocalDateTime()),
-					 dtf.format(reunion.getCreatedAt().toLocalDateTime()),  dtf.format(reunion.getUpdatedAt().toLocalDateTime())  });
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			modelo.addRow(new Object[] { reunion.getIdReunion(), dtf.format(reunion.getFecha().toLocalDateTime()),
+					reunion.getUsersByAlumnoId().getNombre() + " " + reunion.getUsersByAlumnoId().getApellidos(),
+					reunion.getUsersByProfesorId().getNombre() + " " + reunion.getUsersByProfesorId().getApellidos(), reunion.getEstado(),
+					reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(), dtf.format(reunion.getCreatedAt().toLocalDateTime()),
+					dtf.format(reunion.getUpdatedAt().toLocalDateTime()) });
 		}
 	}
 
+	private ArrayList<Reuniones> convertirRespuestaReuniones(Object response) {
+		ArrayList<Reuniones> reuniones = new ArrayList<>();
+		for (Object elemento : (ArrayList<?>) response) {
+			if (elemento instanceof Reuniones) {
+				reuniones.add((Reuniones) elemento);
+			}
+		}
+		return reuniones;
+	}
 
 	private DefaultTableModel cargarModeloHorarios(ArrayList<Horarios> horarios) {
 		DefaultTableModel modeloTabla = new DefaultTableModel(
