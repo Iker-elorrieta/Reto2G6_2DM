@@ -257,16 +257,12 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		if (horarios == null) {
 			return null;
 		}
-		Map<Byte, Object[]> filasPorHora = new TreeMap<>();
+		Map<String, Object[]> filasPorHora = new TreeMap<>();
 		for (Horarios horario : horarios) {
 			if (horario == null) {
 				continue;
 			}
-			Object[] fila = filasPorHora.computeIfAbsent(horario.getHoraBloque(), key -> {
-				Object[] nuevaFila = new Object[6];
-				nuevaFila[0] = key;
-				return nuevaFila;
-			});
+			Object[] fila = filasPorHora.computeIfAbsent(horario.getHoraStr(), key -> crearFilaHorario(key));
 			int columna = horario.obtenerColumnaDia();
 			if (columna == -1) {
 				continue;
@@ -291,8 +287,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			if (horario == null) {
 				continue;
 			}
-			String etiquetaHora = horario.formatearHora();
-			Object[] fila = filasPorHora.computeIfAbsent(etiquetaHora, key -> crearFilaHorario(key));
+			Object[] fila = filasPorHora.computeIfAbsent(horario.getHoraStr(), key -> crearFilaHorario(key));
 			int columna = horario.obtenerColumnaDia();
 			if (columna == -1) {
 				continue;
@@ -327,6 +322,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		nuevaFila[0] = etiquetaHora;
 		return nuevaFila;
 	}
+
 
 	private void agregarContenidoCelda(Object[] fila, int columna, Object contenido) {
 		if (fila == null || columna <= 0 || columna >= fila.length || contenido == null) {

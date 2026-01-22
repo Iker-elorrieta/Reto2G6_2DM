@@ -198,17 +198,7 @@ public class Horarios implements java.io.Serializable {
 			return -1;
 		}
 	}
-	public byte getHoraBloque() {
-	    return (byte) (7 + hora);
-	}
-	public String formatearHora() {
-		int horacambiada = 7 + hora;
-		if (horacambiada < 0) {
-			horacambiada = 0;
-		}
-		LocalTime time = LocalTime.of(Math.min(hora, 23), 0);
-		return time.format(DateTimeFormatter.ofPattern("HH:mm"));
-	}
+
 	public static ArrayList<Horarios> getHorarios(Cliente cliente) {
 		Object response;
 		try {
@@ -256,6 +246,10 @@ public class Horarios implements java.io.Serializable {
 			e.printStackTrace();
 		}
 		return new ArrayList<>();
+	}
+	public String getHoraStr() {
+		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
+		return String.format("%02d:00", horaNormalizada);
 	}
 
 }
