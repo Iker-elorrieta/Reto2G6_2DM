@@ -3,6 +3,7 @@ package com.reto2.elorserv;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 
 import modelo.Centros;
 import modelo.Horarios;
@@ -31,7 +32,10 @@ public class SocketServer extends Thread {
 				salida.writeObject(response);
 				salida.flush();
 			}
-		} catch (Exception e) {
+		} catch (SocketException e) {
+			System.out.println("Usuario desconectado");
+		}
+		catch (Exception e) {
 			System.out.println("Usuario desconectado");
 			e.printStackTrace();
 		}
@@ -85,7 +89,7 @@ public class SocketServer extends Thread {
 				response = Horarios.getHorariosByUserId(userId);
 				break;
 			case "get_profesores":
-				response = Users.getUsersByTipoID(3);
+				response = Users.getUsersByTipo("profesor");
 				break;
 			case "get_alumnos":
 				int profesorId = (int) entrada.readObject();

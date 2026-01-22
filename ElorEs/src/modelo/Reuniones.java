@@ -4,7 +4,11 @@ import java.awt.Color;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
+import cliente.Cliente;
 
 public class Reuniones implements java.io.Serializable {
 
@@ -66,7 +70,10 @@ public class Reuniones implements java.io.Serializable {
 	}
 
 	public String getEstado() {
-		return this.estado;
+		if (this.estado == null) {
+			return "";
+		}
+		return estado.substring(0, 1).toUpperCase() + estado.substring(1).toLowerCase();
 	}
 
 	public void setEstado(String estado) {
@@ -144,13 +151,49 @@ public class Reuniones implements java.io.Serializable {
 	public void setCentro(Centros centro) {
 		this.centro = centro;
 	}
-	
+
+	public static ArrayList<Reuniones> getReunionesSemanaActual(Cliente cliente) {
+		try {
+			Object response = cliente.enviarRequest("get_reuniones_semana", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Reuniones> reuniones = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Reuniones) {
+						reuniones.add((Reuniones) elemento);
+					}
+				}
+				return reuniones;
+			}
+		} catch (Exception e) {
+		}
+		return new ArrayList<>();
+	}
+
+	public static ArrayList<Reuniones> getReunionesUsuario(Cliente cliente) {
+		try {
+			Object response = cliente.enviarRequest("get_reuniones", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Reuniones> reuniones = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Reuniones) {
+						reuniones.add((Reuniones) elemento);
+					}
+				}
+				return reuniones;
+			} else if (response instanceof String) {
+			}
+		} catch (Exception e) {
+		}
+		return new ArrayList<>();
+
+	}
+
 	public String obtenerHora() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime fecha = getFecha().toLocalDateTime();
 		return formatter.format(fecha);
 	}
-	
+
 	public int obtenerColumnaDia() {
 		switch (getFecha().toLocalDateTime().getDayOfWeek()) {
 		case MONDAY:
@@ -168,51 +211,74 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
-	public String describirReunion() {
-		String html = "<html><div style='line-height:1.2;'>";		
+
+	public String describirReunion(boolean envolverHtml, boolean multilinea) {
+		String contenido = construirDescripcionReunion(multilinea);
+		return envolverHtml ? envolverEnHtml(contenido) : contenido;
+	}
+
+	private String construirDescripcionReunion(boolean multilinea) {
+		StringBuilder html = new StringBuilder();
 		String tituloReunion = "";
 		if (asunto != null && !asunto.isEmpty()) {
-		    tituloReunion = asunto;
+			tituloReunion = asunto;
 		} else if (titulo != null && !titulo.isEmpty()) {
-		    tituloReunion = titulo;
+			tituloReunion = titulo;
 		}
-		
+
 		if (getUsersByAlumnoId() != null) {
-		    String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
-		    if (!tituloReunion.isEmpty()) {
-		        html += "<b>" + tituloReunion + " - " + nombreAlumno + "</b>";
-		    } else {
-		        html += "<b>" + nombreAlumno + "</b>";
-		    }
+			String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
+			if (!tituloReunion.isEmpty()) {
+				html.append("<b>").append(tituloReunion).append(" - ").append(nombreAlumno).append("</b>");
+			} else {
+				html.append("<b>").append(nombreAlumno).append("</b>");
+			}
 		} else if (!tituloReunion.isEmpty()) {
-		    html += "<b>" + tituloReunion + "</b>";
+			html.append("<b>").append(tituloReunion).append("</b>");
 		}
-		
+
 		if (estado != null && !estado.trim().isEmpty()) {
-		    String estadoCapitalizado = estado.substring(0, 1).toUpperCase() + estado.substring(1).toLowerCase();
-		    html += "<br/>" + estadoCapitalizado;
+			appendSeparador(html, multilinea);
+			html.append(getEstado());
 		}
-		if (aula != null) {
-		    html += "<br/>" + aula;
+		if (aula != null && !aula.trim().isEmpty()) {
+			appendSeparador(html, multilinea);
+			html.append(aula);
 		}
-		html += "</div></html>";
-		return html;
+		if (html.length() == 0) {
+			html.append("<span style='color:#7A7A7A;'>Reunión</span>");
+		}
+		return html.toString();
 	}
-	
-	public Color obtenerColorEstado() {
-		if (estado == null || estado.trim().isEmpty()) {
+
+	private void appendSeparador(StringBuilder html, boolean multilinea) {
+		if (html.length() == 0) {
+			return;
+		}
+		if (multilinea) {
+			html.append("<br/>");
+		} else {
+			html.append(' ');
+		}
+	}
+
+	private String envolverEnHtml(String contenido) {
+		return "<html><div style='line-height:1.2;'>" + contenido + "</div></html>";
+	}
+
+	public Color getColorEstado() {
+		if (estado == null) {
 			return Color.WHITE;
 		}
-		String estadoLower = estado.toLowerCase().trim();
-		switch (estadoLower) {
+		switch (estado.toLowerCase().trim()) {
 		case "aceptada":
-			return new Color(200, 230, 201); // Verde pastel
+			return new Color(200, 230, 201);
 		case "denegada":
-			return new Color(255, 205, 210); // Rojo pastel
+			return new Color(255, 205, 210);
 		case "pendiente":
-			return new Color(255, 224, 130); // Amarillo/Naranja pastel
+			return new Color(255, 224, 130);
 		case "conflicto":
-			return new Color(224, 224, 224); // Gris
+			return new Color(224, 224, 224);
 		default:
 			return Color.WHITE;
 		}

@@ -1,6 +1,13 @@
 package modelo;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
+
+import cliente.Cliente;
 
 public class Horarios implements java.io.Serializable {
 
@@ -79,7 +86,10 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	public String getAula() {
-		return this.aula;
+		if (this.aula == null) {
+			return null;
+		}
+		return this.aula.replaceAll("(?i)aula\\s*", "").trim();
 	}
 
 	public void setAula(String aula) {
@@ -111,37 +121,65 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	public String describirModulo() {
-		String modulo = moduloTrim();
-		return construirDescripcion(modulo);
+		return describirModulo(true);
+	}
+
+	public String describirModulo(boolean envolverHtml) {
+		return describirModuloDetallado(true, envolverHtml);
+	}
+
+	public String describirModuloCompleto() {
+		return describirModuloCompleto(true);
+	}
+
+	public String describirModuloCompleto(boolean envolverHtml) {
+		return describirModuloDetallado(false, envolverHtml);
+	}
+
+	private String describirModuloDetallado(boolean recortarNombre, boolean envolverHtml) {
+		String modulo = recortarNombre ? getNombreModuloCorto() : obtenerNombreModulo();
+		String contenido = construirDescripcion(modulo);
+		return envolverHtml ? envolverEnHtml(contenido) : contenido;
 	}
 
 	private String construirDescripcion(String modulo) {
-		String aula = (getAula() != null)? getAula().trim():null;
-		String contenido = "<html><div style='line-height:1.2;'>";
-		if (modulo != null && aula != null) {
-			contenido += "<b>" + modulo + "</b> " + aula;
+		String aula = (getAula() != null) ? getAula().trim() : null;
+		String ciclo = (getModulos() != null && getModulos().getCiclos() != null)
+				? getModulos().getCiclos().getNombre().trim()
+				: null;
+		StringBuilder contenido = new StringBuilder();
+		if (modulo != null && aula != null && ciclo != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula).append(" ").append(ciclo);
+		} else if (modulo != null && aula != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula);
 		} else if (modulo != null) {
-			contenido += "<b>" + modulo + "</b>";
+			contenido.append("<b>").append(modulo).append("</b>");
 		} else if (aula != null) {
-			contenido += aula;
+			contenido.append(aula);
 		} else {
-			contenido += "<span style='color:#7A7A7A;'>Disponible</span>";
+			contenido.append("<span style='color:#7A7A7A;'>Disponible</span>");
 		}
-		contenido += "</div></html>";
-		return contenido;
+		return contenido.toString();
 	}
-	private String moduloTrim() {
-		if (getModulos() == null || getModulos().getNombre() == null) {
-			return null;
-		}
-		String limpio = getModulos().getNombre().trim();
+
+	private String envolverEnHtml(String contenido) {
+		return "<html><div style='line-height:1.2;'>" + contenido + "</div></html>";
+	}
+
+	private String getNombreModuloCorto() {
+		String limpio = obtenerNombreModulo();
 		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
 			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
 		}
 		return limpio;
 	}
 
-
+	private String obtenerNombreModulo() {
+		if (getModulos() == null || getModulos().getNombre() == null) {
+			return null;
+		}
+		return getModulos().getNombre().trim();
+	}
 
 	public int obtenerColumnaDia() {
 		switch (dia.trim().toUpperCase()) {
@@ -160,7 +198,64 @@ public class Horarios implements java.io.Serializable {
 			return -1;
 		}
 	}
+	public byte getHoraBloque() {
+	    return (byte) (7 + hora);
+	}
+	public String formatearHora() {
+		int horacambiada = 7 + hora;
+		if (horacambiada < 0) {
+			horacambiada = 0;
+		}
+		LocalTime time = LocalTime.of(Math.min(hora, 23), 0);
+		return time.format(DateTimeFormatter.ofPattern("HH:mm"));
+	}
+	public static ArrayList<Horarios> getHorarios(Cliente cliente) {
+		Object response;
+		try {
+			response = cliente.enviarRequest("get_horarios", new ArrayList<>());
 
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Horarios> horarios = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Horarios) {
+						horarios.add((Horarios) elemento);
+					}
+				}
+				return horarios;
 
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(null, (String) response, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+	public static ArrayList<Horarios> getHorariosporUsuario(Cliente cliente, int usuario) {
+		ArrayList<Object> datos = new ArrayList<>();
+		datos.add(usuario);
+		Object response;
+		try {
+			response = cliente.enviarRequest("get_horarios_id", datos);
+
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Horarios> horarios = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Horarios) {
+						horarios.add((Horarios) elemento);
+					}
+				}
+				return horarios;
+
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(null, (String) response, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
 
 }

@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.crypto.Cipher;
@@ -42,6 +44,7 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
+	private String cicloAsignado;
 	@JsonIgnore
 	private Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
 	@JsonIgnore
@@ -231,6 +234,14 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
+	public String getCicloAsignado() {
+		return cicloAsignado;
+	}
+
+	public void setCicloAsignado(String cicloAsignado) {
+		this.cicloAsignado = cicloAsignado;
+	}
+
 	public Set<Matriculaciones> getMatriculacioneses() {
 		return this.matriculacioneses;
 	}
@@ -271,9 +282,11 @@ public class Users implements java.io.Serializable {
 	public Users convertirUsuario() {
 		Tipos t = new Tipos(getTipos().getId(), getTipos().getName(),getTipos().getNameEu());
 		String usernameDescifrado = descifrar(getUsername());
-		return new Users(getId(),getEmail(), usernameDescifrado, getPassword(), getNombre(), getApellidos(), getDni(),
+		Users usuarioConvertido = new Users(getId(),getEmail(), usernameDescifrado, getPassword(), getNombre(), getApellidos(), getDni(),
 				getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(), getCreatedAt(),
 				getUpdatedAt(),t);
+		usuarioConvertido.setCicloAsignado(getCicloAsignado());
+		return usuarioConvertido;
 	}
 
 
@@ -317,12 +330,12 @@ public class Users implements java.io.Serializable {
 		return q.uniqueResult().convertirUsuario();
 	}
 	@JsonIgnore
-	public static ArrayList<Users> getUsersByTipoID(int id) {
+	public static ArrayList<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String hql = "from Users where tipos.id = :tipoId";
+		String hql = "from Users where tipos.name = :nombre";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter("tipoId", id);
+		q.setParameter("nombre", nombre);
 		ArrayList<Users> a = new ArrayList<Users>(q.list());
 		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
 		for (Users usuario : a) {
@@ -350,18 +363,36 @@ public class Users implements java.io.Serializable {
 		}
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
-			String hql = "select distinct mat.users from Matriculaciones mat "
-					+ "join Horarios h on h.modulos.ciclos = mat.ciclos and h.modulos.curso = mat.curso "
-					+ "where h.users.id = :profesorId and mat.users.tipos.id = 4";
-			Query<Users> q = session.createQuery(hql, Users.class);
+			String hql = "select distinct mat.users, mat.ciclos.nombre, mat.curso from Matriculaciones mat "
+					+ "where mat.users.tipos.nombre = :nombre and exists ("
+					+ "select 1 from Horarios h "
+					+ "where h.users.id = :profesorId "
+					+ "and h.modulos.ciclos.id = mat.ciclos.id "
+					+ "and h.modulos.curso = mat.curso)";
+			Query<Object[]> q = session.createQuery(hql, Object[].class);
 			q.setParameter("profesorId", profesorId);
-			ArrayList<Users> alumnos = new ArrayList<>();
-			for (Users alumno : q.list()) {
-				alumnos.add(alumno.convertirUsuario());
+			q.setParameter("nombre", "alumno");
+			Map<Integer, Users> alumnosPorId = new LinkedHashMap<>();
+			for (Object[] fila : q.list()) {
+				Users alumno = ((Users) fila[0]).convertirUsuario();
+				alumno.setCicloAsignado(formatearEtiquetaCiclo(fila[1], fila[2]));
+				alumnosPorId.put(alumno.getId(), alumno);
 			}
-			return alumnos;
+			return new ArrayList<>(alumnosPorId.values());
 		}
 	}	
+
+	private static String formatearEtiquetaCiclo(Object nombreCiclo, Object cursoValor) {
+		String nombre = nombreCiclo == null ? "Sin ciclo" : nombreCiclo.toString();
+		if (cursoValor == null) {
+			return nombre;
+		}
+		int curso = ((Number) cursoValor).intValue();
+		if (curso <= 0) {
+			return nombre;
+		}
+		return nombre + " (" + curso + "º)";
+	}
 	public Users crearUsuario() {
  	    SessionFactory sesion = HibernateUtil.getSessionFactory();
  	    try (Session session = sesion.openSession()) {

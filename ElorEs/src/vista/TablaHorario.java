@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -18,6 +20,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import modelo.Horarios;
+import modelo.Reuniones;
 
 public class TablaHorario extends JPanel {
 
@@ -36,6 +39,8 @@ public class TablaHorario extends JPanel {
 	private DefaultTableModel modelo;
 	private JScrollPane scrollPane;
 	private Mode mode = Mode.HORARIO;
+	private int[] customColumnWidths;
+	private boolean mostrarModuloCompleto;
 
 	/**
 	 * Create the panel.
@@ -56,13 +61,17 @@ public class TablaHorario extends JPanel {
 					return null;
 				}
 				Object value = getValueAt(row, column);
-				if (value instanceof Horarios) {
-					return ((Horarios) value).getModulos().getNombre().trim()+" "+ ((Horarios) value).getAula();
+				if (value instanceof List<?>) {
+					return TablaHorario.this.describirListaTooltip((List<?>) value);
+				} else if (value instanceof Horarios) {
+					return TablaHorario.this.construirTooltipHorario((Horarios) value);
+				} else if (value instanceof Reuniones) {
+					return TablaHorario.this.construirTooltipReunion((Reuniones) value);
 				}
 				if (value == null) {
 					return null;
 				}
-				return limpiarHtml(value.toString());
+				return value.toString();
 			}
 		};
 		configurarTabla();
@@ -73,7 +82,7 @@ public class TablaHorario extends JPanel {
 	}
 
 	private DefaultTableModel crearModeloBase() {
-		return new DefaultTableModel(new String[] { "Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" },
+		return new DefaultTableModel(new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" },
 				0);
 	}
 
@@ -89,6 +98,9 @@ public class TablaHorario extends JPanel {
 		table.setGridColor(new Color(0xE0E0E0));
 		table.setSelectionBackground(new Color(0xD0D3D9));
 		table.setSelectionForeground(new Color(0x1F1F1F));
+		table.setRowSelectionAllowed(false);
+		table.setColumnSelectionAllowed(false);
+		table.setCellSelectionEnabled(false);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setDefaultEditor(Object.class, null);
 		table.setDefaultRenderer(Object.class, new MultiLineHtmlRenderer());
@@ -101,9 +113,7 @@ public class TablaHorario extends JPanel {
 			int width = obtenerAnchoColumna(i);
 			column.setPreferredWidth(width);
 			column.setMinWidth(width);
-			if (i == 0) {
-				column.setMaxWidth(width);
-			}
+			column.setMaxWidth(width);
 		}
 	}
 
@@ -129,18 +139,25 @@ public class TablaHorario extends JPanel {
 		return modelo;
 	}
 
-	public void actualizarModelo(DefaultTableModel nuevoModelo) {
-		if (nuevoModelo == null) {
-			nuevoModelo = crearModeloBase();
+
+	public void setModelo(DefaultTableModel modelo) {
+		if (modelo == null) {
+			modelo = crearModeloBase();
 		}
-		modelo = nuevoModelo;
 		table.setModel(modelo);
 		configurarTabla();
 		ajustarAlturaFilas();
 	}
 
-	public void setModelo(DefaultTableModel modelo) {
-		actualizarModelo(modelo);
+	public void setCustomColumnWidths(int[] widths) {
+		if (widths == null) {
+			customColumnWidths = null;
+		} else {
+			customColumnWidths = Arrays.copyOf(widths, widths.length);
+		}
+		if (table != null && table.getColumnModel() != null) {
+			configurarColumnas();
+		}
 	}
 
 	public void setMode(Mode mode) {
@@ -152,12 +169,92 @@ public class TablaHorario extends JPanel {
 		ajustarAlturaFilas();
 	}
 
+	public void setMostrarModuloCompleto(boolean mostrarModuloCompleto) {
+		this.mostrarModuloCompleto = mostrarModuloCompleto;
+		if (table != null) {
+			table.repaint();
+		}
+	}
+
 	private int obtenerAnchoColumna(int index) {
+		if (customColumnWidths != null && index < customColumnWidths.length) {
+			return customColumnWidths[index];
+		}
 		int[] widths = mode == Mode.REUNION ? COLUMN_WIDTHS_REUNION : COLUMN_WIDTHS_HORARIO;
 		return widths[Math.min(index, widths.length - 1)];
 	}
 
-	private static class MultiLineHtmlRenderer extends JEditorPane implements TableCellRenderer {
+	private String construirTooltipHorario(Horarios horario) {
+		if (horario == null || horario.getModulos() == null || horario.getModulos().getNombre() == null) {
+			return "Clase";
+		}
+		String modulo = horario.getModulos().getNombre().trim();
+		String aula = horario.getAula();
+		StringBuilder sb = new StringBuilder("Módulo: ").append(modulo);
+		if (aula != null && !aula.trim().isEmpty()) {
+			sb.append(" | Aula: ").append(aula.trim());
+		}
+		return sb.toString();
+	}
+
+	private String construirTooltipReunion(Reuniones reunion) {
+		if (reunion == null) {
+			return "Reunión";
+		}
+		String titulo = reunion.getTitulo() != null ? reunion.getTitulo().trim() : "";
+		String asunto = reunion.getAsunto() != null ? reunion.getAsunto().trim() : "";
+		String alumno = "";
+		if (reunion.getUsersByAlumnoId() != null) {
+			String nombre = reunion.getUsersByAlumnoId().getNombre();
+			String apellidos = reunion.getUsersByAlumnoId().getApellidos();
+			alumno = ((nombre == null ? "" : nombre) + " " + (apellidos == null ? "" : apellidos)).trim();
+		}
+		StringBuilder sb = new StringBuilder();
+		if (!titulo.isEmpty()) {
+			sb.append("Título: ").append(titulo);
+		}
+		if (!asunto.isEmpty()) {
+			if (sb.length() > 0) {
+				sb.append(" | ");
+			}
+			sb.append("Asunto: ").append(asunto);
+		}
+		if (!alumno.isEmpty()) {
+			if (sb.length() > 0) {
+				sb.append(" | ");
+			}
+			sb.append("Alumno: ").append(alumno);
+		}
+		return sb.length() > 0 ? sb.toString() : "Reunión";
+	}
+
+	private String describirListaTooltip(List<?> valores) {
+		if (valores == null) {
+			return null;
+		}
+		Horarios primerHorario = null;
+		Reuniones primerReunion = null;
+		for (Object item : valores) {
+			if (primerHorario == null && item instanceof Horarios) {
+				primerHorario = (Horarios) item;
+			} else if (primerReunion == null && item instanceof Reuniones) {
+				primerReunion = (Reuniones) item;
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		if (primerHorario != null) {
+			sb.append(construirTooltipHorario(primerHorario));
+		}
+		if (primerReunion != null) {
+			if (sb.length() > 0) {
+				sb.append("\n");
+			}
+			sb.append(construirTooltipReunion(primerReunion));
+		}
+		return sb.length() > 0 ? sb.toString() : null;
+	}
+
+	private class MultiLineHtmlRenderer extends JEditorPane implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
 
 		MultiLineHtmlRenderer() {
@@ -169,69 +266,106 @@ public class TablaHorario extends JPanel {
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			Object renderValue = value;
+			int row, int column) {
+			String texto = "";
 			Color backgroundColor = Color.WHITE;
-			
-			if (value instanceof Horarios) {
-				renderValue = ((Horarios) value).describirModulo();
-			} else if (value instanceof String && column > 0) {
-				// Check if this might be a reunion cell by looking for HTML content
-				String stringValue = (String) value;
-				if (stringValue.toLowerCase(Locale.ROOT).contains("<b>")) {
-					// Try to extract estado from the parent model to get color
-					// We need to access the original Reuniones object through the controller
-					// For now, we'll parse the estado from the HTML
-					String estadoLower = extractEstadoFromHtml(stringValue);
-					backgroundColor = getColorForEstado(estadoLower);
-				}
+
+			if (value instanceof List<?>) {
+				texto = procesarLista((List<?>) value);
+				backgroundColor = obtenerColorDesdeLista((List<?>) value);
+			} else if (value instanceof Horarios) {
+				texto = obtenerDescripcionHorario((Horarios) value, true, false);
+			} else if (value instanceof Reuniones) {
+				Reuniones reunion = (Reuniones) value;
+				backgroundColor = reunion.getColorEstado();
+				texto = reunion.describirReunion(true,false);
+			} else if (value != null) {
+				texto = asegurarHtml(value.toString());
 			}
-			
-			String texto = renderValue == null ? "" : renderValue.toString();
-			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
-			if (!normalizado.startsWith("<html")) {
-				texto = "<html>" + texto.replace("\n", "<br/>") + "</html>";
-			}
+
 			setText(texto);
 			setFont(table.getFont());
 			setForeground(isSelected ? table.getSelectionForeground() : new Color(0x1F1F1F));
 			setBackground(isSelected ? table.getSelectionBackground() : backgroundColor);
-			setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+			setBorder(null);
 			return this;
 		}
-		
-		private String extractEstadoFromHtml(String html) {
-			// Extract estado from HTML - it's the first line after the title
-			String[] parts = html.split("<br/>");
-			if (parts.length > 1) {
-				String estadoPart = parts[1].replaceAll("<[^>]+>", "").trim();
-				return estadoPart.toLowerCase();
+
+		private String procesarLista(List<?> valores) {
+			Horarios primerHorario = null;
+			Reuniones primerReunion = null;
+			for (Object item : valores) {
+				if (primerHorario == null && item instanceof Horarios) {
+					primerHorario = (Horarios) item;
+				} else if (primerReunion == null && item instanceof Reuniones) {
+					primerReunion = (Reuniones) item;
+				}
+				if (primerHorario != null && primerReunion != null) {
+					break;
+				}
+			}
+
+			if (primerHorario != null && primerReunion != null) {
+				String moduloContenido = obtenerDescripcionHorario(primerHorario, false, true);
+				String reunionContenido = primerReunion.describirReunion(false, false);
+				return "<html><div style='line-height:1.2;'>" +
+					"<div>" + moduloContenido + "</div>" +
+					"<div style='margin-top:4px;'>" + reunionContenido + "</div>" +
+					"</div></html>";
+			}
+			if (primerHorario != null) {
+				return obtenerDescripcionHorario(primerHorario, true, false);
+			}
+			if (primerReunion != null) {
+				return primerReunion.describirReunion(true,false);
 			}
 			return "";
 		}
-		
-		private Color getColorForEstado(String estadoLower) {
-			switch (estadoLower) {
-			case "aceptada":
-				return new Color(200, 230, 201); // Verde pastel
-			case "denegada":
-				return new Color(255, 205, 210); // Rojo pastel
-			case "pendiente":
-				return new Color(255, 224, 130); // Amarillo/Naranja pastel
-			case "conflicto":
-				return new Color(224, 224, 224); // Gris
-			default:
+
+		private String obtenerDescripcionHorario(Horarios horario, boolean envolverHtml, boolean combinadoConReunion) {
+			if (horario == null) {
+				return "";
+			}
+			boolean usarDescripcionCompleta = mostrarModuloCompleto && !combinadoConReunion;
+			if (usarDescripcionCompleta) {
+				return horario.describirModuloCompleto(envolverHtml);
+			}
+			return horario.describirModulo(envolverHtml);
+		}
+
+		private Color obtenerColorDesdeLista(List<?> valores) {
+			if (valores == null) {
 				return Color.WHITE;
 			}
+			for (Object item : valores) {
+				if (item instanceof Reuniones) {
+					return ((Reuniones) item).getColorEstado();
+				}
+			}
+			return Color.WHITE;
 		}
-	}
 
-	private static String limpiarHtml(String texto) {
-		if (texto == null) {
-			return null;
+		private String asegurarHtml(String texto) {
+			if (texto == null || texto.isBlank()) {
+				return "";
+			}
+			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
+			if (normalizado.startsWith("<html")) {
+				return texto;
+			}
+			return "<html>" + escapeHtml(texto).replace("\n", "<br/>") + "</html>";
 		}
-		String normalizado = texto.replace("<html>", "").replace("</html>", "");
-		return normalizado.replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n").replaceAll("<[^>]+>", "").trim();
+
+		private String escapeHtml(String texto) {
+			if (texto == null) {
+				return "";
+			}
+			return texto.replace("&", "&amp;")
+					.replace("<", "&lt;")
+					.replace(">", "&gt;")
+					.replace("\"", "&quot;")
+					.replace("'", "&#39;");
+		}
 	}
 
 }

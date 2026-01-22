@@ -129,21 +129,18 @@ public class PanelVerHorarios extends JPanel {
 		ocultarColumnaId();
 
 		
-		btnVolver = crearBotonVolver();
+
+		btnVolver =new JButton();
+		btnVolver.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 28, new Color(18, 26, 38)));
+		btnVolver.setContentAreaFilled(false);
+		btnVolver.setBorderPainted(false);
+		btnVolver.setFocusPainted(false);
+		btnVolver.setToolTipText("Volver");
 		btnVolver.setBounds(10, 11, 25, 38);
 		contenedorProfesores.add(btnVolver);
 
 	}
 
-	private JButton crearBotonVolver() {
-		JButton boton = new JButton();
-		boton.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 28, new Color(18, 26, 38)));
-		boton.setContentAreaFilled(false);
-		boton.setBorderPainted(false);
-		boton.setFocusPainted(false);
-		boton.setToolTipText("Volver");
-		return boton;
-	}
 
 	private void ocultarColumnaId() {
 		if (tableProfesores.getColumnModel().getColumnCount() > 1) {

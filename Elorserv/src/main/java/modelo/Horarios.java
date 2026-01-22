@@ -170,10 +170,10 @@ public class Horarios implements java.io.Serializable {
 	}
 	public static ArrayList<Horarios> getHorariosByUserId(Integer userId) {
 		Users user = new Users(userId).getUsuarioPorID();
-		switch (user.getTipos().getId()) {
-			case 4:
+		switch (user.getTipos().getName()) {
+			case "alumno":
 				return getHorariosByAlumnoId(userId);
-			case 3:
+			case "profesor":
 				return getHorariosByProfesorId(userId);
 			default:
 				throw new IllegalArgumentException("Rol no reconocido");

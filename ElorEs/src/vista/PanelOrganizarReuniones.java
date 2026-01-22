@@ -23,6 +23,7 @@ public class PanelOrganizarReuniones extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JButton btnVolver;
+	private JButton btnNuevaReunion;
 	private JTable tableReuniones;
 	private DefaultTableModel modeloReuniones;
 
@@ -55,7 +56,13 @@ public class PanelOrganizarReuniones extends JPanel {
 		contenedorReuniones.setBounds(10, 0, 1374, 425);
 		add(contenedorReuniones);
 
-		btnVolver = crearBotonVolver();
+
+		btnVolver =new JButton();
+		btnVolver.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 28, new Color(18, 26, 38)));
+		btnVolver.setContentAreaFilled(false);
+		btnVolver.setBorderPainted(false);
+		btnVolver.setFocusPainted(false);
+		btnVolver.setToolTipText("Volver");
 		btnVolver.setBounds(10, 11, 25, 38);
 		contenedorReuniones.add(btnVolver);
 
@@ -63,6 +70,10 @@ public class PanelOrganizarReuniones extends JPanel {
 		lblTitulo.setFont(new Font("Raleway", Font.PLAIN, 26));
 		lblTitulo.setBounds(45, 11, 330, 40);
 		contenedorReuniones.add(lblTitulo);
+
+		btnNuevaReunion = crearBotonNuevaReunion();
+		btnNuevaReunion.setBounds(1140, 15, 220, 38);
+		contenedorReuniones.add(btnNuevaReunion);
 
 		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno",
 			"Estado", "Título", "Asunto", "Aula", "Creado", "Actualizado" }, 0) {
@@ -86,7 +97,7 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.setSelectionBackground(new Color(0xD0D3D9));
 		tableReuniones.setSelectionForeground(new Color(0x1F1F1F));
 		tableReuniones.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tableReuniones.setDefaultEditor(Object.class, null);
 
 		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140 };
@@ -97,23 +108,22 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.getColumnModel().getColumn(0).setMaxWidth(0);
 
 		JScrollPane scrollPane = new JScrollPane(tableReuniones);
-		scrollPane.setBounds(0, 70, 1374, 355);
+		scrollPane.setBounds(0, 60, 1374, 365);
 		scrollPane.getViewport().setBackground(Color.WHITE);
 		contenedorReuniones.add(scrollPane);
 	}
 
-	private JButton crearBotonVolver() {
-		JButton boton = new JButton();
-		boton.setIcon(FontIcon.of(MaterialDesignC.CHEVRON_LEFT, 28, new Color(18, 26, 38)));
-		boton.setContentAreaFilled(false);
-		boton.setBorderPainted(false);
-		boton.setFocusPainted(false);
-		boton.setToolTipText("Volver");
-		return boton;
-	}
 
 	public JButton getBtnVolver() {
 		return btnVolver;
+	}
+
+	public JButton getBtnNuevaReunion() {
+		return btnNuevaReunion;
+	}
+
+	public void setBtnNuevaReunion(JButton btnNuevaReunion) {
+		this.btnNuevaReunion = btnNuevaReunion;
 	}
 
 	public JTable getTableReuniones() {
@@ -122,5 +132,34 @@ public class PanelOrganizarReuniones extends JPanel {
 
 	public DefaultTableModel getModeloReuniones() {
 		return modeloReuniones;
+	}
+
+	private JButton crearBotonNuevaReunion() {
+		final Color verdeAccion = new Color(46, 204, 113);
+		JButton boton = new JButton("Nueva reunión") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				try {
+					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					g2.setColor(verdeAccion);
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+				} finally {
+					g2.dispose();
+				}
+				super.paintComponent(g);
+			}
+		};
+		boton.setFont(new Font("Raleway", Font.BOLD, 16));
+		boton.setForeground(Color.WHITE);
+		boton.setIcon(FontIcon.of(MaterialDesignC.CALENDAR_PLUS, 20, Color.WHITE));
+		boton.setIconTextGap(10);
+		boton.setFocusPainted(false);
+		boton.setContentAreaFilled(false);
+		boton.setBorderPainted(false);
+		boton.setOpaque(false);
+		return boton;
 	}
 }

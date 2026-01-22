@@ -34,6 +34,7 @@ public class PantallaMenu extends JFrame {
 	private PanelGeneral panelGeneral;
 	private PanelVerHorarios panelVerHorarios;
 	private PanelOrganizarReuniones panelOrganizarReuniones;
+	private VerAlumnos panelAlumnos;
 	private JPanel panelPerfil;
 	private JPanel panelLogo;
 	private JButton btnConsultarAlumnos;
@@ -131,6 +132,15 @@ public class PantallaMenu extends JFrame {
 		panelOrganizarReuniones = new PanelOrganizarReuniones();
 		panelOrganizarReuniones.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelOrganizarReuniones);
+
+		panelAlumnos = new VerAlumnos();
+		panelAlumnos.setBounds(10, 120, 1394, 460);
+		contentPane.add(panelAlumnos);
+
+		panelGeneral.setVisible(true);
+		panelVerHorarios.setVisible(false);
+		panelOrganizarReuniones.setVisible(false);
+		panelAlumnos.setVisible(false);
 		
 		
 		lblNombreUsuario = new JLabel("Nombre Usuario");
@@ -173,6 +183,10 @@ public class PantallaMenu extends JFrame {
 	public PanelOrganizarReuniones getPanelOrganizarReuniones() {
 		return panelOrganizarReuniones;
 	}
+		public VerAlumnos getPanelAlumnos() {
+			return panelAlumnos;
+		}
+
 	public void setPanelOrganizarReuniones(PanelOrganizarReuniones panelOrganizarReuniones) {
 		this.panelOrganizarReuniones = panelOrganizarReuniones;
 	}
