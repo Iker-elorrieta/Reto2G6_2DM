@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -247,6 +248,20 @@ public class Horarios implements java.io.Serializable {
 		}
 		return new ArrayList<>();
 	}
+	
+	public static Horarios getPrimerHorarioDesdeLista(List<?> valores) {
+		if (valores == null) {
+			return null;
+		}
+		for (Object item : valores) {
+			if (item instanceof Horarios) {
+				return (Horarios) item;
+			}
+		}
+		return null;
+	}
+	
+
 	public String getHoraStr() {
 		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
 		return String.format("%02d:00", horaNormalizada);

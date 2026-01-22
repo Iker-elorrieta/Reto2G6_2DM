@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -187,7 +188,18 @@ public class Reuniones implements java.io.Serializable {
 		return new ArrayList<>();
 
 	}
-
+	public static Reuniones getPrimeraReunionDesdeLista(List<?> valores) {
+		if (valores == null) {
+			return null;
+		}
+		for (Object item : valores) {
+			if (item instanceof Reuniones) {
+				return (Reuniones) item;
+			}
+		}
+		return null;
+	}
+	
 	public String obtenerHora() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime fecha = getFecha().toLocalDateTime();

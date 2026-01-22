@@ -272,7 +272,7 @@ public class TablaHorario extends JPanel {
 
 			if (value instanceof List<?>) {
 				texto = procesarLista((List<?>) value);
-				backgroundColor = obtenerColorDesdeLista((List<?>) value);
+				backgroundColor = Reuniones.getPrimeraReunionDesdeLista((List<?>) value).getColorEstado();
 			} else if (value instanceof Horarios) {
 				texto = obtenerDescripcionHorario((Horarios) value, true, false);
 			} else if (value instanceof Reuniones) {
@@ -280,7 +280,7 @@ public class TablaHorario extends JPanel {
 				backgroundColor = reunion.getColorEstado();
 				texto = reunion.describirReunion(true,false);
 			} else if (value != null) {
-				texto = asegurarHtml(value.toString());
+				texto = value.toString();
 			}
 
 			setText(texto);
@@ -292,19 +292,8 @@ public class TablaHorario extends JPanel {
 		}
 
 		private String procesarLista(List<?> valores) {
-			Horarios primerHorario = null;
-			Reuniones primerReunion = null;
-			for (Object item : valores) {
-				if (primerHorario == null && item instanceof Horarios) {
-					primerHorario = (Horarios) item;
-				} else if (primerReunion == null && item instanceof Reuniones) {
-					primerReunion = (Reuniones) item;
-				}
-				if (primerHorario != null && primerReunion != null) {
-					break;
-				}
-			}
-
+			Horarios primerHorario  = Horarios.getPrimerHorarioDesdeLista(valores);
+			Reuniones primerReunion = Reuniones.getPrimeraReunionDesdeLista(valores);
 			if (primerHorario != null && primerReunion != null) {
 				String moduloContenido = obtenerDescripcionHorario(primerHorario, false, true);
 				String reunionContenido = primerReunion.describirReunion(false, false);
@@ -331,40 +320,6 @@ public class TablaHorario extends JPanel {
 				return horario.describirModuloCompleto(envolverHtml);
 			}
 			return horario.describirModulo(envolverHtml);
-		}
-
-		private Color obtenerColorDesdeLista(List<?> valores) {
-			if (valores == null) {
-				return Color.WHITE;
-			}
-			for (Object item : valores) {
-				if (item instanceof Reuniones) {
-					return ((Reuniones) item).getColorEstado();
-				}
-			}
-			return Color.WHITE;
-		}
-
-		private String asegurarHtml(String texto) {
-			if (texto == null || texto.isBlank()) {
-				return "";
-			}
-			String normalizado = texto.trim().toLowerCase(Locale.ROOT);
-			if (normalizado.startsWith("<html")) {
-				return texto;
-			}
-			return "<html>" + escapeHtml(texto).replace("\n", "<br/>") + "</html>";
-		}
-
-		private String escapeHtml(String texto) {
-			if (texto == null) {
-				return "";
-			}
-			return texto.replace("&", "&amp;")
-					.replace("<", "&lt;")
-					.replace(">", "&gt;")
-					.replace("\"", "&quot;")
-					.replace("'", "&#39;");
 		}
 	}
 
