@@ -136,7 +136,7 @@ public class TablaHorario extends JPanel {
 				texto = htmlCombinado((List<?>) value);
 				backgroundColor = Reuniones.getPrimeraReunionDesdeLista((List<?>) value).getColorEstado();
 			} else if (value instanceof Horarios) {
-				texto = obtenerDescripcionHorario((Horarios) value, true, false);
+				texto = ((Horarios) value).getModuloHtml(!mostrarModuloCompleto, true);
 			} else if (value instanceof Reuniones) {
 				Reuniones reunion = (Reuniones) value;
 				backgroundColor = reunion.getColorEstado();
@@ -156,15 +156,12 @@ public class TablaHorario extends JPanel {
 		private String htmlCombinado(List<?> valores) {
 			Horarios primerHorario = Horarios.getPrimerHorarioDesdeLista(valores);
 			Reuniones primerReunion = Reuniones.getPrimeraReunionDesdeLista(valores);
-			String moduloContenido = obtenerDescripcionHorario(primerHorario, false, true);
+			String moduloContenido = primerHorario.getModuloHtml(mostrarModuloCompleto, false);
 			String reunionContenido = primerReunion.getDescripcionHtml(false, false);
 			return "<html><div style='line-height:1.2;'>" + "<div>" + moduloContenido + "</div>"
 					+ "<div style='margin-top:4px;'>" + reunionContenido + "</div>" + "</div></html>";
 		}
 
-		private String obtenerDescripcionHorario(Horarios horario, boolean envolverHtml, boolean combinadoConReunion) {
-			return horario.getModuloHtml(!mostrarModuloCompleto && !combinadoConReunion, envolverHtml);
-		}
 	}
 
 }
