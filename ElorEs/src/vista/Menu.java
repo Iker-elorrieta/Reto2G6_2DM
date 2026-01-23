@@ -22,19 +22,18 @@ import javax.swing.JLabel;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.swing.FontIcon;
 
-public class PantallaMenu extends JFrame {
+public class Menu extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 	private JLabel lblNombreUsuario;
 	private JLabel lblRolUsuario;
 	private JPanel panelAvatar;
 	private JPanel panelIzquierda;
 	private PanelGeneral panelGeneral;
-	private PanelVerHorarios panelVerHorarios;
+	private PanelHorariosProfesores panelVerHorarios;
 	private PanelOrganizarReuniones panelOrganizarReuniones;
-	private VerAlumnos panelAlumnos;
+	private PanelAlumnos panelAlumnos;
 	private JPanel panelPerfil;
 	private JPanel panelLogo;
 	private JButton btnConsultarAlumnos;
@@ -46,7 +45,7 @@ public class PantallaMenu extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public PantallaMenu() {
+	public Menu() {
 		setResizable(false);
 		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -78,8 +77,7 @@ public class PantallaMenu extends JFrame {
 				}
 			}
 		};
-		//panelIzquierda = new JPanel(); //   Inicio.crearPanelconImagen("/Fondo.png");
-		panelIzquierda =  Inicio.crearPanelconImagen("/Fondo.png");
+		panelIzquierda = Login.crearPanelconImagen("/Fondo.png");
 
 		panelIzquierda.setBorder(null);
 		panelIzquierda.setBounds(0, 0, 1413, 100);
@@ -95,7 +93,7 @@ public class PantallaMenu extends JFrame {
 
 		panelLogo = new JPanel() {
 			private static final long serialVersionUID = 1L;
-			private Image backgroundImage = new ImageIcon(Inicio.class.getResource("/Elorrieta_White.png")).getImage();
+			private Image backgroundImage = new ImageIcon(Login.class.getResource("/Elorrieta_White.png")).getImage();
 
 			@Override
 			protected void paintComponent(Graphics g) {
@@ -125,7 +123,7 @@ public class PantallaMenu extends JFrame {
 		panelGeneral.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelGeneral);
 		
-		panelVerHorarios = new PanelVerHorarios();
+		panelVerHorarios = new PanelHorariosProfesores();
 		panelVerHorarios.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelVerHorarios);
 		
@@ -133,7 +131,7 @@ public class PantallaMenu extends JFrame {
 		panelOrganizarReuniones.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelOrganizarReuniones);
 
-		panelAlumnos = new VerAlumnos();
+		panelAlumnos = new PanelAlumnos();
 		panelAlumnos.setBounds(10, 120, 1394, 460);
 		contentPane.add(panelAlumnos);
 
@@ -172,18 +170,18 @@ public class PantallaMenu extends JFrame {
 		this.panelGeneral = panelGeneral;
 	}
 
-	public PanelVerHorarios getPanelVerHorarios() {
+	public PanelHorariosProfesores getPanelVerHorarios() {
 		return panelVerHorarios;
 	}
 
-	public void setPanelVerHorarios(PanelVerHorarios panelVerHorarios) {
+	public void setPanelVerHorarios(PanelHorariosProfesores panelVerHorarios) {
 		this.panelVerHorarios = panelVerHorarios;
 	}
 
 	public PanelOrganizarReuniones getPanelOrganizarReuniones() {
 		return panelOrganizarReuniones;
 	}
-		public VerAlumnos getPanelAlumnos() {
+		public PanelAlumnos getPanelAlumnos() {
 			return panelAlumnos;
 		}
 
@@ -256,11 +254,11 @@ public class PantallaMenu extends JFrame {
 			                backgroundImage = ImageIO.read(url);		
 			               
 			            } else {
-			                backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			                backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			            }
 			        } catch (Exception e) {
 			            e.printStackTrace();
-			            backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			            backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			        }
 			        setOpaque(false); // hacer el panel transparente
 			    }

@@ -11,9 +11,12 @@ public class Cliente {
     private Socket socket;
     private ObjectInputStream entrada;
     private ObjectOutputStream salida;
-
-    public Cliente(String host, int puerto) throws Exception {
-        socket = new Socket(host, puerto);
+    
+	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT", "5000"));
+	private static String SOCKET_HOST = System.getenv().getOrDefault("SOCKET_HOST", "localhost");
+	
+    public Cliente() throws Exception {
+        socket = new Socket(SOCKET_HOST, SOCKET_PORT);
         System.out.println("Conectado al servidor por socket");
         salida = new ObjectOutputStream(socket.getOutputStream());
         salida.flush();

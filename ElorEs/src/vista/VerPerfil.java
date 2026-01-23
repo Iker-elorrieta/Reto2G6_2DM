@@ -50,7 +50,7 @@ public class VerPerfil extends JFrame {
 		setLocationRelativeTo(null);
 		setResizable(false);
 
-		contentPane = Inicio.crearPanelconImagen("/Fondo.png");
+		contentPane = Login.crearPanelconImagen("/Fondo.png");
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -173,11 +173,11 @@ public class VerPerfil extends JFrame {
 			                backgroundImage = ImageIO.read(url);		
 			               
 			            } else {
-			                backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			                backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			            }
 			        } catch (Exception e) {
 			            e.printStackTrace();
-			            backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			            backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			        }
 			        setOpaque(false); // hacer el panel transparente
 			    }

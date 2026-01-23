@@ -1,8 +1,6 @@
 package modelo;
 
 import java.sql.Timestamp;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,85 +119,6 @@ public class Horarios implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public String describirModulo() {
-		return describirModulo(true);
-	}
-
-	public String describirModulo(boolean envolverHtml) {
-		return describirModuloDetallado(true, envolverHtml);
-	}
-
-	public String describirModuloCompleto() {
-		return describirModuloCompleto(true);
-	}
-
-	public String describirModuloCompleto(boolean envolverHtml) {
-		return describirModuloDetallado(false, envolverHtml);
-	}
-
-	private String describirModuloDetallado(boolean recortarNombre, boolean envolverHtml) {
-		String modulo = recortarNombre ? getNombreModuloCorto() : obtenerNombreModulo();
-		String contenido = construirDescripcion(modulo);
-		return envolverHtml ? envolverEnHtml(contenido) : contenido;
-	}
-
-	private String construirDescripcion(String modulo) {
-		String aula = (getAula() != null) ? getAula().trim() : null;
-		String ciclo = (getModulos() != null && getModulos().getCiclos() != null)
-				? getModulos().getCiclos().getNombre().trim()
-				: null;
-		StringBuilder contenido = new StringBuilder();
-		if (modulo != null && aula != null && ciclo != null) {
-			contenido.append("<b>").append(modulo).append("</b> ").append(aula).append(" ").append(ciclo);
-		} else if (modulo != null && aula != null) {
-			contenido.append("<b>").append(modulo).append("</b> ").append(aula);
-		} else if (modulo != null) {
-			contenido.append("<b>").append(modulo).append("</b>");
-		} else if (aula != null) {
-			contenido.append(aula);
-		} else {
-			contenido.append("<span style='color:#7A7A7A;'>Disponible</span>");
-		}
-		return contenido.toString();
-	}
-
-	private String envolverEnHtml(String contenido) {
-		return "<html><div style='line-height:1.2;'>" + contenido + "</div></html>";
-	}
-
-	private String getNombreModuloCorto() {
-		String limpio = obtenerNombreModulo();
-		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
-			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
-		}
-		return limpio;
-	}
-
-	private String obtenerNombreModulo() {
-		if (getModulos() == null || getModulos().getNombre() == null) {
-			return null;
-		}
-		return getModulos().getNombre().trim();
-	}
-
-	public int obtenerColumnaDia() {
-		switch (dia.trim().toUpperCase()) {
-		case "LUNES":
-			return 1;
-		case "MARTES":
-			return 2;
-		case "MIERCOLES":
-		case "MIÉRCOLES":
-			return 3;
-		case "JUEVES":
-			return 4;
-		case "VIERNES":
-			return 5;
-		default:
-			return -1;
-		}
-	}
-
 	public static ArrayList<Horarios> getHorarios(Cliente cliente) {
 		Object response;
 		try {
@@ -249,6 +168,77 @@ public class Horarios implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 	
+	public String getHoraStr() {
+		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
+		return String.format("%02d:00", horaNormalizada);
+	}
+	
+	public String getTooltip() {
+		String modulo = getModulos().getNombre().trim();
+		String aula = getAula();
+		StringBuilder sb = new StringBuilder("Módulo: ").append(modulo);
+		if (aula != null && !aula.trim().isEmpty()) {
+			sb.append(" | Aula: ").append(aula.trim());
+		}
+		return sb.toString();
+	}
+	
+	public String getModuloHtml(boolean recortarNombre, boolean envolverHtml) {
+		String modulo = recortarNombre ? getNombreModuloCorto() : getModulos().getNombre().trim();
+		String contenido = getDescripcion(modulo);
+		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" :contenido ;
+	}
+
+	private String getDescripcion(String modulo) {
+		String aula = (getAula() != null) ? getAula().trim() : null;
+		String ciclo = (getModulos() != null && getModulos().getCiclos() != null)
+				? getModulos().getCiclos().getNombre().trim()
+				: null;
+		StringBuilder contenido = new StringBuilder();
+		if (modulo != null && aula != null && ciclo != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula).append(" ").append(ciclo);
+		} else if (modulo != null && aula != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula);
+		} else if (modulo != null) {
+			contenido.append("<b>").append(modulo).append("</b>");
+		} else if (aula != null) {
+			contenido.append(aula);
+		} else {
+			contenido.append("<span style='color:#7A7A7A;'>Disponible</span>");
+		}
+		return contenido.toString();
+	}
+
+
+
+	private String getNombreModuloCorto() {
+		String limpio = getModulos().getNombre().trim();
+		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
+			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
+		}
+		return limpio;
+	}
+
+	
+	public int obtenerColumnaDia() {
+		switch (dia.trim().toUpperCase()) {
+		case "LUNES":
+			return 1;
+		case "MARTES":
+			return 2;
+		case "MIERCOLES":
+		case "MIÉRCOLES":
+			return 3;
+		case "JUEVES":
+			return 4;
+		case "VIERNES":
+			return 5;
+		default:
+			return -1;
+		}
+	}
+
+
 	public static Horarios getPrimerHorarioDesdeLista(List<?> valores) {
 		if (valores == null) {
 			return null;
@@ -261,10 +251,5 @@ public class Horarios implements java.io.Serializable {
 		return null;
 	}
 	
-
-	public String getHoraStr() {
-		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
-		return String.format("%02d:00", horaNormalizada);
-	}
 
 }

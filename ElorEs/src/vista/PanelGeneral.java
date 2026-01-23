@@ -62,10 +62,7 @@ public class PanelGeneral extends JPanel {
 		lblMiHorario.setBounds(52, 12, 250, 40);
 		contenedorHorario.add(lblMiHorario);
 
-		panelHorarios = new TablaHorario();
-		panelHorarios.setMode(TablaHorario.Mode.HORARIO);
-		panelHorarios.setCustomColumnWidths(new int[] { 90, 256, 256, 256, 256, 256 });
-		panelHorarios.setMostrarModuloCompleto(true);
+		panelHorarios = new TablaHorario(new int[] { 90, 256, 256, 256, 256, 256 },true);
 		panelHorarios.setBounds(0, 60, 1374, 365);
 		contenedorHorario.add(panelHorarios);
 	}

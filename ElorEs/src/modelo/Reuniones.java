@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
 
 import cliente.Cliente;
 
@@ -224,58 +223,90 @@ public class Reuniones implements java.io.Serializable {
 	}
 
 
-	public String describirReunion(boolean envolverHtml, boolean multilinea) {
-		String contenido = construirDescripcionReunion(multilinea);
-		return envolverHtml ? envolverEnHtml(contenido) : contenido;
+	public String getDescripcionHtml(boolean envolverHtml, boolean multilinea) {
+		String contenido = descripcionHtml(multilinea);
+		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" : contenido;
 	}
 
-	private String construirDescripcionReunion(boolean multilinea) {
-		StringBuilder html = new StringBuilder();
-		String tituloReunion = "";
-		if (asunto != null && !asunto.isEmpty()) {
-			tituloReunion = asunto;
-		} else if (titulo != null && !titulo.isEmpty()) {
-			tituloReunion = titulo;
-		}
+	private String descripcionHtml(boolean multilinea) {
+	    String html = "";
+	    String tituloReunion = "";
 
-		if (getUsersByAlumnoId() != null) {
-			String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
-			if (!tituloReunion.isEmpty()) {
-				html.append("<b>").append(tituloReunion).append(" - ").append(nombreAlumno).append("</b>");
-			} else {
-				html.append("<b>").append(nombreAlumno).append("</b>");
-			}
-		} else if (!tituloReunion.isEmpty()) {
-			html.append("<b>").append(tituloReunion).append("</b>");
-		}
+	    if (asunto != null && !asunto.isEmpty()) {
+	        tituloReunion = asunto;
+	    } else if (titulo != null && !titulo.isEmpty()) {
+	        tituloReunion = titulo;
+	    }
 
-		if (estado != null && !estado.trim().isEmpty()) {
-			appendSeparador(html, multilinea);
-			html.append(getEstado());
-		}
-		if (aula != null && !aula.trim().isEmpty()) {
-			appendSeparador(html, multilinea);
-			html.append(aula);
-		}
-		if (html.length() == 0) {
-			html.append("<span style='color:#7A7A7A;'>Reunión</span>");
-		}
-		return html.toString();
+	    if (getUsersByAlumnoId() != null) {
+	        String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
+	        if (!tituloReunion.isEmpty()) {
+	            html += "<b>" + tituloReunion + " - " + nombreAlumno + "</b>";
+	        } else {
+	            html += "<b>" + nombreAlumno + "</b>";
+	        }
+	    } else if (!tituloReunion.isEmpty()) {
+	        html += "<b>" + tituloReunion + "</b>";
+	    }
+
+	    if (estado != null && !estado.trim().isEmpty()) {
+	        if (multilinea) {
+	            html += "<br/>";
+	        } else {
+	            html += " ";
+	        }
+	        html += getEstado();
+	    }
+
+	    if (aula != null && !aula.trim().isEmpty()) {
+	        if (multilinea) {
+	            html += "<br/>";
+	        } else {
+	            html += " ";
+	        }
+	        html += aula;
+	    }
+
+	    if (html.isEmpty()) {
+	        html = "<span style='color:#7A7A7A;'>Reunión</span>";
+	    }
+
+	    return html;
 	}
 
-	private void appendSeparador(StringBuilder html, boolean multilinea) {
-		if (html.length() == 0) {
-			return;
-		}
-		if (multilinea) {
-			html.append("<br/>");
-		} else {
-			html.append(' ');
-		}
-	}
 
-	private String envolverEnHtml(String contenido) {
-		return "<html><div style='line-height:1.2;'>" + contenido + "</div></html>";
+	public String getTooltip() {
+	    String titulo = getTitulo() != null ? getTitulo().trim() : "";
+	    String asunto = getAsunto() != null ? getAsunto().trim() : "";
+	    String alumno = "";
+
+	    if (getUsersByAlumnoId() != null) {
+	        String nombre = getUsersByAlumnoId().getNombre();
+	        String apellidos = getUsersByAlumnoId().getApellidos();
+	        alumno = ((nombre == null ? "" : nombre) + " " + (apellidos == null ? "" : apellidos)).trim();
+	    }
+
+	    String sb = "";
+
+	    if (!titulo.isEmpty()) {
+	        sb += "Título: " + titulo;
+	    }
+
+	    if (!asunto.isEmpty()) {
+	        if (!sb.isEmpty()) {
+	            sb += " | ";
+	        }
+	        sb += "Asunto: " + asunto;
+	    }
+
+	    if (!alumno.isEmpty()) {
+	        if (!sb.isEmpty()) {
+	            sb += " | ";
+	        }
+	        sb += "Alumno: " + alumno;
+	    }
+
+	    return !sb.isEmpty() ? sb : "Reunión";
 	}
 
 	public Color getColorEstado() {

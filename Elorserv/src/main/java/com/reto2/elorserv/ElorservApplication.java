@@ -4,34 +4,32 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ElorservApplication {
+public class ElorservApplication implements CommandLineRunner {
 
-	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT","5000"));
-	private static int API_PORT = Integer.parseInt(System.getenv().getOrDefault("API_PORT","8080"));
+	@Value("${socket.port}")
+	private int socketPort;
 
 	/*
-	 * IMPORTANTE:
-	 * importa elorserv.sql
+	 * IMPORTANTE: importa elorserv.sql
 	 * 
-	*/
+	 */
 
 	public static void main(String[] args) {
-		// iniciar la aplicacion de spring
-		SpringApplication app = new SpringApplication(ElorservApplication.class);
-		app.setDefaultProperties(
-		    Map.of("server.port", API_PORT)
-		);
-		app.run(args);
-		
-		// Iniciar el servidor de sockets
-		try (ServerSocket serverSocket = new ServerSocket(SOCKET_PORT)) {
-			System.out.println("SOCKET SERVER: Servidor iniciado P:"+SOCKET_PORT);
+		SpringApplication.run(ElorservApplication.class, args);
+	}
+
+	@Override
+	public void run(String... args) {
+
+		try (ServerSocket serverSocket = new ServerSocket(socketPort)) {
+			System.out.println("SOCKET SERVER: Servidor iniciado P:" + socketPort);
 			while (true) {
 				Socket socket = serverSocket.accept();
 				ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
@@ -40,10 +38,9 @@ public class ElorservApplication {
 				new SocketServer(entrada, salida).start();
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			System.err.println("SOCKET SERVER: Error iniciando el servidor -> " + e.getMessage());
 		}
+
 	}
 
-
 }
-

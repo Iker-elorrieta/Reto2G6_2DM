@@ -30,7 +30,7 @@ import javax.swing.table.TableColumn;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.swing.FontIcon;
 
-public class VerAlumnos extends JPanel {
+public class PanelAlumnos extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JButton btnVolver;
@@ -38,7 +38,7 @@ public class VerAlumnos extends JPanel {
 	private JTable tableAlumnos;
 	private DefaultTableModel modeloAlumnos;
 
-	public VerAlumnos() {
+	public PanelAlumnos() {
 		setLayout(null);
 		setPreferredSize(new Dimension(1394, 460));
 		setBackground(Color.WHITE);
@@ -142,7 +142,7 @@ public class VerAlumnos extends JPanel {
 
 	private static class PanelAvatarRenderer extends JPanel implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
-		private static final Image DEFAULT_AVATAR = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+		private static final Image DEFAULT_AVATAR = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 		private static final Map<String, Image> IMAGE_CACHE = new HashMap<>();
 		private static final int AVATAR_PADDING = 5;
 		private Image currentImage = DEFAULT_AVATAR;

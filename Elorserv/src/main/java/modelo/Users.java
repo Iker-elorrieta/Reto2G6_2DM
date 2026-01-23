@@ -364,7 +364,7 @@ public class Users implements java.io.Serializable {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
 			String hql = "select distinct mat.users, mat.ciclos.nombre, mat.curso from Matriculaciones mat "
-					+ "where mat.users.tipos.nombre = :nombre and exists ("
+					+ "where mat.users.tipos.name = :nombre and exists ("
 					+ "select 1 from Horarios h "
 					+ "where h.users.id = :profesorId "
 					+ "and h.modulos.ciclos.id = mat.ciclos.id "
@@ -379,6 +379,9 @@ public class Users implements java.io.Serializable {
 				alumnosPorId.put(alumno.getId(), alumno);
 			}
 			return new ArrayList<>(alumnosPorId.values());
+		} catch (Exception e) {
+			System.out.println("Error al obtener alumnos por ID de profesor: " + e.getMessage());
+			throw e;
 		}
 	}	
 

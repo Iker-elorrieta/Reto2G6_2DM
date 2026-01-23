@@ -19,7 +19,7 @@ import javax.swing.JLabel;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.swing.FontIcon;
 
-public class PanelVerHorarios extends JPanel {
+public class PanelHorariosProfesores extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private TablaHorario panelHorarios;
@@ -30,7 +30,7 @@ public class PanelVerHorarios extends JPanel {
 	 * Create the panel.
 	 */
 
-	public PanelVerHorarios() {
+	public PanelHorariosProfesores() {
 		setLayout(null);
 		setPreferredSize(new Dimension(1394, 460));
 		setBackground(Color.WHITE);
@@ -67,8 +67,7 @@ public class PanelVerHorarios extends JPanel {
 
 
 
-		panelHorarios = new TablaHorario();
-		panelHorarios.setMode(TablaHorario.Mode.HORARIO);
+		panelHorarios = new TablaHorario(new int[] { 60, 124, 124, 124, 124, 124 },false);
 		panelHorarios.setBounds(0, 60, 682, 365);
 		contenedorHorario.add(panelHorarios);
 

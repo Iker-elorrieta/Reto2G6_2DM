@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,26 +18,24 @@ import cliente.Cliente;
 import modelo.Horarios;
 import modelo.Reuniones;
 import modelo.Users;
-import vista.Inicio;
-import vista.PantallaMenu;
+import vista.Login;
+import vista.Menu;
 import vista.VerPerfil;
 
 public class Controlador extends MouseAdapter implements ActionListener {
-	private Inicio vistaLogin;
+	private Login vistaLogin;
 	private Cliente cliente;
 	private Users usuario;
-	private PantallaMenu vistaMenu;
+	private Menu vistaMenu;
 	private VerPerfil vistaPerfil;
-	private static int SOCKET_PORT = Integer.parseInt(System.getenv().getOrDefault("SOCKET_PORT", "5000"));
-	private static String SOCKET_HOST = System.getenv().getOrDefault("SOCKET_HOST", "localhost");
 
-	public Controlador(Inicio vistaLogin) {
+	public Controlador(Login vistaLogin) {
 		this.vistaLogin = vistaLogin;
-		vistaMenu = new PantallaMenu();
+		vistaMenu = new Menu();
 		vistaPerfil = new VerPerfil();
 		inicializarControlador();
 		try {
-			cliente = new Cliente(SOCKET_HOST, SOCKET_PORT);
+			cliente = new Cliente();
 		} catch (Exception e) {
 			vistaLogin.dispose();
 			vistaMenu.dispose();
@@ -52,8 +49,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	 * Aquí se asocian comandos de acción y manejadores a botones y componentes.
 	 */
 	private void inicializarControlador() {
-		vistaLogin.getPanelLogin().getBtnIniciarSesion().setActionCommand("INICIAR_SESION");
-		vistaLogin.getPanelLogin().getBtnIniciarSesion().addActionListener(this);
+		vistaLogin.getBtnIniciarSesion().setActionCommand("INICIAR_SESION");
+		vistaLogin.getBtnIniciarSesion().addActionListener(this);
 
 		vistaPerfil.getBtnDesconectar().setActionCommand("DESCONECTAR");
 		vistaPerfil.getBtnDesconectar().addActionListener(this);
@@ -154,12 +151,12 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 	public void login() {
 		try {
-			Object response = Users.login(cliente, vistaLogin.getPanelLogin().getTextFieldUsuario().getText(),  vistaLogin.getPanelLogin().getTextFieldContrasena().getText());
+			Object response = Users.login(cliente, vistaLogin.getTextFieldUsuario().getText(), vistaLogin.getTextFieldContrasena().getText());
 			if (response instanceof Users && response != null) {
 				usuario = (Users) response;
 
 				if (usuario.getTipos().getId() != 3) {
-					vistaLogin.getPanelLogin().getLblError().setText("Usuario no autorizado para usar la aplicación.");
+					vistaLogin.getLblError().setText("Usuario no autorizado para usar la aplicación.");
 				} else {
 					JOptionPane.showMessageDialog(null, "¡Bienvenido, " + usuario.getNombre() + "!");
 					vistaLogin.setVisible(false);
@@ -174,7 +171,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 				}
 			} else {
 				String mensajeError = (String) response;
-				vistaLogin.getPanelLogin().getLblError().setText("Error: " + mensajeError);
+				vistaLogin.getLblError().setText("Error: " + mensajeError);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -325,20 +322,29 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 
 	private void agregarContenidoCelda(Object[] fila, int columna, Object contenido) {
-		if (fila == null || columna <= 0 || columna >= fila.length || contenido == null) {
-			return;
-		}
-		Object actual = fila[columna];
-		if (actual == null) {
-			fila[columna] = contenido;
-		} else if (actual instanceof List<?>) {
-			((List<Object>) actual).add(contenido);
-		} else {
-			List<Object> combinados = new ArrayList<>();
-			combinados.add(actual);
-			combinados.add(contenido);
-			fila[columna] = combinados;
-		}
+	    if (fila == null || columna <= 0 || columna >= fila.length || contenido == null) {
+	        return;
+	    }
+
+	    Object actual = fila[columna];
+
+	    if (actual == null) {
+	        fila[columna] = contenido;
+	    } else if (actual instanceof List<?> lista) {
+	        if (lista.isEmpty() || lista.get(0) instanceof Object) {
+	           List<Object> listaSegura = new ArrayList<>(lista.size());
+	            for (Object item : lista) {
+	                listaSegura.add(item);
+	            }
+	            listaSegura.add(contenido);
+	            fila[columna] = listaSegura;
+	        } 
+	    } else {
+	        List<Object> combinados = new ArrayList<>();
+	        combinados.add(actual);
+	        combinados.add(contenido);
+	        fila[columna] = combinados;
+	    }
 	}
 
 	private void actualizarListaProfesores(ArrayList<Users> profesores) {
