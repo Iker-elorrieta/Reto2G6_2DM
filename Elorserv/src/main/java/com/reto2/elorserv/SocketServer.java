@@ -26,7 +26,7 @@ public class SocketServer extends Thread {
 		try {
 			System.out.println("Usuario conectado");
 			while (true) {
-				String request = (String) entrada.readObject();
+				String request = entrada.readUTF();
 				System.out.println("REQ: " + request);
 				Object response = procesarRequest(request);
 				salida.writeObject(response);
@@ -34,8 +34,7 @@ public class SocketServer extends Thread {
 			}
 		} catch (SocketException e) {
 			System.out.println("Usuario desconectado");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.out.println("Usuario desconectado");
 			e.printStackTrace();
 		}
@@ -46,12 +45,12 @@ public class SocketServer extends Thread {
 		try {
 			switch (header) {
 			case "login":
-				String username = (String) entrada.readObject();
-				String contrasena = (String) entrada.readObject();
-				Users usuarioAutenticado = new Users(username, contrasena).iniciarSesion();
-				if (usuarioAutenticado != null) {
-					this.usuario = usuarioAutenticado; // Asignar el usuario autenticado
-				}
+				String username = entrada.readUTF();
+				String contrasena = entrada.readUTF();
+				Users usuarioAutenticado = new Users(username, contrasena).iniciarSesion("PROFESOR");
+				if (usuarioAutenticado instanceof Users) {
+					this.usuario = usuarioAutenticado; 
+				} 
 				response = usuarioAutenticado;
 				break;
 			case "get_usuario":
@@ -68,8 +67,8 @@ public class SocketServer extends Thread {
 				response = Reuniones.getReunionesByUserIDSemanaActual(usuario.getId());
 				break;
 			case "update_reunion":
-				int reunionId = (int) entrada.readObject();
-				String nuevoEstado = (String) entrada.readObject();
+				int reunionId =  entrada.readInt();
+				String nuevoEstado = entrada.readUTF();
 				response = new Reuniones(reunionId).cambiarEstadoReunion(Reuniones.EstadoReunion.valueOf(nuevoEstado));
 				break;
 			case "crear_reunion":
@@ -81,19 +80,18 @@ public class SocketServer extends Thread {
 				response = Centros.getAllCentros();
 				break;
 			case "get_horarios":
-				System.out.println(usuario.getId());
 				response = Horarios.getHorariosByUserId(usuario.getId());
 				break;
 			case "get_horarios_id":
-				int userId = (int) entrada.readObject();
+				int userId = entrada.readInt();
 				response = Horarios.getHorariosByUserId(userId);
 				break;
 			case "get_profesores":
 				response = Users.getUsersByTipo("profesor");
 				break;
 			case "get_alumnos":
-				int profesorId = (int) entrada.readObject();
-				response =Users.getAlumnosbyProfesorID(profesorId);
+				int profesorId = entrada.readInt();
+				response = Users.getAlumnosbyProfesorID(profesorId);
 				break;
 			default:
 				response = "Request no reconocido";
@@ -104,7 +102,6 @@ public class SocketServer extends Thread {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
 			response = e.getMessage();
-
 		} catch (RuntimeException e) {
 			response = e.getMessage();
 		}

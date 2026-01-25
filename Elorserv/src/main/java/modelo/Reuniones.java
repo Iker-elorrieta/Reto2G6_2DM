@@ -240,10 +240,9 @@ public class Reuniones implements java.io.Serializable {
 		Session session = sesion.openSession();
 		String hql = "from Reuniones";
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
-		for (Reuniones reunion : reuniones) {
+		for (Reuniones reunion : q.list()) {
 			reunionesConvertidas.add(reunion.convertirReunion());
 		}
 		return reunionesConvertidas;
@@ -255,10 +254,9 @@ public class Reuniones implements java.io.Serializable {
 		String hql = "from Reuniones where usersByAlumnoId.id = :userID or usersByProfesorId.id = :userID";
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
 		q.setParameter("userID", idUser);
-		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
-		for (Reuniones reunion : reuniones) {
+		for (Reuniones reunion : q.list()) {
 			reunionesConvertidas.add(reunion.convertirReunion());
 		}
 		return reunionesConvertidas;
@@ -280,9 +278,8 @@ public class Reuniones implements java.io.Serializable {
 		q.setParameter("userID", idUser);
 		q.setParameter("inicioSemana", inicio);
 		q.setParameter("finSemana", fin);
-		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones>();
-		for (Reuniones reunion : reuniones) {
+		for (Reuniones reunion : q.list()) {
 			reunionesConvertidas.add(reunion.convertirReunion());
 		}
 		return reunionesConvertidas;
@@ -343,4 +340,25 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+    public void eliminarReunion() {
+        if (getIdReunion() == null) {
+            throw new IllegalStateException("Id de reunión obligatorio para eliminar");
+        }
+        SessionFactory sesion = HibernateUtil.getSessionFactory();
+        Transaction tx = null;
+        try (Session session = sesion.openSession()) {
+            tx = session.beginTransaction();
+            Reuniones reunion = session.get(Reuniones.class, getIdReunion());
+            if (reunion == null) {
+                throw new RuntimeException("Reunión no encontrada con id: " + getIdReunion());
+            }
+            session.remove(reunion);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw e;
+        }
+    }
 }

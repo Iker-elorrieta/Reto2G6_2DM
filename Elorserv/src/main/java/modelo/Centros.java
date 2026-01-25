@@ -92,7 +92,6 @@ public class Centros implements Serializable {
 			ArrayList<Centros> centros =new ArrayList<Centros>(Arrays.asList(gson.fromJson(reader, Centros[].class)));
 			for(Centros c: centros) { 
 				if(c.getCCEN().equals(this.CCEN)) {
-
 					centro = c;
 					break;
 				}

@@ -18,7 +18,6 @@ public class ElorservApplication implements CommandLineRunner {
 
 	/*
 	 * IMPORTANTE: importa elorserv.sql
-	 * 
 	 */
 
 	public static void main(String[] args) {

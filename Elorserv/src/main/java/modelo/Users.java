@@ -27,8 +27,8 @@ public class Users implements java.io.Serializable {
 
 	private static final String AES_TRANSFORMATION = "AES/ECB/PKCS5Padding";
 	private static final int AES_KEY_LENGTH = 16;
-	private static final String ENV_KEY = System.getenv().getOrDefault("ELOR_AES_KEY","ELORG6RETO2");
-	
+	private static final String ENV_KEY = System.getenv().getOrDefault("ELOR_AES_KEY", "ELORG6RETO2");
+
 	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Tipos tipos;
@@ -60,8 +60,9 @@ public class Users implements java.io.Serializable {
 
 	public Users(Integer id) {
 		super();
-		this.id= id;
+		this.id = id;
 	}
+
 	public Users(String username, String password) {
 		this.username = username;
 		this.password = password;
@@ -103,8 +104,8 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
-	public Users(Integer id,String email, String username, String password, String nombre, String apellidos, String dni,
-			String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
+	public Users(Integer id, String email, String username, String password, String nombre, String apellidos,
+			String dni, String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
 			Timestamp updatedAt, Tipos tipos) {
 		this.id = id;
 		this.email = email;
@@ -269,9 +270,11 @@ public class Users implements java.io.Serializable {
 	public Set<Reuniones> getReunionesesForProfesorId() {
 		return this.reunionesesForProfesorId;
 	}
+
 	public void setReunionesesForProfesorId(Set<Reuniones> reunionesesForProfesorId) {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
+
 	@Override
 	public String toString() {
 		return "Users [id=" + id + ", tipos=" + tipos + ", email=" + email + ", username=" + username + ", password="
@@ -279,47 +282,60 @@ public class Users implements java.io.Serializable {
 				+ direccion + ", telefono1=" + telefono1 + ", telefono2=" + telefono2 + ", argazkiaUrl=" + argazkiaUrl
 				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
+
 	public Users convertirUsuario() {
-		Tipos t = new Tipos(getTipos().getId(), getTipos().getName(),getTipos().getNameEu());
+		Tipos t = new Tipos(getTipos().getId(), getTipos().getName(), getTipos().getNameEu());
 		String usernameDescifrado = descifrar(getUsername());
-		Users usuarioConvertido = new Users(getId(),getEmail(), usernameDescifrado, getPassword(), getNombre(), getApellidos(), getDni(),
-				getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(), getCreatedAt(),
-				getUpdatedAt(),t);
+		Users usuarioConvertido = new Users(getId(), getEmail(), usernameDescifrado, getPassword(), getNombre(),
+				getApellidos(), getDni(), getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(),
+				getCreatedAt(), getUpdatedAt(), t);
 		usuarioConvertido.setCicloAsignado(getCicloAsignado());
 		return usuarioConvertido;
 	}
 
+	public Users iniciarSesion(String tipoObligatorio) {
+		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+			throw new IllegalArgumentException("Usuario o contraseña incorrectos");
+		}
+		try {
+			Users user = getUsuarioUsernameContraseña(tipoObligatorio);
+			if (user == null && tipoObligatorio == null) {
+				throw new RuntimeException("Credenciales inválidas");
+			} else if (user == null && tipoObligatorio != null) {
+				throw new RuntimeException("Credenciales inválidas o no tiene el rol requerido");
+			}
+			return user;
 
-	
-	public Users iniciarSesion() {
-        if (username == null || username.trim().isEmpty()
-                || password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Usuario o contraseña incorrectos");
-        }
-        try {
-            Users user = getUsuarioUsernameContraseña();
-            if (user == null) {
-                throw new RuntimeException("Credenciales inválidas");
-            }
-            return user;
+		} catch (Exception e) {
+			if (tipoObligatorio != null) {
+				throw new RuntimeException("Credenciales inválidas o no tiene el rol requerido");
+			} else {
+				throw new RuntimeException("Credenciales inválidas");
+			}
+		}
+	}
 
-        } catch (Exception e) {
-            throw new RuntimeException("Credenciales inválidas");
-        }
-    }
-	@JsonIgnore
-	public Users getUsuarioUsernameContraseña() {
+	public Users getUsuarioUsernameContraseña(String tipoObligatorio) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String usernameCifrado = cifrar(username);
-		String passwordCifrado = cifrar(password);
+
 		String hql = "from Users where username = ?1 and password = ?2";
+		// Si se especifica un rol obligatorio, añadir la condición
+		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+			hql += " and tipos.name = :tipo";
+		}
+
 		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter(1, usernameCifrado);
-		q.setParameter(2, passwordCifrado);
+		// Asignar parámetros cifrados
+		q.setParameter(1, cifrar(username));
+		q.setParameter(2, cifrar(password));
+		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+			q.setParameter("tipo", tipoObligatorio);
+		}
 		Users resultado = q.uniqueResult();
 		return resultado != null ? resultado.convertirUsuario() : null;
 	}
+
 	@JsonIgnore
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -329,6 +345,7 @@ public class Users implements java.io.Serializable {
 		q.setParameter(1, getId());
 		return q.uniqueResult().convertirUsuario();
 	}
+
 	@JsonIgnore
 	public static ArrayList<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -336,9 +353,8 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users where tipos.name = :nombre";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter("nombre", nombre);
-		ArrayList<Users> a = new ArrayList<Users>(q.list());
 		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
-		for (Users usuario : a) {
+		for (Users usuario : q.list()) {
 			usuariosConvertidos.add(usuario.convertirUsuario());
 		}
 		return usuariosConvertidos;
@@ -349,14 +365,13 @@ public class Users implements java.io.Serializable {
 		Session session = sesion.openSession();
 		String hql = "from Users";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		ArrayList<Users> a = new ArrayList<Users>(q.list());
 		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
-		for (Users usuario : a) {
+		for (Users usuario : q.list()) {
 			usuariosConvertidos.add(usuario.convertirUsuario());
 		}
 		return usuariosConvertidos;
 	}
-	
+
 	public static ArrayList<Users> getAlumnosbyProfesorID(Integer profesorId) {
 		if (profesorId == null) {
 			throw new IllegalArgumentException("El id del profesor no puede ser nulo");
@@ -364,10 +379,8 @@ public class Users implements java.io.Serializable {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
 			String hql = "select distinct mat.users, mat.ciclos.nombre, mat.curso from Matriculaciones mat "
-					+ "where mat.users.tipos.name = :nombre and exists ("
-					+ "select 1 from Horarios h "
-					+ "where h.users.id = :profesorId "
-					+ "and h.modulos.ciclos.id = mat.ciclos.id "
+					+ "where mat.users.tipos.name = :nombre and exists (" + "select 1 from Horarios h "
+					+ "where h.users.id = :profesorId " + "and h.modulos.ciclos.id = mat.ciclos.id "
 					+ "and h.modulos.curso = mat.curso)";
 			Query<Object[]> q = session.createQuery(hql, Object[].class);
 			q.setParameter("profesorId", profesorId);
@@ -375,7 +388,7 @@ public class Users implements java.io.Serializable {
 			Map<Integer, Users> alumnosPorId = new LinkedHashMap<>();
 			for (Object[] fila : q.list()) {
 				Users alumno = ((Users) fila[0]).convertirUsuario();
-				alumno.setCicloAsignado(formatearEtiquetaCiclo(fila[1], fila[2]));
+				alumno.setCicloAsignado((String) fila[1]);
 				alumnosPorId.put(alumno.getId(), alumno);
 			}
 			return new ArrayList<>(alumnosPorId.values());
@@ -383,42 +396,31 @@ public class Users implements java.io.Serializable {
 			System.out.println("Error al obtener alumnos por ID de profesor: " + e.getMessage());
 			throw e;
 		}
-	}	
-
-	private static String formatearEtiquetaCiclo(Object nombreCiclo, Object cursoValor) {
-		String nombre = nombreCiclo == null ? "Sin ciclo" : nombreCiclo.toString();
-		if (cursoValor == null) {
-			return nombre;
-		}
-		int curso = ((Number) cursoValor).intValue();
-		if (curso <= 0) {
-			return nombre;
-		}
-		return nombre + " (" + curso + "º)";
 	}
+
 	public Users crearUsuario() {
- 	    SessionFactory sesion = HibernateUtil.getSessionFactory();
- 	    try (Session session = sesion.openSession()) {
- 	        Transaction tx = session.beginTransaction();
-	        String usernameNormalizado = getUsername().trim().toLowerCase();
-	        asegurarUsernameDisponible(usernameNormalizado, null);
-	        // Cifrado simétrico
-	        setUsername(cifrar(usernameNormalizado));
- 	        setPassword(cifrar(getPassword()));
- 	        setId(null);
- 	        
- 	        // Timestamps
- 	        Timestamp now = new Timestamp(System.currentTimeMillis());
- 	        setCreatedAt(now);
- 	        setUpdatedAt(now);
- 	        session.persist(this);
- 	        tx.commit();
- 	        return convertirUsuario();
- 	    } catch (Exception e) {
- 	        e.printStackTrace(); 
- 	        throw e;
- 	    }
- 	}
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			Transaction tx = session.beginTransaction();
+			String usernameNormalizado = getUsername().trim().toLowerCase();
+			asegurarUsernameDisponible(usernameNormalizado, null);
+			// Cifrado simétrico
+			setUsername(cifrar(usernameNormalizado));
+			setPassword(cifrar(getPassword()));
+			setId(null);
+
+			// Timestamps
+			Timestamp now = new Timestamp(System.currentTimeMillis());
+			setCreatedAt(now);
+			setUpdatedAt(now);
+			session.persist(this);
+			tx.commit();
+			return convertirUsuario();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
 
 	public Users actualizarUsuario() {
 		if (getId() == null) {
@@ -433,24 +435,24 @@ public class Users implements java.io.Serializable {
 			}
 			String usernameNormalizado = getUsername().trim().toLowerCase();
 			asegurarUsernameDisponible(usernameNormalizado, existente.getId());
- 			if (getTipos() != null) {
- 				Tipos tipoGestionado = session.get(Tipos.class, getTipos().getId());
- 				existente.setTipos(tipoGestionado);
- 			}
- 			existente.setEmail(getEmail());
+			if (getTipos() != null) {
+				Tipos tipoGestionado = session.get(Tipos.class, getTipos().getId());
+				existente.setTipos(tipoGestionado);
+			}
+			existente.setEmail(getEmail());
 			existente.setUsername(cifrar(getUsername()));
 			existente.setUsername(cifrar(usernameNormalizado));
- 			existente.setNombre(getNombre());
- 			existente.setApellidos(getApellidos());
- 			existente.setDni(getDni());
- 			existente.setDireccion(getDireccion());
- 			existente.setTelefono1(getTelefono1());
- 			existente.setTelefono2(getTelefono2());
- 			existente.setArgazkiaUrl(getArgazkiaUrl());
- 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
- 			session.merge(existente);
- 			tx.commit();
- 			return existente.convertirUsuario();
+			existente.setNombre(getNombre());
+			existente.setApellidos(getApellidos());
+			existente.setDni(getDni());
+			existente.setDireccion(getDireccion());
+			existente.setTelefono1(getTelefono1());
+			existente.setTelefono2(getTelefono2());
+			existente.setArgazkiaUrl(getArgazkiaUrl());
+			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+			session.merge(existente);
+			tx.commit();
+			return existente.convertirUsuario();
 		} catch (Exception e) {
 			throw e;
 		}
@@ -479,25 +481,27 @@ public class Users implements java.io.Serializable {
 			throw e;
 		}
 	}
+
 	public void borrarUsuario() {
-	    SessionFactory sesion = HibernateUtil.getSessionFactory();
-	    try (Session session = sesion.openSession()) {
-	        Transaction tx = null;
-	        try {
-	            tx = session.beginTransaction();
-	            Users u = session.get(Users.class, getId());
-	            if (u == null) {
-	                throw new RuntimeException("Usuario no encontrado con id: " + id);
-	            }
-	            session.remove(u);
-	            tx.commit();
-	        } catch (Exception e) {
-	            if (tx != null) tx.rollback();
-	            throw e;
-	        }
-	    } catch (Exception e) {
-	        
-	    }
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		try (Session session = sesion.openSession()) {
+			Transaction tx = null;
+			try {
+				tx = session.beginTransaction();
+				Users u = session.get(Users.class, getId());
+				if (u == null) {
+					throw new RuntimeException("Usuario no encontrado con id: " + id);
+				}
+				session.remove(u);
+				tx.commit();
+			} catch (Exception e) {
+				if (tx != null)
+					tx.rollback();
+				throw e;
+			}
+		} catch (Exception e) {
+
+		}
 
 	}
 
@@ -513,7 +517,7 @@ public class Users implements java.io.Serializable {
 		try (Session session = sesion.openSession()) {
 			String hql = "select count(u.id) from Users u where u.username = :username";
 			if (excluirId != null) {
-				hql= hql+" and u.id <> :excluirId";
+				hql = hql + " and u.id <> :excluirId";
 			}
 			Query<Long> q = session.createQuery(hql.toString(), Long.class);
 			q.setParameter("username", cifrar(usernameNormalizado));
@@ -525,38 +529,37 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	public static String cifrar(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		try {
+			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+			cipher.init(Cipher.ENCRYPT_MODE, key());
+			byte[] cifrado = cipher.doFinal(valor.getBytes(StandardCharsets.UTF_8));
+			return Base64.getEncoder().encodeToString(cifrado);
+		} catch (Exception e) {
+			throw new RuntimeException("Error cifrando valor", e);
+		}
+	}
 
- 	public static String cifrar(String valor) {
- 		if (valor == null) {
- 			return null;
- 		}
- 		try {
- 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
- 			cipher.init(Cipher.ENCRYPT_MODE, key());
- 			byte[] cifrado = cipher.doFinal(valor.getBytes(StandardCharsets.UTF_8));
- 			return Base64.getEncoder().encodeToString(cifrado);
- 		} catch (Exception e) {
- 			throw new RuntimeException("Error cifrando valor", e);
- 		}
- 	}
- 
- 	public static String descifrar(String valor) {
- 		if (valor == null) {
- 			return null;
- 		}
- 		try {
- 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
- 			cipher.init(Cipher.DECRYPT_MODE, key());
- 			byte[] decodificado = Base64.getDecoder().decode(valor);
- 			byte[] descifrado = cipher.doFinal(decodificado);
- 			return new String(descifrado, StandardCharsets.UTF_8);
- 		} catch (Exception e) {
- 			throw new RuntimeException("Error descifrando valor", e);
- 		}
- 	}
- 
- 	@JsonIgnore
- 	private static SecretKeySpec key() {
+	public static String descifrar(String valor) {
+		if (valor == null) {
+			return null;
+		}
+		try {
+			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+			cipher.init(Cipher.DECRYPT_MODE, key());
+			byte[] decodificado = Base64.getDecoder().decode(valor);
+			byte[] descifrado = cipher.doFinal(decodificado);
+			return new String(descifrado, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			throw new RuntimeException("Error descifrando valor", e);
+		}
+	}
+
+	@JsonIgnore
+	private static SecretKeySpec key() {
 		byte[] keyBytes = ENV_KEY.getBytes(StandardCharsets.UTF_8);
 		byte[] normalized = new byte[AES_KEY_LENGTH];
 		for (int i = 0; i < AES_KEY_LENGTH; i++) {
@@ -564,4 +567,4 @@ public class Users implements java.io.Serializable {
 		}
 		return new SecretKeySpec(normalized, "AES");
 	}
- }
+}
