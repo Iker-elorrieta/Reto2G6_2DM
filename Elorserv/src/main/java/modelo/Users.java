@@ -100,23 +100,21 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
-	public Users(Integer id, String email, String username, String password, String nombre, String apellidos,
-			String dni, String direccion, String telefono1, String telefono2, String argazkiaUrl, Timestamp createdAt,
-			Timestamp updatedAt, Tipos tipos) {
-		this.id = id;
-		this.email = email;
-		this.username = username;
-		this.password = password;
-		this.nombre = nombre;
-		this.apellidos = apellidos;
-		this.dni = dni;
-		this.direccion = direccion;
-		this.telefono1 = telefono1;
-		this.telefono2 = telefono2;
-		this.argazkiaUrl = argazkiaUrl;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.tipos = tipos;
+	public Users(Users otro) {
+	    this.id = otro.getId();
+	    this.email = otro.getEmail();
+	    this.username = descifrar(otro.getUsername()); 
+	    this.password = otro.getPassword();
+	    this.nombre = otro.getNombre();
+	    this.apellidos = otro.getApellidos();
+	    this.dni = otro.getDni();
+	    this.direccion = otro.getDireccion();
+	    this.telefono1 = otro.getTelefono1();
+	    this.telefono2 = otro.getTelefono2();
+	    this.argazkiaUrl = otro.getArgazkiaUrl();
+	    this.createdAt = otro.getCreatedAt();
+	    this.updatedAt = otro.getUpdatedAt();	       
+	    this.tipos =  new Tipos(otro.getTipos().getId(), otro.getTipos().getName(), otro.getTipos().getNameEu());
 	}
 
 	public Integer getId() {
@@ -271,15 +269,6 @@ public class Users implements java.io.Serializable {
 				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
 	}
 
-	public Users convertirUsuario() {
-		Tipos t = new Tipos(getTipos().getId(), getTipos().getName(), getTipos().getNameEu());
-		String usernameDescifrado = descifrar(getUsername());
-		Users usuarioConvertido = new Users(getId(), getEmail(), usernameDescifrado, getPassword(), getNombre(),
-				getApellidos(), getDni(), getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(),
-				getCreatedAt(), getUpdatedAt(), t);
-		return usuarioConvertido;
-	}
-
 	public Users iniciarSesion(String tipoObligatorio) {
 		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
 			throw new IllegalArgumentException("Usuario o contraseña incorrectos");
@@ -320,7 +309,7 @@ public class Users implements java.io.Serializable {
 			q.setParameter("tipo", tipoObligatorio);
 		}
 		Users resultado = q.uniqueResult();
-		return resultado != null ? resultado.convertirUsuario() : null;
+		return resultado != null ? new Users(resultado) : null;
 	}
 
 	@JsonIgnore
@@ -330,7 +319,7 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users where id = ?1";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter(1, getId());
-		return q.uniqueResult().convertirUsuario();
+		return new Users(q.uniqueResult());
 	}
 
 	@JsonIgnore
@@ -342,7 +331,7 @@ public class Users implements java.io.Serializable {
 		q.setParameter("nombre", nombre);
 		ArrayList<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
-			usuarios.add(usuario.convertirUsuario());
+			usuarios.add(new Users(usuario));
 		}
 		return usuarios;
 	}
@@ -354,7 +343,7 @@ public class Users implements java.io.Serializable {
 		Query<Users> q = session.createQuery(hql, Users.class);
 		ArrayList<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
-			usuarios.add(usuario.convertirUsuario());
+			usuarios.add(new Users(usuario));
 		}
 		return usuarios;
 	}
@@ -375,7 +364,7 @@ public class Users implements java.io.Serializable {
 			q.setParameter("usuario", this);
 			ArrayList<Users> usuarios = new ArrayList<Users>();
 			for (Users usuario : q.list()) {
-				usuarios.add(usuario.convertirUsuario());
+				usuarios.add(new Users(usuario));
 			}
 			return usuarios;
 		} catch (Exception e) {
@@ -401,7 +390,8 @@ public class Users implements java.io.Serializable {
 			setUpdatedAt(now);
 			session.persist(this);
 			tx.commit();
-			return convertirUsuario();
+			Users creado = session.get(Users.class, getId());
+			return new Users(creado);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -438,7 +428,8 @@ public class Users implements java.io.Serializable {
 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(existente);
 			tx.commit();
-			return existente.convertirUsuario();
+			Users creado = session.get(Users.class, getId());
+			return new Users(creado);
 		} catch (Exception e) {
 			throw e;
 		}
@@ -462,7 +453,7 @@ public class Users implements java.io.Serializable {
 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(existente);
 			tx.commit();
-			return existente.convertirUsuario();
+			return new Users(existente);
 		} catch (Exception e) {
 			throw e;
 		}

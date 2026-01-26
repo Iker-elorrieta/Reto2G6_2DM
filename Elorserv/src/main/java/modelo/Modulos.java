@@ -11,9 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class Modulos implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Ciclos ciclos;
@@ -34,15 +31,16 @@ public class Modulos implements java.io.Serializable {
 		this.curso = curso;
 	}
 
-	public Modulos(Ciclos ciclos, String nombre, String nombreEus, int horas, byte curso, Set<Horarios> horarioses) {
-		this.ciclos = ciclos;
-		this.nombre = nombre;
-		this.nombreEus = nombreEus;
-		this.horas = horas;
-		this.curso = curso;
-		this.horarioses = horarioses;
+	public Modulos(Modulos otro) {
+	    this.ciclos = otro.getCiclos() != null ? new Ciclos(otro.getCiclos().getNombre()) : null;
+	    if (this.ciclos != null) {
+	        this.ciclos.setId(otro.getCiclos().getId());
+	    }
+	    this.nombre = otro.getNombre();
+	    this.nombreEus = otro.getNombreEus();
+	    this.horas = otro.getHoras();
+	    this.curso = otro.getCurso();
 	}
-
 	public Integer getId() {
 		return this.id;
 	}
@@ -99,15 +97,5 @@ public class Modulos implements java.io.Serializable {
 		this.horarioses = horarioses;
 	}
 
-	@JsonIgnore
-	public Modulos convertirModulo() {
-		Ciclos cicloConvertido = null;
-		if (ciclos != null) {
-			cicloConvertido = new Ciclos(ciclos.getNombre());
-			cicloConvertido.setId(ciclos.getId());
-		}
-
-		return new Modulos(cicloConvertido, getNombre(), getNombreEus(), getHoras(), getCurso(), null);
-	}
 
 }

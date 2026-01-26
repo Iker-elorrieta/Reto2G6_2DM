@@ -54,17 +54,16 @@ public class Horarios implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public Horarios(Integer id, Users usuarioConvertido, Modulos moduloConvertido, String dia, byte hora, String aula,
-			String observaciones, Timestamp createdAt, Timestamp updatedAt) {
-		this.id = id;
-		this.users = usuarioConvertido;
-		this.modulos = moduloConvertido;
-		this.dia = dia;
-		this.hora = hora;
-		this.aula = aula;
-		this.observaciones = observaciones;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
+	public Horarios(Horarios otro) {
+	    this.users = otro.getUsers() != null ? new Users(otro.getUsers()) : null;
+	    this.modulos = otro.getModulos() != null ? new Modulos(otro.getModulos()): null;
+	    this.id = otro.getId();
+	    this.dia = otro.getDia();
+	    this.hora = otro.getHora();
+	    this.aula = otro.getAula();
+	    this.observaciones = otro.getObservaciones();
+	    this.createdAt = otro.getCreatedAt();
+	    this.updatedAt = otro.getUpdatedAt();
 	}
 
 	public Integer getId() {
@@ -138,34 +137,10 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public Horarios convertirHorario() {
-	    Users usuarioConvertido = null;
-	    Modulos moduloConvertido = null;
-
-	    if (users != null) {
-	        usuarioConvertido = users.convertirUsuario();
-	    }
-
-	    if (modulos != null) {
-	        moduloConvertido = modulos.convertirModulo();
-	    }
-
-	    return new Horarios(
-	            getId(),
-	            usuarioConvertido,
-	            moduloConvertido,
-	            getDia(),
-	            getHora(),
-	            getAula(),
-	            getObservaciones(),
-	            getCreatedAt(),
-	            getUpdatedAt()
-	    );
-	}
 	private static ArrayList<Horarios> convertirHorarios(Query<Horarios> query) {
 		ArrayList<Horarios> convertidos = new ArrayList<>();
 		for (Horarios horario : query.list()) {
-			convertidos.add(horario.convertirHorario());
+			convertidos.add(new Horarios(horario));
 		}
 		return convertidos;
 	}
@@ -230,7 +205,8 @@ public class Horarios implements java.io.Serializable {
 			setUpdatedAt(now);
 			session.persist(this);
 			tx.commit();
-			return convertirHorario();
+			Horarios horarioCreado = session.get(Horarios.class, getId());
+			return new Horarios(horarioCreado);
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();

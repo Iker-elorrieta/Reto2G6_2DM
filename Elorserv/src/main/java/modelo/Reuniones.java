@@ -222,10 +222,10 @@ public class Reuniones implements java.io.Serializable {
 	    Users alumnoConvertido = null;
 	    Users profesorConvertido = null;
 	    if (usersByAlumnoId != null) {
-	        alumnoConvertido = usersByAlumnoId.convertirUsuario();
+	        alumnoConvertido = new Users(usersByAlumnoId);
 	    }
 	    if (usersByProfesorId != null) {
-	        profesorConvertido = usersByProfesorId.convertirUsuario();
+	        profesorConvertido = new Users(usersByProfesorId);
 	    }
 	    if (centro == null && idCentro != null) {
 	        centro = new Centros(Integer.parseInt(idCentro)).getCentroById();
