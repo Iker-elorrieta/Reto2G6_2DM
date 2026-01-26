@@ -24,7 +24,6 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
-	private String cicloAsignado;
 
 	public Users() {
 	}
@@ -166,13 +165,6 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public String getCicloAsignado() {
-		return cicloAsignado;
-	}
-
-	public void setCicloAsignado(String cicloAsignado) {
-		this.cicloAsignado = cicloAsignado;
-	}
 
 	public static Object login(Cliente cliente, String username, String password) {
 		ArrayList<Object> parametros = new ArrayList<>();
@@ -215,11 +207,9 @@ public class Users implements java.io.Serializable {
 	}
 
 	public ArrayList<Users> getAlumnos(Cliente cliente) {
-		ArrayList<Object> datos = new ArrayList<>();
-		datos.add(getId());
 		Object response;
 		try {
-			response = cliente.enviarRequest("get_alumnos", datos);
+			response = cliente.enviarRequest("get_alumnos", new ArrayList<>());
 
 			if (response instanceof ArrayList<?>) {
 				ArrayList<Users> alumnos = new ArrayList<>();

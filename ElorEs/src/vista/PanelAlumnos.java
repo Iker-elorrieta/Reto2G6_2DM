@@ -77,7 +77,7 @@ public class PanelAlumnos extends JPanel {
 		contenedor.add(lblTitulo);
 
 
-		modeloAlumnos = new DefaultTableModel(new String[] { "ID", "Avatar", "Nombre completo", "Ciclo", "Usuario",
+		modeloAlumnos = new DefaultTableModel(new String[] { "ID", "Avatar", "Nombre completo",  "Usuario",
 				"Email", "DNI", "Dirección", "Teléfono 1", "Teléfono 2" }, 0) {
 			private static final long serialVersionUID = 1L;
 

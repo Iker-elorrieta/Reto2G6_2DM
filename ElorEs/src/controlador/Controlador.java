@@ -285,8 +285,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 				String nombre = alumno.getNombre() == null ? "" : alumno.getNombre();
 				String apellidos = alumno.getApellidos() == null ? "" : alumno.getApellidos();
 				String nombreCompleto = (nombre + " " + apellidos).trim();
-				String ciclo = alumno.getCicloAsignado() == null ? "" : alumno.getCicloAsignado();
-				modelo.addRow(new Object[] { alumno.getId(), alumno.getArgazkiaUrl(), nombreCompleto, ciclo,
+				modelo.addRow(new Object[] { alumno.getId(), alumno.getArgazkiaUrl(), nombreCompleto,
 						alumno.getUsername(), alumno.getEmail(), alumno.getDni(), alumno.getDireccion(),
 						alumno.getTelefono1(), alumno.getTelefono2() });
 			}

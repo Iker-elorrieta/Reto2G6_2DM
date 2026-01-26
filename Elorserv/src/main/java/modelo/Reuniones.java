@@ -251,9 +251,8 @@ public class Reuniones implements java.io.Serializable {
 	public static ArrayList<Reuniones> getReunionesByUserID(int idUser) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String hql = "from Reuniones where usersByAlumnoId.id = :userID or usersByProfesorId.id = :userID";
+		String hql = "from Reuniones where usersByAlumnoId = "+ idUser + " or usersByProfesorId = "+idUser;
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		q.setParameter("userID", idUser);
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
 		for (Reuniones reunion : q.list()) {
@@ -272,10 +271,9 @@ public class Reuniones implements java.io.Serializable {
 
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String hql = "from Reuniones where (usersByAlumnoId.id = :userID or usersByProfesorId.id = :userID) "
+		String hql = "from Reuniones where (usersByAlumnoId = "+idUser+ " or usersByProfesorId = "+ idUser+") "
 				+ "and fecha >= :inicioSemana and fecha < :finSemana order by fecha";
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		q.setParameter("userID", idUser);
 		q.setParameter("inicioSemana", inicio);
 		q.setParameter("finSemana", fin);
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones>();

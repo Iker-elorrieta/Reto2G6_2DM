@@ -90,8 +90,7 @@ public class SocketServer extends Thread {
 				response = Users.getUsersByTipo("profesor");
 				break;
 			case "get_alumnos":
-				int profesorId = entrada.readInt();
-				response = Users.getAlumnosbyProfesorID(profesorId);
+				response = usuario.getAlumnosbyProfesorID();
 				break;
 			default:
 				response = "Request no reconocido";

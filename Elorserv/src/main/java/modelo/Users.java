@@ -6,10 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -44,7 +41,6 @@ public class Users implements java.io.Serializable {
 	private String argazkiaUrl;
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
-	private String cicloAsignado;
 	@JsonIgnore
 	private Set<Matriculaciones> matriculacioneses = new HashSet<Matriculaciones>(0);
 	@JsonIgnore
@@ -235,14 +231,6 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public String getCicloAsignado() {
-		return cicloAsignado;
-	}
-
-	public void setCicloAsignado(String cicloAsignado) {
-		this.cicloAsignado = cicloAsignado;
-	}
-
 	public Set<Matriculaciones> getMatriculacioneses() {
 		return this.matriculacioneses;
 	}
@@ -289,7 +277,6 @@ public class Users implements java.io.Serializable {
 		Users usuarioConvertido = new Users(getId(), getEmail(), usernameDescifrado, getPassword(), getNombre(),
 				getApellidos(), getDni(), getDireccion(), getTelefono1(), getTelefono2(), getArgazkiaUrl(),
 				getCreatedAt(), getUpdatedAt(), t);
-		usuarioConvertido.setCicloAsignado(getCicloAsignado());
 		return usuarioConvertido;
 	}
 
@@ -353,11 +340,11 @@ public class Users implements java.io.Serializable {
 		String hql = "from Users where tipos.name = :nombre";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter("nombre", nombre);
-		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
+		ArrayList<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
-			usuariosConvertidos.add(usuario.convertirUsuario());
+			usuarios.add(usuario.convertirUsuario());
 		}
-		return usuariosConvertidos;
+		return usuarios;
 	}
 
 	public static ArrayList<Users> getAllUsuarios() {
@@ -365,33 +352,29 @@ public class Users implements java.io.Serializable {
 		Session session = sesion.openSession();
 		String hql = "from Users";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		ArrayList<Users> usuariosConvertidos = new ArrayList<Users>();
+		ArrayList<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
-			usuariosConvertidos.add(usuario.convertirUsuario());
+			usuarios.add(usuario.convertirUsuario());
 		}
-		return usuariosConvertidos;
+		return usuarios;
 	}
-
-	public static ArrayList<Users> getAlumnosbyProfesorID(Integer profesorId) {
-		if (profesorId == null) {
+	@JsonIgnore
+	public  ArrayList<Users> getAlumnosbyProfesorID() {
+		if (getId() == null) {
 			throw new IllegalArgumentException("El id del profesor no puede ser nulo");
 		}
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
-			String hql = "select distinct mat.users, mat.ciclos.nombre, mat.curso from Matriculaciones mat "
-					+ "where mat.users.tipos.name = :nombre and exists (" + "select 1 from Horarios h "
-					+ "where h.users.id = :profesorId " + "and h.modulos.ciclos.id = mat.ciclos.id "
-					+ "and h.modulos.curso = mat.curso)";
-			Query<Object[]> q = session.createQuery(hql, Object[].class);
-			q.setParameter("profesorId", profesorId);
+			String hql = "select distinct mat.users  from Matriculaciones mat "
+					+ "where mat.users.tipos.name = :nombre and exists (select 1 from Horarios h where h.users = :usuario )";
+			Query<Users> q = session.createQuery(hql, Users.class);
 			q.setParameter("nombre", "alumno");
-			Map<Integer, Users> alumnosPorId = new LinkedHashMap<>();
-			for (Object[] fila : q.list()) {
-				Users alumno = ((Users) fila[0]).convertirUsuario();
-				alumno.setCicloAsignado((String) fila[1]);
-				alumnosPorId.put(alumno.getId(), alumno);
+			q.setParameter("usuario", this);
+			ArrayList<Users> usuarios = new ArrayList<Users>();
+			for (Users usuario : q.list()) {
+				usuarios.add(usuario.convertirUsuario());
 			}
-			return new ArrayList<>(alumnosPorId.values());
+			return usuarios;
 		} catch (Exception e) {
 			System.out.println("Error al obtener alumnos por ID de profesor: " + e.getMessage());
 			throw e;

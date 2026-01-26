@@ -189,11 +189,10 @@ public class Horarios implements java.io.Serializable {
 			String hql = "select h from Horarios h "
 					+ "join h.modulos m "
 					+ "join Matriculaciones mat "
-					+ "where mat.users.id = :alumnoId "
-					+ "and mat.ciclos = m.ciclos "
+					+ "where mat.users =  "+ alumnoId
+					+ " and mat.ciclos = m.ciclos "
 					+ "and mat.curso = m.curso";
 			Query<Horarios> q = session.createQuery(hql, Horarios.class);
-			q.setParameter("alumnoId", alumnoId);
 			return convertirHorarios(q);
 		}
 	}
