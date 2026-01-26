@@ -26,7 +26,8 @@ public class TablaHorario extends JPanel {
 	private static final int FILA_ALTURA = 56;
 	private JTable table;
 	private DefaultTableModel modelo;
-	private DefaultTableModel modeloInicial = new DefaultTableModel(new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" },0);
+	private DefaultTableModel modeloInicial = new DefaultTableModel(
+			new String[] { "", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" }, 0);
 	private int[] columnasWidths;
 	private boolean mostrarModuloCompleto;
 
@@ -49,8 +50,13 @@ public class TablaHorario extends JPanel {
 				}
 				Object value = getValueAt(row, column);
 				if (value instanceof List<?>) {
-					return Horarios.getPrimerHorarioDesdeLista((List<?>) value).getTooltip() + "   Reunión:"
-							+ Reuniones.getPrimeraReunionDesdeLista((List<?>) value).getTooltip();
+					Horarios primerHorario = Horarios.getPrimerHorarioDesdeLista((List<?>) value);
+					Reuniones primerReunion = Reuniones.getPrimeraReunionDesdeLista((List<?>) value);
+					if (primerReunion == null) {
+					return primerHorario.getTooltip();
+					}					
+					return primerHorario.getTooltip() + "   Reunión:"
+							+ primerReunion.getTooltip();
 				} else if (value instanceof Horarios) {
 					return ((Horarios) value).getTooltip();
 				} else if (value instanceof Reuniones) {

@@ -492,9 +492,9 @@ public class Users implements java.io.Serializable {
 		String usernameNormalizado = username.trim().toLowerCase();
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
-			String hql = "select count(u.id) from Users u where u.username = :username";
+			String hql = "select count(u) from Users u where u.username = :username";
 			if (excluirId != null) {
-				hql = hql + " and u.id <> :excluirId";
+				hql = hql + " and u <> :excluirId";
 			}
 			Query<Long> q = session.createQuery(hql.toString(), Long.class);
 			q.setParameter("username", cifrar(usernameNormalizado));
