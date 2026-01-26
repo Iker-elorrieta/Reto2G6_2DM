@@ -4,8 +4,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,11 +21,13 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
 import cliente.Cliente;
+import modelo.Centros;
 import modelo.Horarios;
 import modelo.Reuniones;
 import modelo.Users;
 import vista.Login;
 import vista.Menu;
+import vista.VentanaAnadirReunion;
 import vista.VerPerfil;
 
 public class Controlador extends MouseAdapter implements ActionListener {
@@ -28,6 +36,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private Login vistaLogin;
 	private Menu vistaMenu;
 	private VerPerfil vistaPerfil;
+	private VentanaAnadirReunion ventanaReunion;
 
 	// Socket
 	private Cliente cliente;
@@ -38,7 +47,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	// Acciones posibles (usado en procesarAccion)
 	private enum Accion {
 		INICIAR_SESION, DESCONECTAR, VOLVER_MENU, VOLVER_MENUPAGINA, CONSULTAR_ALUMNOS, VER_HORARIOS,
-		ORGANIZAR_REUNIONES, ABRIR_PERFIL, HORARIO_PROFESOR_SELECCIONADO
+		ORGANIZAR_REUNIONES, ABRIR_FORMULARIO_REUNION, ABRIR_PERFIL, HORARIO_PROFESOR_SELECCIONADO,
+		CREAR_REUNION
 	}
 
 	// Constructor (ejecutado desde ElorEs.java)
@@ -47,6 +57,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		this.vistaLogin = vistaLogin;
 		vistaMenu = new Menu();
 		vistaPerfil = new VerPerfil();
+		ventanaReunion = new VentanaAnadirReunion();
 
 		// Configurar botones y listeners
 		inicializarControlador();
@@ -84,6 +95,9 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().setActionCommand(Accion.VOLVER_MENU.name());
 		vistaMenu.getPanelOrganizarReuniones().getBtnVolver().addActionListener(this);
+		vistaMenu.getPanelOrganizarReuniones().getBtnNuevaReunion()
+				.setActionCommand(Accion.ABRIR_FORMULARIO_REUNION.name());
+		vistaMenu.getPanelOrganizarReuniones().getBtnNuevaReunion().addActionListener(this);
 
 		vistaMenu.getPanelVerHorarios().getBtnVolver().setActionCommand(Accion.VOLVER_MENU.name());
 		vistaMenu.getPanelVerHorarios().getBtnVolver().addActionListener(this);
@@ -108,6 +122,9 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 		vistaMenu.getPanelPerfil().addMouseListener(this);
 		vistaMenu.getPanelLogo().addMouseListener(this);
+
+		ventanaReunion.getBtnGuardar().setActionCommand(Accion.CREAR_REUNION.name());
+		ventanaReunion.getBtnGuardar().addActionListener(this);
 	}
 
 	/**
@@ -145,16 +162,23 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			mostrarPanel(vistaMenu.getPanelOrganizarReuniones(), "REUNIONES");
 			actualizarTablaReuniones(Reuniones.getReunionesUsuario(cliente));
 			break;
+		case ABRIR_FORMULARIO_REUNION:
+			mostrarFormularioNuevaReunion();
+			break;
 		case ABRIR_PERFIL:
 			vistaPerfil.setVisible(true);
 			break;
 		case HORARIO_PROFESOR_SELECCIONADO:
 			mostrarHorarioProfesorSeleccionado();
 			break;
+		case CREAR_REUNION:
+			crearReunion();
+			break;
 		default:
 			break;
 		}
 	}
+
 
 	// Redireccionar botones a procesarAccion
 	@Override
@@ -444,4 +468,66 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar el horario: " + e.getMessage());
 		}
 	}
+	
+	/*
+	 * Muestra el formulario para crear una nueva reunión.
+	 */
+	private void mostrarFormularioNuevaReunion() {
+		List<Users> alumnos = usuario.getAlumnos(cliente);
+		List<Centros> centros;
+		try {
+			centros = Centros.getCentros(cliente);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "No se pudieron cargar los centros: " + e.getMessage());
+			return;
+		}
+		ventanaReunion.limpiarFormulario();
+		ventanaReunion.setAlumnos(alumnos);
+		ventanaReunion.setCentros(centros);
+		ventanaReunion.setVisible(true);
+	}
+	/*	 
+	 * Crea una nueva reunión con los datos del formulario y actualiza la tabla de
+	 * reuniones si es exitoso.
+	 */
+	private void crearReunion() {
+		try {
+			Users alumno = (Users) ventanaReunion.getComboAlumnos().getSelectedItem();
+			Centros centro = (Centros) ventanaReunion.getComboCentros().getSelectedItem();
+			String titulo = ventanaReunion.getTxtTitulo().getText().trim();
+			String asunto = ventanaReunion.getTxtAsunto().getText().trim();
+			String aula = ventanaReunion.getTxtAula().getText().trim();
+			Date fechaSeleccionada = ventanaReunion.getSelectorFecha().getDate();
+			Date horaSeleccionada = (Date) ventanaReunion.getSelectorHora().getValue();
+
+			if (alumno == null || centro == null || titulo.isEmpty() || asunto.isEmpty() || aula.isEmpty()
+					|| fechaSeleccionada == null || horaSeleccionada == null) {
+				ventanaReunion.getLblEstado().setText("Completa todos los campos antes de crear la reunión.");
+				return;
+			}
+
+			LocalDate fecha = fechaSeleccionada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			LocalTime hora = horaSeleccionada.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+			LocalDateTime fechaHora = LocalDateTime.of(fecha, hora.withSecond(0).withNano(0));
+			Timestamp timestamp = Timestamp.valueOf(fechaHora);
+
+			Reuniones nuevaReunion = new Reuniones(alumno, usuario, titulo, asunto, aula, timestamp, centro, centro.getCCEN());
+			
+			Object response = nuevaReunion.crearReunion(cliente);
+			if (response instanceof Reuniones) {
+				ventanaReunion.limpiarFormulario();
+				actualizarTablaReuniones(Reuniones.getReunionesUsuario(cliente));
+				actualizarTablaMiHorario();
+				ventanaReunion.setVisible(false);
+			} else if (response instanceof String mensaje) {
+				ventanaReunion.getLblEstado().setText(mensaje);
+			} else {
+				ventanaReunion.getLblEstado().setText("No se pudo crear la reunión.");
+			}
+		} catch (Exception e) {
+			ventanaReunion.getLblEstado().setText("Error: " + e.getMessage());
+		}
+	}
+
+
 }

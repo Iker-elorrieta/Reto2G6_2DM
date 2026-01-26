@@ -73,7 +73,7 @@ public class SocketServer extends Thread {
 				break;
 			case "crear_reunion":
 				Reuniones nuevaReunion = (Reuniones) entrada.readObject();
-				nuevaReunion.setUsersByAlumnoId(usuario);
+				nuevaReunion.setUsersByProfesorId(usuario);
 				response = nuevaReunion.crearReunion();
 				break;
 			case "get_centros":

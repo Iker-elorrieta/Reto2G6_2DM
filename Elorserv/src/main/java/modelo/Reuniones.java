@@ -88,22 +88,21 @@ public class Reuniones implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public Reuniones(Integer idReunion2, Users alumnoConvertido, Users profesorConvertido, String estado2,
-			String estadoEus2, String idCentro2, String titulo2, String asunto2, String aula2, Timestamp fecha2,
-			Timestamp createdAt2, Timestamp updatedAt2, Centros centro) {
-		this.idReunion = idReunion2;
-		this.usersByAlumnoId = alumnoConvertido;
-		this.usersByProfesorId = profesorConvertido;
-		this.estado = estado2;
-		this.estadoEus = estadoEus2;
-		this.idCentro = idCentro2;
-		this.titulo = titulo2;
-		this.asunto = asunto2;
-		this.aula = aula2;
-		this.fecha = fecha2;
-		this.createdAt = createdAt2;
-		this.updatedAt = updatedAt2;
-		this.centro = centro;
+	public Reuniones(Reuniones otro) {
+	    this.idReunion = otro.getIdReunion();
+	    this.usersByAlumnoId = otro.getUsersByAlumnoId() != null ? new Users(otro.getUsersByAlumnoId()) : null;
+	    this.usersByProfesorId = otro.getUsersByProfesorId() != null ? new Users(otro.getUsersByProfesorId()) : null;
+
+	    this.estado = otro.getEstado();
+	    this.estadoEus = otro.getEstadoEus();
+	    this.idCentro = otro.getIdCentro();
+	    this.titulo = otro.getTitulo();
+	    this.asunto = otro.getAsunto();
+	    this.aula = otro.getAula();
+	    this.fecha = otro.getFecha();
+	    this.createdAt = otro.getCreatedAt();
+	    this.updatedAt = otro.getUpdatedAt();
+	    this.centro = otro.getCentro() != null ? otro.getCentro() : null;
 	}
 
 	public Integer getIdReunion() {
@@ -216,24 +215,17 @@ public class Reuniones implements java.io.Serializable {
 	public void setCentro(Centros centro) {
 		this.centro = centro;
 	}
+	
 
-	@JsonIgnore
-	public Reuniones convertirReunion() {
-	    Users alumnoConvertido = null;
-	    Users profesorConvertido = null;
-	    if (usersByAlumnoId != null) {
-	        alumnoConvertido = new Users(usersByAlumnoId);
-	    }
-	    if (usersByProfesorId != null) {
-	        profesorConvertido = new Users(usersByProfesorId);
-	    }
-	    if (centro == null && idCentro != null) {
-	        centro = new Centros(Integer.parseInt(idCentro)).getCentroById();
-	    }
-	    return new Reuniones(getIdReunion(), alumnoConvertido, profesorConvertido, getEstado(),
-	            getEstadoEus(), getIdCentro(), getTitulo(), getAsunto(), getAula(), getFecha(), getCreatedAt(),
-	            getUpdatedAt(),centro);
+
+	@Override
+	public String toString() {
+		return "Reuniones [idReunion=" + idReunion + ", usersByAlumnoId=" + usersByAlumnoId + ", usersByProfesorId="
+				+ usersByProfesorId + ", estado=" + estado + ", estadoEus=" + estadoEus + ", idCentro=" + idCentro
+				+ ", titulo=" + titulo + ", asunto=" + asunto + ", aula=" + aula + ", fecha=" + fecha + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + ", centro=" + centro + "]";
 	}
+
 	@JsonIgnore
 	public static ArrayList<Reuniones> getAllReuniones() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -243,7 +235,7 @@ public class Reuniones implements java.io.Serializable {
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
 		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(reunion.convertirReunion());
+			reunionesConvertidas.add(new Reuniones(reunion));
 		}
 		return reunionesConvertidas;
 		
@@ -256,7 +248,7 @@ public class Reuniones implements java.io.Serializable {
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
 				>();
 		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(reunion.convertirReunion());
+			reunionesConvertidas.add(new Reuniones(reunion));
 		}
 		return reunionesConvertidas;
 	}
@@ -278,7 +270,7 @@ public class Reuniones implements java.io.Serializable {
 		q.setParameter("finSemana", fin);
 		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones>();
 		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(reunion.convertirReunion());
+			reunionesConvertidas.add(new Reuniones(reunion));
 		}
 		return reunionesConvertidas;
 	}
@@ -287,8 +279,8 @@ public class Reuniones implements java.io.Serializable {
 		Transaction tx = null;
 		try (Session session = sesion.openSession()) {
 			tx = session.beginTransaction();
-			Users alumno = new Users(getUsersByAlumnoId().getId()).getUsuarioPorID();
-			Users profesor =  new Users(getUsersByProfesorId().getId()).getUsuarioPorID();
+			Users alumno = getUsersByAlumnoId().getUsuarioPorID();
+			Users profesor =  getUsersByProfesorId().getUsuarioPorID();
 			setUsersByAlumnoId(alumno);
 			setUsersByProfesorId(profesor);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -301,8 +293,10 @@ public class Reuniones implements java.io.Serializable {
 			}
 			session.persist(this);
 			tx.commit();
-			return convertirReunion();
+			return this;
 		} catch (Exception e) {
+			System.out.println(this);
+			System.out.println(e.getMessage());
 			if (tx != null) {
 				tx.rollback();
 			}
@@ -329,7 +323,8 @@ public class Reuniones implements java.io.Serializable {
 			reunion.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(reunion);
 			tx.commit();
-			return reunion.convertirReunion();
+			Reuniones reunionCreada = session.get(Reuniones.class, getIdReunion());
+			return new Reuniones(reunionCreada);
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();

@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import cliente.Cliente;
 
 public class Reuniones implements java.io.Serializable {
@@ -43,6 +42,18 @@ public class Reuniones implements java.io.Serializable {
 		this.fecha = fecha;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
+	}
+
+	public Reuniones(Users alumno, Users profesor, String titulo, String asunto, String aula, Timestamp fecha,
+			Centros centro, Integer idCentro) {
+		this.usersByAlumnoId = alumno;
+		this.usersByProfesorId = profesor;
+		this.titulo = titulo;
+		this.asunto = asunto;
+		this.aula = aula;
+		this.fecha = fecha;
+		this.centro = centro;
+		this.idCentro = idCentro.toString();
 	}
 
 	public Integer getIdReunion() {
@@ -187,6 +198,7 @@ public class Reuniones implements java.io.Serializable {
 		return new ArrayList<>();
 
 	}
+
 	public static Reuniones getPrimeraReunionDesdeLista(List<?> valores) {
 		if (valores == null) {
 			return null;
@@ -198,7 +210,18 @@ public class Reuniones implements java.io.Serializable {
 		}
 		return null;
 	}
-	
+
+	public Object crearReunion(Cliente cliente) {
+		try {
+			ArrayList<Object> parametros = new ArrayList<>();
+			parametros.add(this);
+			Object response = cliente.enviarRequest("crear_reunion", parametros);
+			return response;
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
 	public String obtenerHora() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime fecha = getFecha().toLocalDateTime();
@@ -222,91 +245,89 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
-
 	public String getDescripcionHtml(boolean envolverHtml, boolean multilinea) {
 		String contenido = descripcionHtml(multilinea);
 		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" : contenido;
 	}
 
 	private String descripcionHtml(boolean multilinea) {
-	    String html = "";
-	    String tituloReunion = "";
+		String html = "";
+		String tituloReunion = "";
 
-	    if (asunto != null && !asunto.isEmpty()) {
-	        tituloReunion = asunto;
-	    } else if (titulo != null && !titulo.isEmpty()) {
-	        tituloReunion = titulo;
-	    }
+		if (asunto != null && !asunto.isEmpty()) {
+			tituloReunion = asunto;
+		} else if (titulo != null && !titulo.isEmpty()) {
+			tituloReunion = titulo;
+		}
 
-	    if (getUsersByAlumnoId() != null) {
-	        String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
-	        if (!tituloReunion.isEmpty()) {
-	            html += "<b>" + tituloReunion + " - " + nombreAlumno + "</b>";
-	        } else {
-	            html += "<b>" + nombreAlumno + "</b>";
-	        }
-	    } else if (!tituloReunion.isEmpty()) {
-	        html += "<b>" + tituloReunion + "</b>";
-	    }
+		if (getUsersByAlumnoId() != null) {
+			String nombreAlumno = getUsersByAlumnoId().getNombre() + " " + getUsersByAlumnoId().getApellidos();
+			if (!tituloReunion.isEmpty()) {
+				html += "<b>" + tituloReunion + " - " + nombreAlumno + "</b>";
+			} else {
+				html += "<b>" + nombreAlumno + "</b>";
+			}
+		} else if (!tituloReunion.isEmpty()) {
+			html += "<b>" + tituloReunion + "</b>";
+		}
 
-	    if (estado != null && !estado.trim().isEmpty()) {
-	        if (multilinea) {
-	            html += "<br/>";
-	        } else {
-	            html += " ";
-	        }
-	        html += getEstado();
-	    }
+		if (estado != null && !estado.trim().isEmpty()) {
+			if (multilinea) {
+				html += "<br/>";
+			} else {
+				html += " ";
+			}
+			html += getEstado();
+		}
 
-	    if (aula != null && !aula.trim().isEmpty()) {
-	        if (multilinea) {
-	            html += "<br/>";
-	        } else {
-	            html += " ";
-	        }
-	        html += aula;
-	    }
+		if (aula != null && !aula.trim().isEmpty()) {
+			if (multilinea) {
+				html += "<br/>";
+			} else {
+				html += " ";
+			}
+			html += aula;
+		}
 
-	    if (html.isEmpty()) {
-	        html = "<span style='color:#7A7A7A;'>Reunión</span>";
-	    }
+		if (html.isEmpty()) {
+			html = "<span style='color:#7A7A7A;'>Reunión</span>";
+		}
 
-	    return html;
+		return html;
 	}
 
-
 	public String getTooltip() {
-	    String titulo = getTitulo() != null ? getTitulo().trim() : "";
-	    String asunto = getAsunto() != null ? getAsunto().trim() : "";
-	    String alumno = "";
+		String titulo = getTitulo() != null ? getTitulo().trim() : "";
+		String asunto = getAsunto() != null ? getAsunto().trim() : "";
+		String alumno = "";
 
-	    if (getUsersByAlumnoId() != null) {
-	        String nombre = getUsersByAlumnoId().getNombre();
-	        String apellidos = getUsersByAlumnoId().getApellidos();
-	        alumno = ((nombre == null ? "" : nombre) + " " + (apellidos == null ? "" : apellidos)).trim();
-	    }
+		if (getUsersByAlumnoId() != null) {
+			String nombre = getUsersByAlumnoId().getNombre();
+			String apellidos = getUsersByAlumnoId().getApellidos();
+			alumno = ((nombre == null ? "" : nombre) + " " + (apellidos == null ? "" : apellidos)).trim();
+		}
 
-	    String sb = "";
+		String sb = "";
 
-	    if (!titulo.isEmpty()) {
-	        sb += "Título: " + titulo;
-	    }
+		if (!titulo.isEmpty()) {
+			sb += "Título: " + titulo;
+		}
 
-	    if (!asunto.isEmpty()) {
-	        if (!sb.isEmpty()) {
-	            sb += " | ";
-	        }
-	        sb += "Asunto: " + asunto;
-	    }
+		if (!asunto.isEmpty()) {
+			if (!sb.isEmpty()) {
+				sb += " | ";
+			}
+			sb += "Asunto: " + asunto;
+		}
 
-	    if (!alumno.isEmpty()) {
-	        if (!sb.isEmpty()) {
-	            sb += " | ";
-	        }
-	        sb += "Alumno: " + alumno;
-	    }
+		if (!alumno.isEmpty()) {
+			if (!sb.isEmpty()) {
+				sb += " | ";
+			}
+			sb += "Alumno: " + alumno;
+		}
 
-	    return !sb.isEmpty() ? sb : "Reunión";
+		return !sb.isEmpty() ? sb : "Reunión";
 	}
 
 	public Color getColorEstado() {

@@ -391,7 +391,7 @@ public class Users implements java.io.Serializable {
 			session.persist(this);
 			tx.commit();
 			Users creado = session.get(Users.class, getId());
-			return new Users(creado);
+			return creado;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -429,7 +429,7 @@ public class Users implements java.io.Serializable {
 			session.merge(existente);
 			tx.commit();
 			Users creado = session.get(Users.class, getId());
-			return new Users(creado);
+			return creado;
 		} catch (Exception e) {
 			throw e;
 		}
@@ -453,7 +453,7 @@ public class Users implements java.io.Serializable {
 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(existente);
 			tx.commit();
-			return new Users(existente);
+			return existente;
 		} catch (Exception e) {
 			throw e;
 		}
