@@ -358,15 +358,18 @@ public class Users implements java.io.Serializable {
 		}
 		return usuarios;
 	}
+
 	@JsonIgnore
-	public  ArrayList<Users> getAlumnosbyProfesorID() {
+	public ArrayList<Users> getAlumnosbyProfesorID() {
 		if (getId() == null) {
 			throw new IllegalArgumentException("El id del profesor no puede ser nulo");
 		}
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
-			String hql = "select distinct mat.users  from Matriculaciones mat "
-					+ "where mat.users.tipos.name = :nombre and exists (select 1 from Horarios h where h.users = :usuario )";
+			String hql = "select distinct mat.users from Matriculaciones mat "
+					+ "where mat.users.tipos.name = :nombre and exists (" + "select 1 from Horarios h "
+					+ "where h.users = :usuario" + " and h.modulos.ciclos = mat.ciclos "
+					+ "and h.modulos.curso = mat.curso)";
 			Query<Users> q = session.createQuery(hql, Users.class);
 			q.setParameter("nombre", "alumno");
 			q.setParameter("usuario", this);
