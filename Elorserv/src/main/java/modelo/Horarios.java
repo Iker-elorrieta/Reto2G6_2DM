@@ -2,7 +2,7 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.reto2.elorserv.HibernateUtil;
@@ -137,14 +137,7 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	private static ArrayList<Horarios> convertirHorarios(Query<Horarios> query) {
-		ArrayList<Horarios> convertidos = new ArrayList<>();
-		for (Horarios horario : query.list()) {
-			convertidos.add(new Horarios(horario));
-		}
-		return convertidos;
-	}
-	public static ArrayList<Horarios> getHorariosByUserId(Integer userId) {
+	public static List<Horarios> getHorariosByUserId(Integer userId) {
 		Users user = new Users(userId).getUsuarioPorID();
 		switch (user.getTipos().getName()) {
 			case "alumno":
@@ -155,7 +148,7 @@ public class Horarios implements java.io.Serializable {
 				throw new IllegalArgumentException("Rol no reconocido");
 		}
 	}
-	public static ArrayList<Horarios> getHorariosByAlumnoId(Integer alumnoId) {
+	public static List<Horarios> getHorariosByAlumnoId(Integer alumnoId) {
 		if (alumnoId == null) {
 			throw new IllegalArgumentException("El id del alumno no puede ser nulo");
 		}
@@ -168,10 +161,11 @@ public class Horarios implements java.io.Serializable {
 					+ " and mat.ciclos = m.ciclos "
 					+ "and mat.curso = m.curso";
 			Query<Horarios> q = session.createQuery(hql, Horarios.class);
-			return convertirHorarios(q);
+			q.list().replaceAll(h -> new Horarios(h));
+			return q.list();
 		}
 	}
-	private static ArrayList<Horarios> getHorariosByProfesorId(Integer userId) {
+	private static List<Horarios> getHorariosByProfesorId(Integer userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("El id del usuario no puede ser nulo");
 		}
@@ -180,7 +174,8 @@ public class Horarios implements java.io.Serializable {
 			String hql = "from Horarios where users.id = :userId";
 			Query<Horarios> q = session.createQuery(hql, Horarios.class);
 			q.setParameter("userId", userId);
-			return convertirHorarios(q);
+			q.list().replaceAll(h -> new Horarios(h));
+			return q.list();
 		}
 	}
 	public Horarios crearHorario() {

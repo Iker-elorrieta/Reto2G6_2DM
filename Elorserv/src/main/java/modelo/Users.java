@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -316,32 +317,30 @@ public class Users implements java.io.Serializable {
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String hql = "from Users where id = ?1";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter(1, getId());
-		return new Users(q.uniqueResult());
+		Users user = session.get(Users.class, getId());
+		return new Users(user);
 	}
 
 	@JsonIgnore
-	public static ArrayList<Users> getUsersByTipo(String nombre) {
+	public static List<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Users where tipos.name = :nombre";
 		Query<Users> q = session.createQuery(hql, Users.class);
 		q.setParameter("nombre", nombre);
-		ArrayList<Users> usuarios = new ArrayList<Users>();
+		List<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
 			usuarios.add(new Users(usuario));
 		}
 		return usuarios;
 	}
 
-	public static ArrayList<Users> getAllUsuarios() {
+	public static List<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Users";
 		Query<Users> q = session.createQuery(hql, Users.class);
-		ArrayList<Users> usuarios = new ArrayList<Users>();
+		List<Users> usuarios = new ArrayList<Users>();
 		for (Users usuario : q.list()) {
 			usuarios.add(new Users(usuario));
 		}
@@ -349,7 +348,7 @@ public class Users implements java.io.Serializable {
 	}
 
 	@JsonIgnore
-	public ArrayList<Users> getAlumnosbyProfesorID() {
+	public List<Users> getAlumnosbyProfesorID() {
 		if (getId() == null) {
 			throw new IllegalArgumentException("El id del profesor no puede ser nulo");
 		}
@@ -362,7 +361,7 @@ public class Users implements java.io.Serializable {
 			Query<Users> q = session.createQuery(hql, Users.class);
 			q.setParameter("nombre", "alumno");
 			q.setParameter("usuario", this);
-			ArrayList<Users> usuarios = new ArrayList<Users>();
+			List<Users> usuarios = new ArrayList<Users>();
 			for (Users usuario : q.list()) {
 				usuarios.add(new Users(usuario));
 			}
@@ -494,17 +493,19 @@ public class Users implements java.io.Serializable {
 		try (Session session = sesion.openSession()) {
 			String hql = "select count(u) from Users u where u.username = :username";
 			if (excluirId != null) {
-				hql = hql + " and u <> :excluirId";
+				hql = hql + " and u <> :excluir";
 			}
 			Query<Long> q = session.createQuery(hql.toString(), Long.class);
 			q.setParameter("username", cifrar(usernameNormalizado));
 			if (excluirId != null) {
-				q.setParameter("excluirId", excluirId);
+				Users u = session.get(Users.class, excluirId);
+				q.setParameter("excluir", u);
 			}
 			Long count = q.uniqueResult();
 			return count != null && count > 0;
 		}
 	}
+
 
 	public static String cifrar(String valor) {
 		if (valor == null) {

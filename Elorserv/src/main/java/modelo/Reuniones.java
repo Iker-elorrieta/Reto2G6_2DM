@@ -4,7 +4,7 @@ package modelo;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -227,33 +227,25 @@ public class Reuniones implements java.io.Serializable {
 	}
 
 	@JsonIgnore
-	public static ArrayList<Reuniones> getAllReuniones() {
+	public static List<Reuniones> getAllReuniones() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Reuniones";
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
-				>();
-		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(new Reuniones(reunion));
-		}
-		return reunionesConvertidas;
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
 		
 	}
-	public static ArrayList<Reuniones> getReunionesByUserID(int idUser) {
+	public static List<Reuniones> getReunionesByUserID(int idUser) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Reuniones where usersByAlumnoId = "+ idUser + " or usersByProfesorId = "+idUser;
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
-				>();
-		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(new Reuniones(reunion));
-		}
-		return reunionesConvertidas;
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
 	}
 
-	public static ArrayList<Reuniones> getReunionesByUserIDSemanaActual(int idUser) {
+	public static List<Reuniones> getReunionesByUserIDSemanaActual(int idUser) {
 		LocalDate hoy = LocalDate.now();
 		LocalDate inicioSemana = hoy.with(DayOfWeek.MONDAY);
 		LocalDate finSemana = inicioSemana.plusDays(7);
@@ -268,11 +260,8 @@ public class Reuniones implements java.io.Serializable {
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
 		q.setParameter("inicioSemana", inicio);
 		q.setParameter("finSemana", fin);
-		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones>();
-		for (Reuniones reunion : q.list()) {
-			reunionesConvertidas.add(new Reuniones(reunion));
-		}
-		return reunionesConvertidas;
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
 	}
 	public Reuniones crearReunion() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
