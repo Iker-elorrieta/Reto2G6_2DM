@@ -3,79 +3,71 @@ package vista;
 import javax.swing.JPanel;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
+
+import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class PanelGeneral extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 	private TablaHorario panelHorarios;
-	private JButton btnVerOtrosHorarios;
-	private JButton btnOrganizarReuniones;
 
 	/**
 	 * Create the panel.
 	 */
 	public PanelGeneral() {
 		setLayout(null);
+		setPreferredSize(new Dimension(1394, 460));
+		setBackground(Color.WHITE);
+
+		// Panel contenedor para Mi Horario y reuniones
+		JPanel contenedorHorario = new JPanel() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				try {
+					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					g2.setColor(Color.WHITE);
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+					g2.setColor(new Color(30, 42, 68, 20));
+					g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+				} finally {
+					g2.dispose();
+				}
+				super.paintComponent(g);
+			}
+		};
+		contenedorHorario.setLayout(null);
+		contenedorHorario.setOpaque(false);
+		contenedorHorario.setBounds(10, 0, 1374, 425);
+		add(contenedorHorario);
+
+		JLabel lblIconoHorario = new JLabel();
+		lblIconoHorario.setIcon(FontIcon.of(MaterialDesignC.CLOCK_OUTLINE, 28, new Color(255, 159, 64)));
+		lblIconoHorario.setBounds(15, 12, 32, 40);
+		contenedorHorario.add(lblIconoHorario);
+
 		JLabel lblMiHorario = new JLabel("Mi horario");
-		lblMiHorario.setFont(new Font("Dialog", Font.PLAIN, 30));
-		lblMiHorario.setBounds(0, 11, 160, 51);
-		add(lblMiHorario);
-		
-		btnOrganizarReuniones = new JButton("Organizar reuniones");
+		lblMiHorario.setFont(new Font("Raleway", Font.PLAIN, 26));
+		lblMiHorario.setForeground(new Color(255, 159, 64));
+		lblMiHorario.setBounds(52, 12, 250, 40);
+		contenedorHorario.add(lblMiHorario);
 
-		btnOrganizarReuniones.setForeground(Color.WHITE);
-		btnOrganizarReuniones.setFont(fuenteBold);
-		btnOrganizarReuniones.setBackground(Color.decode("#0092A5"));
-		btnOrganizarReuniones.setBounds(389, 355, 251, 38);
-		add(btnOrganizarReuniones);
-		
-		TablaHorario panelReunionesSemanal = new TablaHorario();
-		panelReunionesSemanal.setBounds(0, 406, 637, 262);
-		add(panelReunionesSemanal);
-		
-		JLabel lblMiHorario_1 = new JLabel("Reuniones esta semana");
-		lblMiHorario_1.setFont(new Font("Dialog", Font.PLAIN, 30));
-		lblMiHorario_1.setBounds(0, 345, 361, 51);
-		add(lblMiHorario_1);
-		
-		btnVerOtrosHorarios = new JButton("Ver otros horarios");
-		btnVerOtrosHorarios.setForeground(Color.WHITE);
-		btnVerOtrosHorarios.setFont(new Font("Dialog", Font.BOLD, 20));
-		btnVerOtrosHorarios.setBackground(Color.decode("#0092A5"));
-		btnVerOtrosHorarios.setBounds(389, 21, 254, 38);
-		add(btnVerOtrosHorarios);
-		
-		panelHorarios = new TablaHorario();
-		panelHorarios.setLocation(0, 73);
-		panelHorarios.setSize(637, 262);
-		add(panelHorarios);
-	}
-
-	public JButton getBtnVerOtrosHorarios() {
-		return btnVerOtrosHorarios;
-	}
-
-	public void setBtnVerOtrosHorarios(JButton btnVerOtrosHorarios) {
-		this.btnVerOtrosHorarios = btnVerOtrosHorarios;
-	}
-
-	public JButton getBtnOrganizarReuniones() {
-		return btnOrganizarReuniones;
-	}
-
-	public void setBtnOrganizarReuniones(JButton btnOrganizarReuniones) {
-		this.btnOrganizarReuniones = btnOrganizarReuniones;
+		panelHorarios = new TablaHorario(new int[] { 90, 256, 256, 256, 256, 256 },true);
+		panelHorarios.setBounds(0, 60, 1374, 365);
+		contenedorHorario.add(panelHorarios);
 	}
 	
 	public TablaHorario getPanelHorarios() {
 		return panelHorarios;
 	}
-
-	
-
 }

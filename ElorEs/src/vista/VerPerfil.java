@@ -2,10 +2,12 @@ package vista;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -37,6 +39,8 @@ public class VerPerfil extends JFrame {
 	private JLabel lblTelefono2;
 	private JPanel panel;
 	private JLabel lblUsuario;
+	private JButton btnDesconectar;
+	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 
 
 	public VerPerfil() {
@@ -46,7 +50,7 @@ public class VerPerfil extends JFrame {
 		setLocationRelativeTo(null);
 		setResizable(false);
 
-		contentPane = Inicio.crearPanelconImagen("/Fondo.png");
+		contentPane = Login.crearPanelconImagen("/Fondo.png");
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -63,7 +67,7 @@ public class VerPerfil extends JFrame {
 				g2.dispose();
 			}
 		};
-		panel.setBounds(10, 32, 424, 308);
+		panel.setBounds(10, 32, 424, 324);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -78,37 +82,37 @@ public class VerPerfil extends JFrame {
 		panel.add(lblNombreUsuario);
 		
 		lblUsuarioTitulo = new JLabel("Usuario:");
-		lblUsuarioTitulo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblUsuarioTitulo.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblUsuarioTitulo.setBounds(10, 89, 72, 20);
 		panel.add(lblUsuarioTitulo);
 		
 		lblUsuario = new JLabel("NOMBRE");
-		lblUsuario.setFont(new Font("Dialog", Font.PLAIN, 15));
+		lblUsuario.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblUsuario.setBounds(81, 89, 333, 20);
 		panel.add(lblUsuario);
 		
 		lblCorreoElectrnico = new JLabel("Correo electrónico:");
-		lblCorreoElectrnico.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblCorreoElectrnico.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblCorreoElectrnico.setBounds(10, 120, 160, 20);
 		panel.add(lblCorreoElectrnico);
 		
 		lblEmail = new JLabel("NOMBRE");
-		lblEmail.setFont(new Font("Dialog", Font.PLAIN, 15));
+		lblEmail.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblEmail.setBounds(164, 120, 250, 20);
 		panel.add(lblEmail);
 		
 		lblDNITitulo = new JLabel("DNI:");
-		lblDNITitulo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblDNITitulo.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblDNITitulo.setBounds(10, 151, 41, 20);
 		panel.add(lblDNITitulo);
 		
 		lblDNI = new JLabel("NOMBRE");
-		lblDNI.setFont(new Font("Dialog", Font.PLAIN, 15));
+		lblDNI.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblDNI.setBounds(49, 151, 365, 20);
 		panel.add(lblDNI);
 		
 		lblDireccionTitulo = new JLabel("Dirección:");
-		lblDireccionTitulo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblDireccionTitulo.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblDireccionTitulo.setBounds(10, 182, 85, 20);
 		panel.add(lblDireccionTitulo);
 		
@@ -118,29 +122,44 @@ public class VerPerfil extends JFrame {
 		panel.add(lblDireccion);
 		
 		lblTelefono1Titulo = new JLabel("Teléfono 1:");
-		lblTelefono1Titulo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTelefono1Titulo.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblTelefono1Titulo.setBounds(10, 213, 100, 20);
 		panel.add(lblTelefono1Titulo);
 		
 		lblTelefono1 = new JLabel("NOMBRE");
-		lblTelefono1.setFont(new Font("Dialog", Font.PLAIN, 15));
+		lblTelefono1.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblTelefono1.setBounds(107, 213, 307, 20);
 		panel.add(lblTelefono1);
 		
 		lblTelefono2Titulo = new JLabel("Teléfono 2:");
-		lblTelefono2Titulo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTelefono2Titulo.setFont(new Font("Raleway", Font.BOLD, 15));
 		lblTelefono2Titulo.setBounds(10, 244, 100, 20);
 		panel.add(lblTelefono2Titulo);
 		
 		lblTelefono2 = new JLabel("NOMBRE");
-		lblTelefono2.setFont(new Font("Dialog", Font.PLAIN, 15));
+		lblTelefono2.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblTelefono2.setBounds(107, 244, 307, 20);
 		panel.add(lblTelefono2);
 	
+		btnDesconectar = new JButton("Desconectar");
+		btnDesconectar.setForeground(new Color(0, 0, 0));
+		btnDesconectar.setFont(fuenteBold);
+		btnDesconectar.setBackground(new Color(255, 255, 255));
+		btnDesconectar.setBounds(10, 275, 404, 38);
+		panel.add(btnDesconectar);
 		
 
 	}
-	
+
+	public JButton getBtnDesconectar() {
+		return btnDesconectar;
+	}
+
+
+	public void setBtnDesconectar(JButton btnDesconectar) {
+		this.btnDesconectar = btnDesconectar;
+	}
+
 	public void cargarAvatar(String argazkiaUrl) {
 		panelAvatar = new JPanel() {
 			    private static final long serialVersionUID = 1L;
@@ -154,11 +173,11 @@ public class VerPerfil extends JFrame {
 			                backgroundImage = ImageIO.read(url);		
 			               
 			            } else {
-			                backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			                backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			            }
 			        } catch (Exception e) {
 			            e.printStackTrace();
-			            backgroundImage = new ImageIcon(Inicio.class.getResource("/avatar.png")).getImage();
+			            backgroundImage = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
 			        }
 			        setOpaque(false); // hacer el panel transparente
 			    }

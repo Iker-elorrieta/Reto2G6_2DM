@@ -2,7 +2,9 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -86,22 +88,21 @@ public class Reuniones implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public Reuniones(Integer idReunion2, Users alumnoConvertido, Users profesorConvertido, String estado2,
-			String estadoEus2, String idCentro2, String titulo2, String asunto2, String aula2, Timestamp fecha2,
-			Timestamp createdAt2, Timestamp updatedAt2, Centros centro) {
-		this.idReunion = idReunion2;
-		this.usersByAlumnoId = alumnoConvertido;
-		this.usersByProfesorId = profesorConvertido;
-		this.estado = estado2;
-		this.estadoEus = estadoEus2;
-		this.idCentro = idCentro2;
-		this.titulo = titulo2;
-		this.asunto = asunto2;
-		this.aula = aula2;
-		this.fecha = fecha2;
-		this.createdAt = createdAt2;
-		this.updatedAt = updatedAt2;
-		this.centro = centro;
+	public Reuniones(Reuniones otro) {
+	    this.idReunion = otro.getIdReunion();
+	    this.usersByAlumnoId = otro.getUsersByAlumnoId() != null ? new Users(otro.getUsersByAlumnoId()) : null;
+	    this.usersByProfesorId = otro.getUsersByProfesorId() != null ? new Users(otro.getUsersByProfesorId()) : null;
+
+	    this.estado = otro.getEstado();
+	    this.estadoEus = otro.getEstadoEus();
+	    this.idCentro = otro.getIdCentro();
+	    this.titulo = otro.getTitulo();
+	    this.asunto = otro.getAsunto();
+	    this.aula = otro.getAula();
+	    this.fecha = otro.getFecha();
+	    this.createdAt = otro.getCreatedAt();
+	    this.updatedAt = otro.getUpdatedAt();
+	    this.centro = otro.getCentro() != null ? otro.getCentro() : null;
 	}
 
 	public Integer getIdReunion() {
@@ -214,60 +215,61 @@ public class Reuniones implements java.io.Serializable {
 	public void setCentro(Centros centro) {
 		this.centro = centro;
 	}
+	
+
+
+	@Override
+	public String toString() {
+		return "Reuniones [idReunion=" + idReunion + ", usersByAlumnoId=" + usersByAlumnoId + ", usersByProfesorId="
+				+ usersByProfesorId + ", estado=" + estado + ", estadoEus=" + estadoEus + ", idCentro=" + idCentro
+				+ ", titulo=" + titulo + ", asunto=" + asunto + ", aula=" + aula + ", fecha=" + fecha + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + ", centro=" + centro + "]";
+	}
 
 	@JsonIgnore
-	public Reuniones convertirReunion() {
-	    Users alumnoConvertido = null;
-	    Users profesorConvertido = null;
-	    if (usersByAlumnoId != null) {
-	        alumnoConvertido = usersByAlumnoId.convertirUsuario();
-	    }
-	    if (usersByProfesorId != null) {
-	        profesorConvertido = usersByProfesorId.convertirUsuario();
-	    }
-	    if (centro == null && idCentro != null) {
-	        centro = new Centros(Integer.parseInt(idCentro)).getCentroById();
-	    }
-	    return new Reuniones(getIdReunion(), alumnoConvertido, profesorConvertido, getEstado(),
-	            getEstadoEus(), getIdCentro(), getTitulo(), getAsunto(), getAula(), getFecha(), getCreatedAt(),
-	            getUpdatedAt(),centro);
-	}
-	@JsonIgnore
-	public static ArrayList<Reuniones> getAllReuniones() {
+	public static List<Reuniones> getAllReuniones() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
 		String hql = "from Reuniones";
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
-		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
-				>();
-		for (Reuniones reunion : reuniones) {
-			reunionesConvertidas.add(reunion.convertirReunion());
-		}
-		return reunionesConvertidas;
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
 		
 	}
-	public static ArrayList<Reuniones> getReunionesByUserID(int idUser) {
+	public static List<Reuniones> getReunionesByUserID(int idUser) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
-		String hql = "from Reuniones where usersByAlumnoId.id = :userID or usersByProfesorId.id = :userID";
+		String hql = "from Reuniones where usersByAlumnoId = "+ idUser + " or usersByProfesorId = "+idUser;
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		q.setParameter("userID", idUser);
-		ArrayList<Reuniones> reuniones = new ArrayList<Reuniones>(q.list());
-		ArrayList<Reuniones> reunionesConvertidas = new ArrayList<Reuniones
-				>();
-		for (Reuniones reunion : reuniones) {
-			reunionesConvertidas.add(reunion.convertirReunion());
-		}
-		return reunionesConvertidas;
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
+	}
+
+	public static List<Reuniones> getReunionesByUserIDSemanaActual(int idUser) {
+		LocalDate hoy = LocalDate.now();
+		LocalDate inicioSemana = hoy.with(DayOfWeek.MONDAY);
+		LocalDate finSemana = inicioSemana.plusDays(7);
+
+		Timestamp inicio = Timestamp.valueOf(inicioSemana.atStartOfDay());
+		Timestamp fin = Timestamp.valueOf(finSemana.atStartOfDay());
+
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		String hql = "from Reuniones where (usersByAlumnoId = "+idUser+ " or usersByProfesorId = "+ idUser+") "
+				+ "and fecha >= :inicioSemana and fecha < :finSemana order by fecha";
+		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
+		q.setParameter("inicioSemana", inicio);
+		q.setParameter("finSemana", fin);
+		q.list().replaceAll(reunion -> new Reuniones(reunion));
+		return q.list();
 	}
 	public Reuniones crearReunion() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Transaction tx = null;
 		try (Session session = sesion.openSession()) {
 			tx = session.beginTransaction();
-			Users alumno = new Users(getUsersByAlumnoId().getId()).getUsuarioPorID();
-			Users profesor =  new Users(getUsersByProfesorId().getId()).getUsuarioPorID();
+			Users alumno = getUsersByAlumnoId().getUsuarioPorID();
+			Users profesor =  getUsersByProfesorId().getUsuarioPorID();
 			setUsersByAlumnoId(alumno);
 			setUsersByProfesorId(profesor);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -280,8 +282,10 @@ public class Reuniones implements java.io.Serializable {
 			}
 			session.persist(this);
 			tx.commit();
-			return convertirReunion();
+			return this;
 		} catch (Exception e) {
+			System.out.println(this);
+			System.out.println(e.getMessage());
 			if (tx != null) {
 				tx.rollback();
 			}
@@ -308,7 +312,7 @@ public class Reuniones implements java.io.Serializable {
 			reunion.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(reunion);
 			tx.commit();
-			return reunion.convertirReunion();
+			return this;
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();
@@ -317,4 +321,25 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+    public void eliminarReunion() {
+        if (getIdReunion() == null) {
+            throw new IllegalStateException("Id de reunión obligatorio para eliminar");
+        }
+        SessionFactory sesion = HibernateUtil.getSessionFactory();
+        Transaction tx = null;
+        try (Session session = sesion.openSession()) {
+            tx = session.beginTransaction();
+            Reuniones reunion = session.get(Reuniones.class, getIdReunion());
+            if (reunion == null) {
+                throw new RuntimeException("Reunión no encontrada con id: " + getIdReunion());
+            }
+            session.remove(reunion);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw e;
+        }
+    }
 }

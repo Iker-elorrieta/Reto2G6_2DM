@@ -1,10 +1,17 @@
 package modelo;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import cliente.Cliente;
 
 public class Horarios implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private static final int MAX_MODULO_LENGTH = 13;
 	private Integer id;
 	private Users users;
 	private Modulos modulos;
@@ -78,7 +85,10 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	public String getAula() {
-		return this.aula;
+		if (this.aula == null) {
+			return null;
+		}
+		return this.aula.replaceAll("(?i)aula\\s*", "").trim();
 	}
 
 	public void setAula(String aula) {
@@ -108,5 +118,138 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+	public static ArrayList<Horarios> getHorarios(Cliente cliente) {
+		Object response;
+		try {
+			response = cliente.enviarRequest("get_horarios", new ArrayList<>());
+
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Horarios> horarios = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Horarios) {
+						horarios.add((Horarios) elemento);
+					}
+				}
+				return horarios;
+
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(null, (String) response, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+	public static ArrayList<Horarios> getHorariosporUsuario(Cliente cliente, int usuario) {
+		ArrayList<Object> datos = new ArrayList<>();
+		datos.add(usuario);
+		Object response;
+		try {
+			response = cliente.enviarRequest("get_horarios_id", datos);
+
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Horarios> horarios = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Horarios) {
+						horarios.add((Horarios) elemento);
+					}
+				}
+				return horarios;
+
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(null, (String) response, "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+	
+	public String getHoraStr() {
+		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
+		return String.format("%02d:00", horaNormalizada);
+	}
+	
+	public String getTooltip() {
+		String modulo = getModulos().getNombre().trim();
+		String aula = getAula();
+		StringBuilder sb = new StringBuilder("Módulo: ").append(modulo);
+		if (aula != null && !aula.trim().isEmpty()) {
+			sb.append(" | Aula: ").append(aula.trim());
+		}
+		return sb.toString();
+	}
+	
+	public String getModuloHtml(boolean recortarNombre, boolean envolverHtml) {
+		String modulo = recortarNombre ? getNombreModuloCorto() : getModulos().getNombre().trim();
+		String contenido = getDescripcion(modulo);
+		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" :contenido ;
+	}
+
+	private String getDescripcion(String modulo) {
+		String aula = (getAula() != null) ? getAula().trim() : null;
+		String ciclo = (getModulos() != null && getModulos().getCiclos() != null)
+				? getModulos().getCiclos().getNombre().trim()
+				: null;
+		StringBuilder contenido = new StringBuilder();
+		if (modulo != null && aula != null && ciclo != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula).append(" ").append(ciclo);
+		} else if (modulo != null && aula != null) {
+			contenido.append("<b>").append(modulo).append("</b> ").append(aula);
+		} else if (modulo != null) {
+			contenido.append("<b>").append(modulo).append("</b>");
+		} else if (aula != null) {
+			contenido.append(aula);
+		} else {
+			contenido.append("<span style='color:#7A7A7A;'>Disponible</span>");
+		}
+		return contenido.toString();
+	}
+
+
+
+	private String getNombreModuloCorto() {
+		String limpio = getModulos().getNombre().trim();
+		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
+			limpio = limpio.substring(0, MAX_MODULO_LENGTH - 3) + "...";
+		}
+		return limpio;
+	}
+
+	
+	public int obtenerColumnaDia() {
+		switch (dia.trim().toUpperCase()) {
+		case "LUNES":
+			return 1;
+		case "MARTES":
+			return 2;
+		case "MIERCOLES":
+		case "MIÉRCOLES":
+			return 3;
+		case "JUEVES":
+			return 4;
+		case "VIERNES":
+			return 5;
+		default:
+			return -1;
+		}
+	}
+
+
+	public static Horarios getPrimerHorarioDesdeLista(List<?> valores) {
+		if (valores == null) {
+			return null;
+		}
+		for (Object item : valores) {
+			if (item instanceof Horarios) {
+				return (Horarios) item;
+			}
+		}
+		return null;
+	}
+	
 
 }

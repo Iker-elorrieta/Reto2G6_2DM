@@ -42,7 +42,7 @@ public class Controller implements WebMvcConfigurer {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestParam String username, @RequestParam String contrasena) {
 		try {
-			Users user = new Users(username,contrasena).iniciarSesion();
+			Users user = new Users(username,contrasena).iniciarSesion(null);
 			return ResponseEntity.ok(user);
 
 		} catch (IllegalArgumentException e) {
@@ -160,12 +160,38 @@ public class Controller implements WebMvcConfigurer {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
+
+	@DeleteMapping("/reuniones/{id}")
+	public ResponseEntity<?> borrarReunion(@PathVariable Integer id) {
+		try {
+			new Reuniones(id).eliminarReunion();
+			return ResponseEntity.noContent().build();
+		} catch (IllegalStateException | IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al borrar la reunión");
+		}
+	}
 	
 	/* HORARIOS */
 	@GetMapping("/horarios/{id}")
 	public ResponseEntity<?> getHorariosByUserID(@PathVariable Integer id) {
 		try {
 			return ResponseEntity.ok(Horarios.getHorariosByUserId(id));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+
+	@PostMapping("/horarios/")
+	public ResponseEntity<?> crearHorario(@RequestBody Horarios horario) {
+		try {
+			Horarios nuevo = horario.crearHorario();
+			return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (RuntimeException e) {

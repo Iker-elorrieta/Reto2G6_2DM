@@ -1,8 +1,11 @@
 package modelo;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import cliente.Cliente;
 
+import javax.swing.JOptionPane;
+
+import cliente.Cliente;
 
 public class Users implements java.io.Serializable {
 
@@ -161,18 +164,83 @@ public class Users implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	
+
+
+	public static Object login(Cliente cliente, String username, String password) {
+		ArrayList<Object> parametros = new ArrayList<>();
+		parametros.add(username);
+		parametros.add(password);
+		try {
+			return cliente.enviarRequest("login", parametros);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Error al conectar con el servidor.");
+			return null;
+		}
+	}
+
+	public void desconectar(Cliente cliente) {
+		try {
+			cliente.enviarRequest("logout", new ArrayList<>());
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Error al desconectar del servidor.");
+		}
+	}
+
+	public ArrayList<Users> getProfesores(Cliente cliente) {
+		try {
+			Object response = cliente.enviarRequest("get_profesores", new ArrayList<>());
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Users> profesores = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Users) {
+						profesores.add((Users) elemento);
+					}
+				}
+				return
+
+				profesores;
+			} else if (response instanceof String) {
+			}
+		} catch (Exception e) {
+		}
+		return new ArrayList<>();
+	}
+
+	public ArrayList<Users> getAlumnos(Cliente cliente) {
+		Object response;
+		try {
+			response = cliente.enviarRequest("get_alumnos", new ArrayList<>());
+
+			if (response instanceof ArrayList<?>) {
+				ArrayList<Users> alumnos = new ArrayList<>();
+				for (Object elemento : (ArrayList<?>) response) {
+					if (elemento instanceof Users) {
+						alumnos.add((Users) elemento);
+					}
+				}
+				return alumnos;
+
+			} else if (response instanceof String) {
+				JOptionPane.showMessageDialog(null, response);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+
 	public Users getUsuarioLogged(Cliente cliente) {
 
 		try {
-		return (Users) cliente.enviarRequest("get_usuario",new ArrayList<>());
-		
+			return (Users) cliente.enviarRequest("get_usuario", new ArrayList<>());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
-	
+
 	}
 
 }

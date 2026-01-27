@@ -9,7 +9,7 @@ import org.hibernate.Transaction;
 import modelo.Users;
 
 
-// EJECUTAR UNA SOLA VEZ PARA HASHEAR USUARIOS AL IMPORTAR BD
+// EJECUTAR UNA SOLA VEZ PARA HASHEAR USUARIOS AL IMPORTAR BD (directamente del Moodle)
 public class HashUsuarios {
 	public static void main(String[] args) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
