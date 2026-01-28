@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.swing.JOptionPane;
@@ -27,7 +28,7 @@ import modelo.Reuniones;
 import modelo.Users;
 import vista.Login;
 import vista.Menu;
-import vista.VentanaAnadirReunion;
+import vista.AnadirReunion;
 import vista.VerPerfil;
 
 public class Controlador extends MouseAdapter implements ActionListener {
@@ -36,7 +37,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	private Login vistaLogin;
 	private Menu vistaMenu;
 	private VerPerfil vistaPerfil;
-	private VentanaAnadirReunion ventanaReunion;
+	private AnadirReunion ventanaReunion;
 
 	// Socket
 	private Cliente cliente;
@@ -47,8 +48,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	// Acciones posibles (usado en procesarAccion)
 	private enum Accion {
 		INICIAR_SESION, DESCONECTAR, VOLVER_MENU, VOLVER_MENUPAGINA, CONSULTAR_ALUMNOS, VER_HORARIOS,
-		ORGANIZAR_REUNIONES, ABRIR_FORMULARIO_REUNION, ABRIR_PERFIL, HORARIO_PROFESOR_SELECCIONADO,
-		CREAR_REUNION
+		ORGANIZAR_REUNIONES, ABRIR_FORMULARIO_REUNION, ABRIR_PERFIL, HORARIO_PROFESOR_SELECCIONADO, CREAR_REUNION,
+		ACEPTAR_REUNION, RECHAZAR_REUNION
 	}
 
 	// Constructor (ejecutado desde ElorEs.java)
@@ -57,7 +58,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		this.vistaLogin = vistaLogin;
 		vistaMenu = new Menu();
 		vistaPerfil = new VerPerfil();
-		ventanaReunion = new VentanaAnadirReunion();
+		ventanaReunion = new AnadirReunion();
 
 		// Configurar botones y listeners
 		inicializarControlador();
@@ -125,6 +126,11 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 		ventanaReunion.getBtnGuardar().setActionCommand(Accion.CREAR_REUNION.name());
 		ventanaReunion.getBtnGuardar().addActionListener(this);
+
+		vistaMenu.getPanelOrganizarReuniones().getBtnAceptar().setActionCommand(Accion.ACEPTAR_REUNION.name());
+		vistaMenu.getPanelOrganizarReuniones().getBtnAceptar().addActionListener(this);
+		vistaMenu.getPanelOrganizarReuniones().getBtnRechazar().setActionCommand(Accion.RECHAZAR_REUNION.name());
+		vistaMenu.getPanelOrganizarReuniones().getBtnRechazar().addActionListener(this);
 	}
 
 	/**
@@ -139,6 +145,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		case DESCONECTAR:
 			usuario.desconectar(cliente);
 			vistaMenu.setVisible(false);
+			vistaPerfil.setVisible(false);
 			vistaLogin.setVisible(true);
 			break;
 		case VOLVER_MENU:
@@ -156,11 +163,11 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			break;
 		case VER_HORARIOS:
 			mostrarPanel(vistaMenu.getPanelVerHorarios(), "HORARIOS");
-			actualizarListaProfesores(usuario.getProfesores(cliente));
+			actualizarListaProfesores();
 			break;
 		case ORGANIZAR_REUNIONES:
 			mostrarPanel(vistaMenu.getPanelOrganizarReuniones(), "REUNIONES");
-			actualizarTablaReuniones(Reuniones.getReunionesUsuario(cliente));
+			actualizarTablaReuniones();
 			break;
 		case ABRIR_FORMULARIO_REUNION:
 			mostrarFormularioNuevaReunion();
@@ -174,11 +181,16 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		case CREAR_REUNION:
 			crearReunion();
 			break;
+		case ACEPTAR_REUNION:
+			actualizarEstadoReunionDesdeTabla(true);
+			break;
+		case RECHAZAR_REUNION:
+			actualizarEstadoReunionDesdeTabla(false);
+			break;
 		default:
 			break;
 		}
 	}
-
 
 	// Redireccionar botones a procesarAccion
 	@Override
@@ -248,7 +260,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		vistaMenu.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
 				+ usuario.getTipos().getName().substring(1).toLowerCase());
 		vistaMenu.cargarAvatar(usuario.getArgazkiaUrl());
-		
+
 		// Datos de ver perfil
 		vistaPerfil.getLblNombreUsuario().setText(usuario.getNombre() + " " + usuario.getApellidos());
 		vistaPerfil.getLblRolUsuario().setText(usuario.getTipos().getName().substring(0, 1).toUpperCase()
@@ -274,7 +286,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	}
 
 	// Actualiza la tabla de reuniones con la lista proporcionada
-	private void actualizarTablaReuniones(List<Reuniones> reuniones) {
+	private void actualizarTablaReuniones() {
+		ArrayList<Reuniones> reuniones = Reuniones.getReunionesUsuario(cliente);
 		DefaultTableModel modelo = vistaMenu.getPanelOrganizarReuniones().getModeloReuniones();
 		if (modelo == null) {
 			return;
@@ -289,8 +302,43 @@ public class Controlador extends MouseAdapter implements ActionListener {
 					reunion.getUsersByAlumnoId().getNombre() + " " + reunion.getUsersByAlumnoId().getApellidos(),
 					reunion.getEstado(), reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(),
 					dtf.format(reunion.getCreatedAt().toLocalDateTime()),
-					dtf.format(reunion.getUpdatedAt().toLocalDateTime()) });
+					dtf.format(reunion.getUpdatedAt().toLocalDateTime()), null, null });
 		}
+	}
+
+	private void actualizarEstadoReunionDesdeTabla(boolean aceptar) {
+		int filaVista = vistaMenu.getPanelOrganizarReuniones().getTableReuniones().getSelectedRow();
+		if (filaVista < 0) {
+			return;
+		}
+
+		int filaModelo = vistaMenu.getPanelOrganizarReuniones().getTableReuniones().convertRowIndexToModel(filaVista);
+		DefaultTableModel modelo = vistaMenu.getPanelOrganizarReuniones().getModeloReuniones();
+
+		int idReunion = ((Number) modelo.getValueAt(filaModelo, 0)).intValue();
+
+		String estadoActual = Objects.toString(modelo.getValueAt(filaModelo, 3), "");
+		String estadoDestino = obtenerEstadoDestino(aceptar, estadoActual);
+
+		try {
+			Reuniones respuesta = Reuniones.actualizarEstado(cliente, idReunion, estadoDestino);
+			if (respuesta == null) {
+				JOptionPane.showMessageDialog(vistaMenu, "No se pudo actualizar la reunión.");
+				return;
+			}
+			actualizarTablaReuniones();
+			actualizarTablaMiHorario();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(vistaMenu, "Error al actualizar la reunión: " + e.getMessage());
+		}
+	}
+
+	private String obtenerEstadoDestino(boolean aceptar, String estadoActual) {
+		String estadoNormalizado = estadoActual == null ? "" : estadoActual.trim().toUpperCase();
+		if (aceptar) {
+			return "ACEPTADA".equals(estadoNormalizado) ? "PENDIENTE" : "ACEPTADA";
+		}
+		return "DENEGADA".equals(estadoNormalizado) ? "PENDIENTE" : "DENEGADA";
 	}
 
 	// Actualiza la tabla de alumnos asignados al profesor actual
@@ -439,7 +487,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 	 * Actualiza la lista de profesores en el panel de ver horarios Funcion llamada
 	 * desde procesarAccion accion VER_HORARIOS
 	 */
-	private void actualizarListaProfesores(ArrayList<Users> profesores) {
+	private void actualizarListaProfesores() {
+		ArrayList<Users> profesores = usuario.getProfesores(cliente);
 		vistaMenu.getPanelVerHorarios().getModeloProfesores().setRowCount(0);
 		for (Users profesor : profesores) {
 			vistaMenu.getPanelVerHorarios().getModeloProfesores()
@@ -468,7 +517,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			JOptionPane.showMessageDialog(vistaMenu, "No se pudo cargar el horario: " + e.getMessage());
 		}
 	}
-	
+
 	/*
 	 * Muestra el formulario para crear una nueva reunión.
 	 */
@@ -486,7 +535,8 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		ventanaReunion.setCentros(centros);
 		ventanaReunion.setVisible(true);
 	}
-	/*	 
+
+	/*
 	 * Crea una nueva reunión con los datos del formulario y actualiza la tabla de
 	 * reuniones si es exitoso.
 	 */
@@ -511,12 +561,13 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			LocalDateTime fechaHora = LocalDateTime.of(fecha, hora.withSecond(0).withNano(0));
 			Timestamp timestamp = Timestamp.valueOf(fechaHora);
 
-			Reuniones nuevaReunion = new Reuniones(alumno, usuario, titulo, asunto, aula, timestamp, centro, centro.getCCEN());
-			
+			Reuniones nuevaReunion = new Reuniones(alumno, usuario, titulo, asunto, aula, timestamp, centro,
+					centro.getCCEN());
+
 			Object response = nuevaReunion.crearReunion(cliente);
 			if (response instanceof Reuniones) {
 				ventanaReunion.limpiarFormulario();
-				actualizarTablaReuniones(Reuniones.getReunionesUsuario(cliente));
+				actualizarTablaReuniones();
 				actualizarTablaMiHorario();
 				ventanaReunion.setVisible(false);
 			} else if (response instanceof String mensaje) {
@@ -528,6 +579,5 @@ public class Controlador extends MouseAdapter implements ActionListener {
 			ventanaReunion.getLblEstado().setText("Error: " + e.getMessage());
 		}
 	}
-
 
 }

@@ -222,6 +222,20 @@ public class Reuniones implements java.io.Serializable {
 		return null;
 	}
 
+	public static Reuniones actualizarEstado(Cliente cliente, int idReunion, String nuevoEstado) throws Exception {
+		ArrayList<Object> parametros = new ArrayList<>();
+		parametros.add(idReunion);
+		parametros.add(nuevoEstado.toUpperCase());
+		Object response = cliente.enviarRequest("update_reunion", parametros);
+		if (response instanceof Reuniones) {
+			return (Reuniones) response;
+		}
+		if (response instanceof String) {
+			throw new RuntimeException((String) response);
+		}
+		return null;
+	}
+
 	public String obtenerHora() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime fecha = getFecha().toLocalDateTime();

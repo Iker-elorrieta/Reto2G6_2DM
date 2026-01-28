@@ -1,19 +1,23 @@
 package vista;
 
+import javax.swing.AbstractCellEditor;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
@@ -26,6 +30,9 @@ public class PanelOrganizarReuniones extends JPanel {
 	private JButton btnNuevaReunion;
 	private JTable tableReuniones;
 	private DefaultTableModel modeloReuniones;
+	
+	private JButton btnAceptar;
+	private JButton btnRechazar;
 
 	public PanelOrganizarReuniones() {
 		setLayout(null);
@@ -76,12 +83,12 @@ public class PanelOrganizarReuniones extends JPanel {
 		contenedorReuniones.add(btnNuevaReunion);
 
 		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno",
-			"Estado", "Título", "Asunto", "Aula", "Creado", "Actualizado" }, 0) {
+			"Estado", "Título", "Asunto", "Aula", "Creado", "Actualizado", "", "" }, 0) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public boolean isCellEditable(int row, int column) {
-				return false;
+				return column >= getColumnCount() - 2;
 			}
 		};
 
@@ -100,12 +107,30 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tableReuniones.setDefaultEditor(Object.class, null);
 
-		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140 };
+		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140, 110, 120 };
 		for (int i = 0; i < columnWidths.length && i < tableReuniones.getColumnCount(); i++) {
 			tableReuniones.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
 		}
 		tableReuniones.getColumnModel().getColumn(0).setMinWidth(0);
 		tableReuniones.getColumnModel().getColumn(0).setMaxWidth(0);
+
+		int aceptarColumnIndex = modeloReuniones.getColumnCount() - 2;
+		int rechazarColumnIndex = modeloReuniones.getColumnCount() - 1;
+
+		btnAceptar = new JButton();
+		btnRechazar = new JButton();
+		
+		tableReuniones.getColumnModel().getColumn(aceptarColumnIndex)
+				.setCellRenderer(new BotonAccionRenderer("Aceptar", new Color(46, 204, 113)));
+		
+		tableReuniones.getColumnModel().getColumn(aceptarColumnIndex)
+				.setCellEditor(new BotonAccionEditor(btnAceptar,"Aceptar", new Color(46, 204, 113)));
+		
+		tableReuniones.getColumnModel().getColumn(rechazarColumnIndex)
+				.setCellRenderer(new BotonAccionRenderer("Rechazar", new Color(231, 76, 60)));
+		
+		tableReuniones.getColumnModel().getColumn(rechazarColumnIndex)
+				.setCellEditor(new BotonAccionEditor(btnRechazar,"Rechazar", new Color(231, 76, 60)));
 
 		JScrollPane scrollPane = new JScrollPane(tableReuniones);
 		scrollPane.setBounds(0, 60, 1374, 365);
@@ -134,6 +159,26 @@ public class PanelOrganizarReuniones extends JPanel {
 		return modeloReuniones;
 	}
 
+	public JButton getBtnAceptar() {
+		return btnAceptar;
+	}
+
+
+	public void setBtnAceptar(JButton btnAceptar) {
+		this.btnAceptar = btnAceptar;
+	}
+
+
+	public JButton getBtnRechazar() {
+		return btnRechazar;
+	}
+
+
+	public void setBtnRechazar(JButton btnRechazar) {
+		this.btnRechazar = btnRechazar;
+	}
+
+
 	private JButton crearBotonNuevaReunion() {
 		final Color verdeAccion = new Color(46, 204, 113);
 		JButton boton = new JButton("Nueva reunión") {
@@ -161,5 +206,59 @@ public class PanelOrganizarReuniones extends JPanel {
 		boton.setBorderPainted(false);
 		boton.setOpaque(false);
 		return boton;
+	}
+
+	private static class BotonAccionRenderer extends JButton implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+		private final String texto;
+
+		BotonAccionRenderer(String texto, Color color) {
+			this.texto = texto;
+			setOpaque(true);
+			setForeground(Color.WHITE);
+			setBackground(color);
+			setFont(new Font("Raleway", Font.BOLD, 14));
+			setFocusPainted(false);
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			setText(texto);
+			return this;
+		}
+	}
+
+	private static class BotonAccionEditor extends AbstractCellEditor implements TableCellEditor {
+		private static final long serialVersionUID = 1L;
+		private final JButton button;
+		private final Color background;
+		private final String texto;
+
+		BotonAccionEditor(JButton button, String texto, Color background) {
+			this.texto = texto;
+			this.background = background;
+			this.button = button;
+			button.setForeground(Color.WHITE);
+			button.setFont(new Font("Raleway", Font.BOLD, 14));
+			button.setFocusPainted(false);
+			button.setContentAreaFilled(true);
+			button.setOpaque(true);
+			button.setBackground(background);
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+				int column) {
+			button.setText(texto);
+			button.setBackground(background);
+			return button;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			return null;
+		}
+
 	}
 }

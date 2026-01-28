@@ -31,7 +31,7 @@ public class Login extends JFrame {
 	 * Create the frame.
 	 */
 	public Login() {
-		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
+		setTitle("Framework educativo - CIFP Elorrieta-Erreka Mari LHII");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 460, 564);
@@ -52,14 +52,14 @@ public class Login extends JFrame {
 			@Override
 			protected void paintComponent(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g.create();
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setColor(getBackground());
-				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-				g2.dispose();
+				   g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	                g2.setColor(getBackground());
+	                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+	                g2.dispose();
 			}
 		};
-		panelLogin.setBackground(Color.WHITE);
 		panelLogin.setOpaque(false);
+		panelLogin.setBackground(new Color(255, 255, 255, 230));
 		panelLogin.setLayout(null);
 		panelLogin.setBounds(38, 150, 374, 295);
 		contentPane.add(panelLogin);

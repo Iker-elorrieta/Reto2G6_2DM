@@ -47,7 +47,7 @@ public class Menu extends JFrame {
 	 */
 	public Menu() {
 		setResizable(false);
-		setTitle("Framework educativo - CIFP Elorrieta-Errekamari LHII");
+		setTitle("Framework educativo - CIFP Elorrieta-Erreka Mari LHII");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1429, 595);
 		setLocationRelativeTo(null);

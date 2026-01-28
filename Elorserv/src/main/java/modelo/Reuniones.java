@@ -4,6 +4,7 @@ package modelo;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -263,6 +264,58 @@ public class Reuniones implements java.io.Serializable {
 		q.list().replaceAll(reunion -> new Reuniones(reunion));
 		return q.list();
 	}
+
+	private boolean hayConflictoConAgendaProfesor() {
+		List<Horarios> horariosProfesor = Horarios.getHorariosByUserId(getUsersByProfesorId().getId());
+		if (horariosProfesor != null) {
+			for (Horarios horario : horariosProfesor) {
+				if (horario.coincide(getFecha())) {
+					return true;
+				}
+			}
+		}
+		List<Reuniones> reunionesProfesor = obtenerReunionesEnDia(getUsersByProfesorId(), getFecha());
+		if (reunionesProfesor != null) {
+			LocalDateTime nuevaFecha = getFecha().toLocalDateTime();
+			for (Reuniones reunionExistente : reunionesProfesor) {
+				EstadoReunion estadoExistente = reunionExistente.getEstadoEnum();
+				if (estadoExistente == EstadoReunion.DENEGADA) {
+					continue;
+				}
+				if (coincide(nuevaFecha)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	private static List<Reuniones> obtenerReunionesEnDia(Users profesor, Timestamp fechaReferencia) {
+		SessionFactory sesion = HibernateUtil.getSessionFactory();
+		Session session = sesion.openSession();
+		LocalDate fecha = fechaReferencia.toLocalDateTime().toLocalDate();
+		Timestamp inicioDia = Timestamp.valueOf(fecha.atStartOfDay());
+		Timestamp finDia = Timestamp.valueOf(fecha.plusDays(1).atStartOfDay());
+		String hql = "from Reuniones where usersByProfesorId = :profesor and fecha >= :inicioDia and fecha < :finDia";
+		return session.createQuery(hql, Reuniones.class)
+				.setParameter("profesor", profesor)
+				.setParameter("inicioDia", inicioDia)
+				.setParameter("finDia", finDia)
+				.list();
+	}
+
+
+
+	private  boolean coincide(LocalDateTime nuevaFecha) {
+		if (!nuevaFecha.toLocalDate().equals(getFecha().toLocalDateTime().toLocalDate())) {
+			return false;
+		}
+		return nuevaFecha.getHour() == getFecha().toLocalDateTime().getHour();
+	}
+
+
+
 	public Reuniones crearReunion() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Transaction tx = null;
@@ -276,8 +329,11 @@ public class Reuniones implements java.io.Serializable {
 			if (getCreatedAt() == null) {
 				setCreatedAt(now);
 			}
-			setUpdatedAt(now);
-			if (getEstadoEnum() == null) {
+			setUpdatedAt(now); 
+			boolean hayConflicto = hayConflictoConAgendaProfesor();
+			if (hayConflicto) {
+				setEstado(EstadoReunion.CONFLICTO);
+			} else if (getEstadoEnum() == null) {
 				setEstado(EstadoReunion.PENDIENTE);
 			}
 			session.persist(this);

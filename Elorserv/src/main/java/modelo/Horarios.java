@@ -2,6 +2,8 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -91,7 +93,7 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	public String getDia() {
-		return this.dia;
+		return this.dia.trim().toUpperCase();
 	}
 
 	public void setDia(String dia) {
@@ -137,6 +139,37 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+	
+	private static String diaSemana(DayOfWeek day) {
+		switch (day) {
+		case MONDAY:
+			return "LUNES";
+		case TUESDAY:
+			return "MARTES";
+		case WEDNESDAY:
+			return "MIERCOLES";
+		case THURSDAY:
+			return "JUEVES";
+		case FRIDAY:
+			return "VIERNES";
+		case SATURDAY:
+			return "SABADO";
+		case SUNDAY:
+			return "DOMINGO";
+		default:
+			return "";
+		}
+	}
+
+	public boolean coincide(Timestamp fechaReunion) {
+		LocalDateTime fechaR = fechaReunion.toLocalDateTime();
+		String diaReunion = diaSemana(fechaR.getDayOfWeek());
+		if (!getDia().equals(diaReunion)) {
+			return false;
+		}
+		return (7+ hora) == (fechaR.getHour());
+	}
+	
 	public static List<Horarios> getHorariosByUserId(Integer userId) {
 		Users user = new Users(userId).getUsuarioPorID();
 		switch (user.getTipos().getName()) {

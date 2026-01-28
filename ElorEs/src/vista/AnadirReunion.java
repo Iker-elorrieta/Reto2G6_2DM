@@ -30,7 +30,7 @@ import com.toedter.calendar.JDateChooser;
 import modelo.Centros;
 import modelo.Users;
 
-public class VentanaAnadirReunion extends JFrame {
+public class AnadirReunion extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +48,8 @@ public class VentanaAnadirReunion extends JFrame {
     private JLabel lblEstado;
     
     
-    public VentanaAnadirReunion() {
-        setTitle("Anadir reunion - CIFP Elorrieta-Errekamari LHII");
+    public AnadirReunion() {
+        setTitle("Anadir reunion - CIFP Elorrieta-Erreka Mari LHII");
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 690, 560);
