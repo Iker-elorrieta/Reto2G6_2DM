@@ -47,7 +47,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 
 	// Acciones posibles (usado en procesarAccion)
 	private enum Accion {
-		INICIAR_SESION, DESCONECTAR, VOLVER_MENU, VOLVER_MENUPAGINA, CONSULTAR_ALUMNOS, VER_HORARIOS,
+		INICIAR_SESION, DESCONECTAR, VOLVER_MENU, CONSULTAR_ALUMNOS, VER_HORARIOS,
 		ORGANIZAR_REUNIONES, ABRIR_FORMULARIO_REUNION, ABRIR_PERFIL, HORARIO_PROFESOR_SELECCIONADO, CREAR_REUNION,
 		ACEPTAR_REUNION, RECHAZAR_REUNION
 	}
@@ -151,13 +151,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		case VOLVER_MENU:
 			mostrarPanel(vistaMenu.getPanelGeneral(), "");
 			break;
-		case VOLVER_MENUPAGINA:
-			vistaPerfil.setVisible(false);
-			vistaMenu.setVisible(true);
-			mostrarPanel(vistaMenu.getPanelGeneral(), "");
-			break;
 		case CONSULTAR_ALUMNOS:
-			vistaMenu.setVisible(true);
 			mostrarPanel(vistaMenu.getPanelAlumnos(), "ALUMNOS");
 			actualizarTablaAlumnos();
 			break;

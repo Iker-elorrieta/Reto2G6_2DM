@@ -219,13 +219,7 @@ public class Reuniones implements java.io.Serializable {
 	
 
 
-	@Override
-	public String toString() {
-		return "Reuniones [idReunion=" + idReunion + ", usersByAlumnoId=" + usersByAlumnoId + ", usersByProfesorId="
-				+ usersByProfesorId + ", estado=" + estado + ", estadoEus=" + estadoEus + ", idCentro=" + idCentro
-				+ ", titulo=" + titulo + ", asunto=" + asunto + ", aula=" + aula + ", fecha=" + fecha + ", createdAt="
-				+ createdAt + ", updatedAt=" + updatedAt + ", centro=" + centro + "]";
-	}
+
 
 	/**
 	 * Recupera todas las reuniones en la base de datos (como copias defensivas).

@@ -141,7 +141,7 @@ public class Horarios implements java.io.Serializable {
 	}
 	
 	/**
-	 * Convierte un DayOfWeek en un string enespañol.
+	 * Convierte un DayOfWeek en un string en español.
 	 */
 	private static String diaSemana(DayOfWeek day) {
 		switch (day) {
@@ -251,8 +251,7 @@ public class Horarios implements java.io.Serializable {
 			setUpdatedAt(now);
 			session.persist(this);
 			tx.commit();
-			Horarios horarioCreado = session.get(Horarios.class, getId());
-			return new Horarios(horarioCreado);
+			return this;
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();
