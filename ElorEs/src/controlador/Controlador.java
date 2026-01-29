@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.swing.JOptionPane;
@@ -310,12 +309,9 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		DefaultTableModel modelo = vistaMenu.getPanelOrganizarReuniones().getModeloReuniones();
 
 		int idReunion = ((Number) modelo.getValueAt(filaModelo, 0)).intValue();
-
-		String estadoActual = Objects.toString(modelo.getValueAt(filaModelo, 3), "");
-		String estadoDestino = obtenerEstadoDestino(aceptar, estadoActual);
-
+		
 		try {
-			Reuniones respuesta = Reuniones.actualizarEstado(cliente, idReunion, estadoDestino);
+			Reuniones respuesta = Reuniones.actualizarEstado(cliente, idReunion, (aceptar)?"ACEPTADA":"DENEGADA");
 			if (respuesta == null) {
 				JOptionPane.showMessageDialog(vistaMenu, "No se pudo actualizar la reunión.");
 				return;
@@ -327,13 +323,7 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		}
 	}
 
-	private String obtenerEstadoDestino(boolean aceptar, String estadoActual) {
-		String estadoNormalizado = estadoActual == null ? "" : estadoActual.trim().toUpperCase();
-		if (aceptar) {
-			return "ACEPTADA".equals(estadoNormalizado) ? "PENDIENTE" : "ACEPTADA";
-		}
-		return "DENEGADA".equals(estadoNormalizado) ? "PENDIENTE" : "DENEGADA";
-	}
+
 
 	// Actualiza la tabla de alumnos asignados al profesor actual
 	private void actualizarTablaAlumnos() {

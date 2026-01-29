@@ -235,14 +235,16 @@ public class PanelOrganizarReuniones extends JPanel {
 			TableModel model = table.getModel();
 			String estado = Objects.toString(model.getValueAt(modelRow, 3), "");
 
-			if ("Aceptar".equals(texto) && "ACEPTADA".equalsIgnoreCase(estado) || "Rechazar".equals(texto) && "DENEGADA".equalsIgnoreCase(estado)) {
-				setText("Pendiente");
-				setBackground(COLOR_PENDIENTE);
-			} else{
-				setText(texto);
-				setBackground(colorBase);
-			}
-			return this;
+	
+				   if ("ACEPTADA".equalsIgnoreCase(estado) || "DENEGADA".equalsIgnoreCase(estado)) {
+					   JPanel panelVacio = new JPanel();
+					   panelVacio.setOpaque(false);
+					   return panelVacio;
+				   } else {
+					   setText(texto);
+					   setBackground(colorBase);
+					   return this;
+				   }
 		}
 	}
 
@@ -281,19 +283,19 @@ public class PanelOrganizarReuniones extends JPanel {
 		// Ajustar el botón justo antes de mostrarlo en la celda
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
-			this.tabla = table;
-			int modelRow = table.convertRowIndexToModel(row);
-			TableModel model = table.getModel();
-			String estado = Objects.toString(model.getValueAt(modelRow, 3), "");
-
-			if ("Aceptar".equals(texto) && "ACEPTADA".equalsIgnoreCase(estado) || "Rechazar".equals(texto) && "DENEGADA".equalsIgnoreCase(estado)) {
-				button.setText("Pendiente");
-				button.setBackground(COLOR_PENDIENTE);
-			} else {
-				button.setText(texto);
-				button.setBackground(background);
-			}
-			return button;
+			   this.tabla = table;
+			   int modelRow = table.convertRowIndexToModel(row);
+			   TableModel model = table.getModel();
+			   String estado = Objects.toString(model.getValueAt(modelRow, 3), "");
+			   if ("ACEPTADA".equalsIgnoreCase(estado) || "DENEGADA".equalsIgnoreCase(estado)) {
+				   JPanel panelVacio = new JPanel();
+				   panelVacio.setOpaque(false);
+				   return panelVacio;
+			   } else {
+				   button.setText(texto);
+				   button.setBackground(background);
+				   return button;
+			   }
 		}
 
 		@Override
