@@ -140,6 +140,9 @@ public class Horarios implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 	
+	/**
+	 * Convierte un DayOfWeek en un string enespañol.
+	 */
 	private static String diaSemana(DayOfWeek day) {
 		switch (day) {
 		case MONDAY:
@@ -161,6 +164,9 @@ public class Horarios implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Comprueba si un horario coincide con la fecha/hora de una reunión.
+	 */
 	public boolean coincide(Timestamp fechaReunion) {
 		LocalDateTime fechaR = fechaReunion.toLocalDateTime();
 		String diaReunion = diaSemana(fechaR.getDayOfWeek());
@@ -170,6 +176,9 @@ public class Horarios implements java.io.Serializable {
 		return (7+ hora) == (fechaR.getHour());
 	}
 	
+	/**
+	 * Devuelve los horarios de un usuario determinando su rol (alumno/profesor).
+	 */
 	public static List<Horarios> getHorariosByUserId(Integer userId) {
 		Users user = new Users(userId).getUsuarioPorID();
 		switch (user.getTipos().getName()) {
@@ -181,6 +190,9 @@ public class Horarios implements java.io.Serializable {
 				throw new IllegalArgumentException("Rol no reconocido");
 		}
 	}
+	/**
+	 * Recupera los horarios de un alumno consultando sus matriculaciones.
+	 */
 	public static List<Horarios> getHorariosByAlumnoId(Integer alumnoId) {
 		if (alumnoId == null) {
 			throw new IllegalArgumentException("El id del alumno no puede ser nulo");
@@ -198,6 +210,9 @@ public class Horarios implements java.io.Serializable {
 			return q.list();
 		}
 	}
+	/**
+	 * Recupera los horarios de un profesor por su id.
+	 */
 	private static List<Horarios> getHorariosByProfesorId(Integer userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("El id del usuario no puede ser nulo");
@@ -211,6 +226,9 @@ public class Horarios implements java.io.Serializable {
 			return q.list();
 		}
 	}
+	/**
+	 * Guarda un nuevo horario en la base de datos validando que usuario y módulo existan.
+	 */
 	public Horarios crearHorario() {
 		if (getUsers() == null || getUsers().getId() == null) {
 			throw new IllegalArgumentException("Usuario obligatorio para crear horario");

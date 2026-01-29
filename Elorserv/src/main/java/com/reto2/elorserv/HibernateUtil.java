@@ -28,7 +28,7 @@ public class HibernateUtil {
     private static SessionFactory buildSessionFactory() {
         try {
             Configuration cfg = new Configuration();
-            cfg.configure("hibernate.cfg.xml");
+			cfg.configure("hibernate.cfg.xml");
             cfg.setProperty(
                 "hibernate.connection.url",
                 "jdbc:mysql://" +  env.getProperty("db.host") + ":" + env.getProperty("db.port") 

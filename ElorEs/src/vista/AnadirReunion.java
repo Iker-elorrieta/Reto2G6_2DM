@@ -251,9 +251,15 @@ public class AnadirReunion extends JFrame {
 	}
 
 
+    /**
+     * Renderizador para elementos de Centros en los JComboBox.
+     */
     private static class CentroRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Crea la representación visual del elemento de la lista.
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {
@@ -269,9 +275,16 @@ public class AnadirReunion extends JFrame {
         }
     }
 
+    /**
+     * Renderizador para elementos de Users en los JComboBox.
+
+     */
     private static class UsuarioRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Construye el texto a mostrar para un usuario ("Nombre Apellidos").
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {

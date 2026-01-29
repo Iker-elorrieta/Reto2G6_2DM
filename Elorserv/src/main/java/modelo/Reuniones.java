@@ -67,6 +67,9 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+	public EstadoReunion getEstadoEnum() {
+		return EstadoReunion.fromValue(this.estado);
+	}
 	public Reuniones() {
 	}
 
@@ -134,9 +137,6 @@ public class Reuniones implements java.io.Serializable {
 		return this.estado;
 	}
 
-	public EstadoReunion getEstadoEnum() {
-		return EstadoReunion.fromValue(this.estado);
-	}
 
 	public void setEstado(String estado) {
 		this.estado = estado;
@@ -227,6 +227,9 @@ public class Reuniones implements java.io.Serializable {
 				+ createdAt + ", updatedAt=" + updatedAt + ", centro=" + centro + "]";
 	}
 
+	/**
+	 * Recupera todas las reuniones en la base de datos (como copias defensivas).
+	 */
 	@JsonIgnore
 	public static List<Reuniones> getAllReuniones() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -237,6 +240,10 @@ public class Reuniones implements java.io.Serializable {
 		return q.list();
 		
 	}
+
+	/**
+	 * Recupera las reuniones en las que participa un usuario dado (como alumno o profesor).
+	 */
 	public static List<Reuniones> getReunionesByUserID(int idUser) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -245,7 +252,9 @@ public class Reuniones implements java.io.Serializable {
 		q.list().replaceAll(reunion -> new Reuniones(reunion));
 		return q.list();
 	}
-
+	/**
+	 * Recupera las reuniones de la semana actual para un usuario específico.
+	 */
 	public static List<Reuniones> getReunionesByUserIDSemanaActual(int idUser) {
 		LocalDate hoy = LocalDate.now();
 		LocalDate inicioSemana = hoy.with(DayOfWeek.MONDAY);
@@ -265,6 +274,9 @@ public class Reuniones implements java.io.Serializable {
 		return q.list();
 	}
 
+	/**
+	 * Comprueba si la reunión entra en conflicto con la agenda del profesor
+	 */
 	private boolean hayConflictoConAgendaProfesor() {
 		List<Horarios> horariosProfesor = Horarios.getHorariosByUserId(getUsersByProfesorId().getId());
 		if (horariosProfesor != null) {
@@ -290,7 +302,9 @@ public class Reuniones implements java.io.Serializable {
 		return false;
 	}
 
-
+	/**
+	 * Obtiene las reuniones de un profesor en el día especificado.
+	 */
 	private static List<Reuniones> obtenerReunionesEnDia(Users profesor, Timestamp fechaReferencia) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -305,8 +319,9 @@ public class Reuniones implements java.io.Serializable {
 				.list();
 	}
 
-
-
+	/**
+	 * Comprueba si la nueva fecha coincide con la hora de la reunión actual.
+	 */
 	private  boolean coincide(LocalDateTime nuevaFecha) {
 		if (!nuevaFecha.toLocalDate().equals(getFecha().toLocalDateTime().toLocalDate())) {
 			return false;
@@ -316,6 +331,10 @@ public class Reuniones implements java.io.Serializable {
 
 
 
+	/**
+	 * Crea la reunión en la base de datos. Comprueba conflictos con la agenda del profesor
+	 * y marca el estado apropiado antes de guardar.
+	 */
 	public Reuniones crearReunion() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Transaction tx = null;
@@ -349,6 +368,9 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Cambia el estado de una reunión guardada.
+	 */
 	public Reuniones cambiarEstadoReunion(EstadoReunion nuevoEstado) {
 		if (getIdReunion() == null) {
 			throw new IllegalStateException("Id de reunión obligatorio para actualizar estado");
@@ -377,6 +399,9 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+    /**
+     * Elimina la reunión identificada por este objeto.
+     */
     public void eliminarReunion() {
         if (getIdReunion() == null) {
             throw new IllegalStateException("Id de reunión obligatorio para eliminar");

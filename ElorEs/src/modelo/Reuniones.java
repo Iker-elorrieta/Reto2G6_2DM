@@ -84,7 +84,7 @@ public class Reuniones implements java.io.Serializable {
 		if (this.estado == null) {
 			return "";
 		}
-		return estado.substring(0, 1).toUpperCase() + estado.substring(1).toLowerCase();
+		return estado.substring(0, 1).toUpperCase() + estado.substring(1).toLowerCase(); // Capitaliza la primera letra
 	}
 
 	public void setEstado(String estado) {
@@ -163,6 +163,9 @@ public class Reuniones implements java.io.Serializable {
 		this.centro = centro;
 	}
 
+	/**
+	 * Solicita al servidor las reuniones de la semana actual para el usuario.
+	 */
 	public static ArrayList<Reuniones> getReunionesSemanaActual(Cliente cliente) {
 		try {
 			Object response = cliente.enviarRequest("get_reuniones_semana", new ArrayList<>());
@@ -180,6 +183,9 @@ public class Reuniones implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Recupera todas las reuniones del usuario desde el servidor.
+	 */
 	public static ArrayList<Reuniones> getReunionesUsuario(Cliente cliente) {
 		try {
 			Object response = cliente.enviarRequest("get_reuniones", new ArrayList<>());
@@ -199,6 +205,9 @@ public class Reuniones implements java.io.Serializable {
 
 	}
 
+	/**
+	 * Devuelve la primera instancia de Reuniones encontrada en una lista MEZCLADA.
+	 */
 	public static Reuniones getPrimeraReunionDesdeLista(List<?> valores) {
 		if (valores == null) {
 			return null;
@@ -211,6 +220,9 @@ public class Reuniones implements java.io.Serializable {
 		return null;
 	}
 
+	/**
+	 * Envía una solicitud para crear esta reunión en el servidor.
+	 */
 	public Object crearReunion(Cliente cliente) {
 		try {
 			ArrayList<Object> parametros = new ArrayList<>();
@@ -222,6 +234,9 @@ public class Reuniones implements java.io.Serializable {
 		return null;
 	}
 
+	/**
+	 * Solicita al servidor la actualización del estado de una reunión.
+	 */
 	public static Reuniones actualizarEstado(Cliente cliente, int idReunion, String nuevoEstado) throws Exception {
 		ArrayList<Object> parametros = new ArrayList<>();
 		parametros.add(idReunion);
@@ -236,12 +251,18 @@ public class Reuniones implements java.io.Serializable {
 		return null;
 	}
 
+	/**
+	 * Devuelve la hora de la reunión en formato "HH:mm".
+	 */
 	public String obtenerHora() {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime fecha = getFecha().toLocalDateTime();
 		return formatter.format(fecha);
 	}
 
+	/**
+	 * Devuelve la columna del día para su uso en la vista de horario (Lunes=1 ... Viernes=5).
+	 */
 	public int obtenerColumnaDia() {
 		switch (getFecha().toLocalDateTime().getDayOfWeek()) {
 		case MONDAY:
@@ -259,11 +280,17 @@ public class Reuniones implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Devuelve la descripción de la reunión como HTML opcionalmente envuelto y con saltos de línea.
+	 */
 	public String getDescripcionHtml(boolean envolverHtml, boolean multilinea) {
 		String contenido = descripcionHtml(multilinea);
 		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" : contenido;
 	}
 
+	/**
+	 * Forma el contenido descriptivo de la reunión (texto interno, sin etiquetas externas).
+	 */
 	private String descripcionHtml(boolean multilinea) {
 		String html = "";
 		String tituloReunion = "";
@@ -310,6 +337,9 @@ public class Reuniones implements java.io.Serializable {
 		return html;
 	}
 
+	/**
+	 * Construye un texto breve que sirve como tooltip con título, asunto y alumno si existen.
+	 */
 	public String getTooltip() {
 		String titulo = getTitulo() != null ? getTitulo().trim() : "";
 		String asunto = getAsunto() != null ? getAsunto().trim() : "";
@@ -344,6 +374,9 @@ public class Reuniones implements java.io.Serializable {
 		return !sb.isEmpty() ? sb : "Reunión";
 	}
 
+	/**
+	 * Devuelve un color asociado al estado de la reunión para uso en la interfaz.
+	 */
 	public Color getColorEstado() {
 		if (estado == null) {
 			return Color.WHITE;

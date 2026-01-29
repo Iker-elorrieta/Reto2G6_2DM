@@ -122,37 +122,52 @@ public class TablaHorario extends JPanel {
 		}
 	}
 
+	// Renderer HTML para celdas de horario que pueden contener Horarios y/o Reuniones
 	private class HorarioReunionesHTMLRenderer extends JEditorPane implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
 
+		// Constructor: configuración inicial del JEditorPane para HTML
 		HorarioReunionesHTMLRenderer() {
+			// Indicar que el contenido es HTML para permitir formato
 			setContentType("text/html");
+			// Respetar las propiedades de fuente del sistema para buen renderizado
 			putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+			// No editable: solo se usa para mostrar contenido
 			setEditable(false);
+			// Opaque true para que el background se pinte correctamente
 			setOpaque(true);
 		}
 
 		@Override
+		// Devuelve el componente configurado para la celda concreta
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			// Texto HTML que se mostrará dentro del editor
 			String texto = "";
+			// Color de fondo por defecto blanco
 			Color backgroundColor = Color.WHITE;
 
+			// Si la celda contiene una lista, combinar el primer Horario y la primera Reunión si existen
 			if (value instanceof List<?>) {
 				texto = htmlCombinado((List<?>) value);
+				// Si hay reunión, usar su color de estado como fondo
 				Reuniones primeraReunion = Reuniones.getPrimeraReunionDesdeLista((List<?>) value);
 				if (primeraReunion != null)
 					backgroundColor = primeraReunion.getColorEstado();
+			// Si contiene solo un Horarios, obtener su HTML 
 			} else if (value instanceof Horarios) {
 				texto = ((Horarios) value).getModuloHtml(!mostrarModuloCompleto, true);
+			// Si contiene una Reunión, usar su color y descripción en HTML
 			} else if (value instanceof Reuniones) {
 				Reuniones reunion = (Reuniones) value;
 				backgroundColor = reunion.getColorEstado();
 				texto = reunion.getDescripcionHtml(true, false);
+			// Si es otro tipo de objeto, usar su toString
 			} else if (value != null) {
 				texto = value.toString();
 			}
 
+			// Aplicar texto, fuente y colores según selección
 			setText(texto);
 			setFont(table.getFont());
 			setForeground(isSelected ? table.getSelectionForeground() : new Color(0x1F1F1F));
@@ -161,12 +176,16 @@ public class TablaHorario extends JPanel {
 			return this;
 		}
 
+		// Combina HTML de Horario y Reunión cuando la celda contiene ambos valores en una lista
 		private String htmlCombinado(List<?> valores) {
+			// Tomar el primer Horario y la primera Reunión de la lista
 			Horarios primerHorario = Horarios.getPrimerHorarioDesdeLista(valores);
 			Reuniones primerReunion = Reuniones.getPrimeraReunionDesdeLista(valores);
+			// Si no hay reunión, devolver solo el HTML del módulo
 			if (primerReunion == null) {
 				return primerHorario.getModuloHtml(mostrarModuloCompleto, false);
 			}
+			// Si hay ambos, construir un bloque HTML con módulo arriba y reunión abajo
 			String moduloContenido = primerHorario.getModuloHtml(mostrarModuloCompleto, false);
 			String reunionContenido = primerReunion.getDescripcionHtml(false, false);
 			return "<html><div style='line-height:1.2;'>" + "<div>" + moduloContenido + "</div>"

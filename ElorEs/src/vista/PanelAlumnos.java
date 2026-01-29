@@ -140,70 +140,95 @@ public class PanelAlumnos extends JPanel {
 		return boton;
 	}
 
+	// SE USA SOLO EN LA COLUMNA DE AVATAR DE LA TABLA DE ALUMNOS
 	private static class PanelAvatarRenderer extends JPanel implements TableCellRenderer {
 		private static final long serialVersionUID = 1L;
+		// Imagen por defecto usada cuando no hay avatar válido disponible
 		private static final Image DEFAULT_AVATAR = new ImageIcon(Login.class.getResource("/avatar.png")).getImage();
+		// Cache de imágenes por URL para evitar descargas repetidas
 		private static final Map<String, Image> IMAGE_CACHE = new HashMap<>();
-		private static final int AVATAR_PADDING = 5;
 		private Image currentImage = DEFAULT_AVATAR;
+		// Marca si la fila está seleccionada (se usa para dibujar borde de selección)
 		private boolean selected;
 
+		// Constructor: configura el panel para ser transparente
 		PanelAvatarRenderer() {
 			setOpaque(false);
 		}
 
 		@Override
+		// Se invoca por la tabla para recuperar el componente que mostrará la celda
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
+			// Cargar la imagen correspondiente al valor de la celda
 			currentImage = cargarImagen(value);
+			// Guardar el estado de selección para uso en paintComponent
 			selected = isSelected;
+			// Ajustar tamaño preferido según la altura de fila (mínimo 44 px)
 			int size = Math.max(table.getRowHeight(), 44);
 			setPreferredSize(new Dimension(size, size));
 			return this;
 		}
 
 		@Override
+		// Pintado personalizado: dibuja la imagen recortada en forma circular y borde si está seleccionado
 		protected void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g.create();
 			try {
+				// Activar antialiasing para suavizar dibujo
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				// Calcular tamaño base disponible y diámetro del avatar (respetando padding)
 				int baseSize = Math.min(getWidth(), getHeight());
-				int diameter = Math.max(baseSize - (AVATAR_PADDING * 2), 20);
+				int diameter = Math.max(baseSize - (5 * 2), 20);
+				// Centrar el avatar dentro del área del renderer
 				int x = (getWidth() - diameter) / 2;
 				int y = (getHeight() - diameter) / 2;
+				// Crear recorte redondeado para el avatar (círculo)
 				RoundRectangle2D clip = new RoundRectangle2D.Float(x, y, diameter, diameter, diameter, diameter);
+				// Aplicar el clip para que la imagen quede recortada
 				g2.setClip(clip);
 				if (currentImage != null) {
+					// Dibujar la imagen escalada dentro del clip circular
 					g2.drawImage(currentImage, x, y, x + diameter, y + diameter, this);
 				} else {
+					// Si no hay imagen, rellenar con un gris claro
 					g2.setColor(Color.LIGHT_GRAY);
 					g2.fill(clip);
 				}
+				// Restablecer clip para poder dibujar el borde
 				g2.setClip(null);
 				if (selected) {
+					// Si está seleccionado, dibujar un borde semitransparente alrededor
 					g2.setColor(new Color(30, 42, 68, 140));
 					g2.setStroke(new java.awt.BasicStroke(2f));
 					g2.draw(clip);
 				}
 			} finally {
+				// Liberar el Graphics2D creado
 				g2.dispose();
 			}
 		}
 
+		// Carga la imagen a partir del valor de la celda
 		private Image cargarImagen(Object value) {
+			// Si no es cadena, devolver la imagen por defecto
 			if (!(value instanceof String)) {
 				return DEFAULT_AVATAR;
 			}
+			// Normalizar la URL trimming espacios
 			String url = ((String) value).trim();
+			// Si la URL está vacía o contiene "null", usar la imagen por defecto
 			if (url.isEmpty() || "null".equalsIgnoreCase(url)) {
 				return DEFAULT_AVATAR;
 			}
+			// Usar la cache de imágenes; si no existe, intentar descargar la imagen remota
 			return IMAGE_CACHE.computeIfAbsent(url, key -> {
 				try {
 					URI uri = new URI(key);
 					URL remote = uri.toURL();
 					return ImageIO.read(remote);
 				} catch (Exception e) {
+					// En caso de error, devolver la imagen por defecto
 					return DEFAULT_AVATAR;
 				}
 			});

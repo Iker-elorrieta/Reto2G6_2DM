@@ -165,7 +165,10 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-
+	/**
+	 * Envía una petición de inicio de sesión al servidor. Devuelve el objeto Users
+	 * si el login es exitoso, o un mensaje de error (STRING) en caso contrario.
+	 */
 	public static Object login(Cliente cliente, String username, String password) {
 		ArrayList<Object> parametros = new ArrayList<>();
 		parametros.add(username);
@@ -178,6 +181,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Envía una petición de cierre de sesión (logout) al servidor
+	 */
 	public void desconectar(Cliente cliente) {
 		try {
 			cliente.enviarRequest("logout", new ArrayList<>());
@@ -186,6 +192,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Solicita la lista de profesores al servidor.
+	 */
 	public ArrayList<Users> getProfesores(Cliente cliente) {
 		try {
 			Object response = cliente.enviarRequest("get_profesores", new ArrayList<>());
@@ -206,6 +215,9 @@ public class Users implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Solicita la lista de alumnos al servidor.
+	 */
 	public ArrayList<Users> getAlumnos(Cliente cliente) {
 		Object response;
 		try {
@@ -230,13 +242,13 @@ public class Users implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Obtiene los datos del usuario actualmente autenticado en el servidor.
+	 */
 	public Users getUsuarioLogged(Cliente cliente) {
-
 		try {
 			return (Users) cliente.enviarRequest("get_usuario", new ArrayList<>());
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

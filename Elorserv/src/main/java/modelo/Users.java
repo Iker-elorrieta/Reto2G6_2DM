@@ -262,14 +262,10 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
-	@Override
-	public String toString() {
-		return "Users [id=" + id + ", tipos=" + tipos + ", email=" + email + ", username=" + username + ", password="
-				+ password + ", nombre=" + nombre + ", apellidos=" + apellidos + ", dni=" + dni + ", direccion="
-				+ direccion + ", telefono1=" + telefono1 + ", telefono2=" + telefono2 + ", argazkiaUrl=" + argazkiaUrl
-				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
-	}
-
+	/**
+	 * Valida las credenciales del usuario actual y devuelve el usuario si existen.
+	 * Si se especifica un tipoObligatorio, también valida que el usuario tenga ese rol.
+	*/
 	public Users iniciarSesion(String tipoObligatorio) {
 		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
 			throw new IllegalArgumentException("Usuario o contraseña incorrectos");
@@ -292,6 +288,10 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Busca en la base de datos un usuario que coincida con el username y password actuales.
+	 * Si tipoObligatorio está definido, añade esa condición a la consulta.
+	 */
 	public Users getUsuarioUsernameContraseña(String tipoObligatorio) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -313,6 +313,9 @@ public class Users implements java.io.Serializable {
 		return resultado != null ? new Users(resultado) : null;
 	}
 
+	/**
+	 * Recupera la información del usuario desde la base de datos por su id y devuelve una copia.
+	 */
 	@JsonIgnore
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -321,6 +324,9 @@ public class Users implements java.io.Serializable {
 		return new Users(user);
 	}
 
+	/**
+	 * Recupera todos los usuarios que tienen el tipo/rol especificado.
+	 */
 	@JsonIgnore
 	public static List<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -335,6 +341,9 @@ public class Users implements java.io.Serializable {
 		return usuarios;
 	}
 
+	/**
+	 * Recupera todos los usuarios de la base de datos.
+	 */
 	public static List<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Session session = sesion.openSession();
@@ -347,6 +356,9 @@ public class Users implements java.io.Serializable {
 		return usuarios;
 	}
 
+	/**
+	 * Devuelve la lista de alumnos asociados a este profesor según las matrículas y horarios.
+	 */
 	@JsonIgnore
 	public List<Users> getAlumnosbyProfesorID() {
 		if (getId() == null) {
@@ -372,6 +384,10 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Crea un nuevo usuario en la base de datos.
+	 * Normaliza y cifra el username y la contraseña, y establece timestamps.
+	 */
 	public Users crearUsuario() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
@@ -397,6 +413,10 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Actualiza un usuario existente en la base de datos con los datos de este objeto.
+	 * Verifica disponibilidad de username y mantiene el tipo asociado si se proporciona.
+	 */
 	public Users actualizarUsuario() {
 		if (getId() == null) {
 			throw new IllegalArgumentException("Id obligatorio para actualizar usuario");
@@ -434,6 +454,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Cambia la contraseña del usuario actual.
+	 * */
 	public Users cambiarPassword(String nuevaPassword) {
 		if (getId() == null) {
 			throw new IllegalArgumentException("Id obligatorio para cambiar la contraseña");
@@ -458,6 +481,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Elimina el usuario de la base de datos identificado por este objeto.
+	 */
 	public void borrarUsuario() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
@@ -481,12 +507,18 @@ public class Users implements java.io.Serializable {
 
 	}
 
+	/**
+	 * Lanza una excepción si el username ya está registrado en la base de datos.
+	 */
 	private static void asegurarUsernameDisponible(String username, Integer excluirId) {
 		if (usernameExiste(username, excluirId)) {
 			throw new IllegalArgumentException("El nombre de usuario ya está en uso");
 		}
 	}
 
+	/**
+	 * Comprueba si un username ya existe en la base de datos.
+	*/
 	public static boolean usernameExiste(String username, Integer excluirId) {
 		String usernameNormalizado = username.trim().toLowerCase();
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -507,6 +539,9 @@ public class Users implements java.io.Serializable {
 	}
 
 
+	/**
+	 * Cifra una cadena usando AES con la clave configurada en la variable de entorno (o por defecto).
+	*/
 	public static String cifrar(String valor) {
 		if (valor == null) {
 			return null;
@@ -521,6 +556,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Descifra una cadena previamente cifrada por cifrar(String).
+	*/
 	public static String descifrar(String valor) {
 		if (valor == null) {
 			return null;
@@ -536,6 +574,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Genera la clave AES a partir de la variable de entorno de configuración.
+	 */
 	@JsonIgnore
 	private static SecretKeySpec key() {
 		byte[] keyBytes = ENV_KEY.getBytes(StandardCharsets.UTF_8);
