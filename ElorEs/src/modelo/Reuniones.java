@@ -215,7 +215,7 @@ public class Reuniones implements java.io.Serializable {
 		try {
 			ArrayList<Object> parametros = new ArrayList<>();
 			parametros.add(this);
-			Object response = cliente.enviarRequest("crear_reunion", parametros);
+			Object response = cliente.enviarRequest("post_reunion", parametros);
 			return response;
 		} catch (Exception e) {
 		}

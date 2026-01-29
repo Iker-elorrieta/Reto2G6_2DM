@@ -71,7 +71,7 @@ public class SocketServer extends Thread {
 				String nuevoEstado = entrada.readUTF();
 				response = new Reuniones(reunionId).cambiarEstadoReunion(Reuniones.EstadoReunion.valueOf(nuevoEstado));
 				break;
-			case "crear_reunion":
+			case "post_reunion":
 				Reuniones nuevaReunion = (Reuniones) entrada.readObject();
 				nuevaReunion.setUsersByProfesorId(usuario);
 				response = nuevaReunion.crearReunion();
