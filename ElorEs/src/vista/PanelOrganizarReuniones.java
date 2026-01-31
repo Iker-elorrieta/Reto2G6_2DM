@@ -108,7 +108,7 @@ public class PanelOrganizarReuniones extends JPanel {
 		contenedorReuniones.add(btnNuevaReunion);
 
 		modeloReuniones = new DefaultTableModel(new String[] { "ID", "Fecha", "Alumno", "Estado", "Título", "Asunto",
-				"Aula", "Creado", "Actualizado", "", "" }, 0) {
+				"Aula", "Creado", "Actualizado", "Centro", "", "" }, 0) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -116,6 +116,7 @@ public class PanelOrganizarReuniones extends JPanel {
 				return column >= getColumnCount() - 2;
 			}
 		};
+
 
 		tableReuniones = new JTable(modeloReuniones);
 		tableReuniones.setFont(new Font("Raleway", Font.PLAIN, 15));
@@ -132,7 +133,7 @@ public class PanelOrganizarReuniones extends JPanel {
 		tableReuniones.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tableReuniones.setDefaultEditor(Object.class, null);
 
-		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140, 110, 120 };
+		int[] columnWidths = { 0, 140, 200, 120, 130, 200, 80, 140, 140, 180, 110, 120 };
 		for (int i = 0; i < columnWidths.length && i < tableReuniones.getColumnCount(); i++) {
 			tableReuniones.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
 		}
@@ -141,6 +142,7 @@ public class PanelOrganizarReuniones extends JPanel {
 
 		int aceptarColumnIndex = modeloReuniones.getColumnCount() - 2;
 		int rechazarColumnIndex = modeloReuniones.getColumnCount() - 1;
+
 
 		btnAceptar = new JButton();
 		btnRechazar = new JButton();

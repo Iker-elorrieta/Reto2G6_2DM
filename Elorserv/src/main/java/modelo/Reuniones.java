@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -96,7 +97,6 @@ public class Reuniones implements java.io.Serializable {
 	    this.idReunion = otro.getIdReunion();
 	    this.usersByAlumnoId = otro.getUsersByAlumnoId() != null ? new Users(otro.getUsersByAlumnoId()) : null;
 	    this.usersByProfesorId = otro.getUsersByProfesorId() != null ? new Users(otro.getUsersByProfesorId()) : null;
-
 	    this.estado = otro.getEstado();
 	    this.estadoEus = otro.getEstadoEus();
 	    this.idCentro = otro.getIdCentro();
@@ -106,7 +106,8 @@ public class Reuniones implements java.io.Serializable {
 	    this.fecha = otro.getFecha();
 	    this.createdAt = otro.getCreatedAt();
 	    this.updatedAt = otro.getUpdatedAt();
-	    this.centro = otro.getCentro() != null ? otro.getCentro() : null;
+	    // Carga el centro asociado desde el Json
+	    this.centro = new Centros(Integer.parseInt(this.idCentro)).getCentroById();
 	}
 
 	public Integer getIdReunion() {
@@ -222,7 +223,7 @@ public class Reuniones implements java.io.Serializable {
 
 
 	/**
-	 * Recupera todas las reuniones en la base de datos (como copias defensivas).
+	 * Recupera todas las reuniones en la base de datos .
 	 */
 	@JsonIgnore
 	public static List<Reuniones> getAllReuniones() {
@@ -243,8 +244,12 @@ public class Reuniones implements java.io.Serializable {
 		Session session = sesion.openSession();
 		String hql = "from Reuniones where usersByAlumnoId = "+ idUser + " or usersByProfesorId = "+idUser;
 		Query<Reuniones> q = session.createQuery(hql, Reuniones.class);
-		q.list().replaceAll(reunion -> new Reuniones(reunion));
-		return q.list();
+		// Necesario para devolver el centro referenciado en Angular y ElorEs
+		ArrayList<Reuniones> reuniones = new ArrayList<>();
+		for (Reuniones reunion : q.list()) {
+			reuniones.add(new Reuniones(reunion));
+		}
+		return reuniones;
 	}
 	/**
 	 * Recupera las reuniones de la semana actual para un usuario específico.

@@ -111,5 +111,5 @@ public class Centros implements Serializable {
 		return centro;
 	}
 
-    
+
 }

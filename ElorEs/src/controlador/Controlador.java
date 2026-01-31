@@ -291,11 +291,17 @@ public class Controlador extends MouseAdapter implements ActionListener {
 		}
 		for (Reuniones reunion : reuniones) {
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			String nombreCentro = null;
+			if (reunion.getCentro() != null && reunion.getCentro().getNOM() != null && !reunion.getCentro().getNOM().isBlank()) {
+				nombreCentro = reunion.getCentro().getNOM();
+			} else if (reunion.getIdCentro() != null) {
+				nombreCentro = reunion.getIdCentro();
+			}
 			modelo.addRow(new Object[] { reunion.getIdReunion(), dtf.format(reunion.getFecha().toLocalDateTime()),
 					reunion.getUsersByAlumnoId().getNombre() + " " + reunion.getUsersByAlumnoId().getApellidos(),
 					reunion.getEstado(), reunion.getTitulo(), reunion.getAsunto(), reunion.getAula(),
 					dtf.format(reunion.getCreatedAt().toLocalDateTime()),
-					dtf.format(reunion.getUpdatedAt().toLocalDateTime()), null, null });
+					dtf.format(reunion.getUpdatedAt().toLocalDateTime()), nombreCentro, null, null });
 		}
 	}
 
