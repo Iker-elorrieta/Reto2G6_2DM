@@ -30,7 +30,7 @@ import com.toedter.calendar.JDateChooser;
 import modelo.Centros;
 import modelo.Users;
 
-public class VentanaAnadirReunion extends JFrame {
+public class AnadirReunion extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +48,8 @@ public class VentanaAnadirReunion extends JFrame {
     private JLabel lblEstado;
     
     
-    public VentanaAnadirReunion() {
-        setTitle("Anadir reunion - CIFP Elorrieta-Errekamari LHII");
+    public AnadirReunion() {
+        setTitle("Anadir reunion - CIFP Elorrieta-Erreka Mari LHII");
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 690, 560);
@@ -251,9 +251,15 @@ public class VentanaAnadirReunion extends JFrame {
 	}
 
 
+    /**
+     * Renderizador para elementos de Centros en los JComboBox.
+     */
     private static class CentroRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Crea la representación visual del elemento de la lista.
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {
@@ -269,9 +275,16 @@ public class VentanaAnadirReunion extends JFrame {
         }
     }
 
+    /**
+     * Renderizador para elementos de Users en los JComboBox.
+
+     */
     private static class UsuarioRenderer extends DefaultListCellRenderer {
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Construye el texto a mostrar para un usuario ("Nombre Apellidos").
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {

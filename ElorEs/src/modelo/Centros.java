@@ -236,6 +236,9 @@ public class Centros implements Serializable {
 				+ ", LONGITUD=" + LONGITUD + "]";
 	}
 
+	/**
+	 * Solicita al servidor la lista de centros.
+	 */
 	public static List<Centros> getCentros(Cliente cliente) throws Exception {
 		List<Centros> centros = new ArrayList<>();
 		Object response = cliente.enviarRequest("get_centros", new ArrayList<>());

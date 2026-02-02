@@ -2,7 +2,11 @@ package modelo;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
 
 import cliente.Cliente;
@@ -165,11 +169,20 @@ public class Users implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
+	public static final String AES_TRANSFORMATION = "AES/ECB/PKCS5Padding";
+	public static final int AES_KEY_LENGTH = 16;
+	public static final String CLIENT_ENV_KEY = System.getenv().getOrDefault("ELOR_CLIENT_AES_KEY", "CLNTS3CR3T202601");
 
+	/**
+	 * Envía una petición de inicio de sesión al servidor. Devuelve el objeto Users
+	 * si el login es exitoso, o un mensaje de error (STRING) en caso contrario.
+	 * Antes de enviar, cifra las credenciales con la clave cliente (cliente->servidor).
+	 */
 	public static Object login(Cliente cliente, String username, String password) {
 		ArrayList<Object> parametros = new ArrayList<>();
-		parametros.add(username);
-		parametros.add(password);
+		// Normalizar username como hace el servidor/DB
+		parametros.add(cifrarCliente(username.trim().toLowerCase()));
+		parametros.add(cifrarCliente(password));
 		try {
 			return cliente.enviarRequest("login", parametros);
 		} catch (Exception e) {
@@ -178,6 +191,46 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Cifra con la clave cliente (cliente -> servidor)
+	 */
+	public static String cifrarCliente(String valor) {
+		if (valor == null) return null;
+		try {
+			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+			cipher.init(Cipher.ENCRYPT_MODE, keyFromString(CLIENT_ENV_KEY));
+			byte[] cifrado = cipher.doFinal(valor.getBytes(StandardCharsets.UTF_8));
+			return Base64.getEncoder().encodeToString(cifrado);
+		} catch (Exception e) {
+			throw new RuntimeException("Error cifrando valor", e);
+		}
+	}
+
+	public static String descifrarCliente(String valor) {
+		if (valor == null) return null;
+		try {
+			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
+			cipher.init(Cipher.DECRYPT_MODE, keyFromString(CLIENT_ENV_KEY));
+			byte[] decodificado = Base64.getDecoder().decode(valor);
+			byte[] descifrado = cipher.doFinal(decodificado);
+			return new String(descifrado, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			throw new RuntimeException("Error descifrando valor", e);
+		}
+	}
+
+	private static SecretKeySpec keyFromString(String clave) {
+		byte[] keyBytes = clave.getBytes(StandardCharsets.UTF_8);
+		byte[] normalized = new byte[AES_KEY_LENGTH];
+		for (int i = 0; i < AES_KEY_LENGTH; i++) {
+			normalized[i] = i < keyBytes.length ? keyBytes[i] : 0;
+		}
+		return new SecretKeySpec(normalized, "AES");
+	}
+
+	/**
+	 * Envía una petición de cierre de sesión (logout) al servidor
+	 */
 	public void desconectar(Cliente cliente) {
 		try {
 			cliente.enviarRequest("logout", new ArrayList<>());
@@ -186,6 +239,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Solicita la lista de profesores al servidor.
+	 */
 	public ArrayList<Users> getProfesores(Cliente cliente) {
 		try {
 			Object response = cliente.enviarRequest("get_profesores", new ArrayList<>());
@@ -206,6 +262,9 @@ public class Users implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Solicita la lista de alumnos al servidor.
+	 */
 	public ArrayList<Users> getAlumnos(Cliente cliente) {
 		Object response;
 		try {
@@ -230,13 +289,13 @@ public class Users implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * Obtiene los datos del usuario actualmente autenticado en el servidor.
+	 */
 	public Users getUsuarioLogged(Cliente cliente) {
-
 		try {
 			return (Users) cliente.enviarRequest("get_usuario", new ArrayList<>());
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

@@ -19,6 +19,9 @@ import java.net.URL;
 
 import javax.swing.JLabel;
 
+import org.kordamp.ikonli.materialdesign2.MaterialDesignL;
+import org.kordamp.ikonli.swing.FontIcon;
+
 public class VerPerfil extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -40,13 +43,12 @@ public class VerPerfil extends JFrame {
 	private JPanel panel;
 	private JLabel lblUsuario;
 	private JButton btnDesconectar;
-	private Font fuenteBold = new Font("Raleway", Font.BOLD, 20);
 
 
 	public VerPerfil() {
 		setTitle("Consultar perfil - CIFP Elorrieta-Errekamari LHII");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 460, 411);
+		setBounds(100, 100, 460, 380);
 		setLocationRelativeTo(null);
 		setResizable(false);
 
@@ -67,7 +69,9 @@ public class VerPerfil extends JFrame {
 				g2.dispose();
 			}
 		};
-		panel.setBounds(10, 32, 424, 324);
+		panel.setBounds(10, 32, 424, 285);
+		panel.setOpaque(false);
+		panel.setBackground(new Color(255, 255, 255, 230));
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -77,9 +81,19 @@ public class VerPerfil extends JFrame {
 		lblRolUsuario.setFont(new Font("Raleway", Font.PLAIN, 15));
 		
 		lblNombreUsuario = new JLabel("Nombre Usuario");
-		lblNombreUsuario.setBounds(70, 21, 316, 20);
+		lblNombreUsuario.setBounds(70, 21, 280, 20);
 		lblNombreUsuario.setFont(new Font("Raleway", Font.BOLD, 15));
 		panel.add(lblNombreUsuario);
+
+		btnDesconectar = new JButton();
+		btnDesconectar.setBounds(380, 17, 34, 34);
+		btnDesconectar.setToolTipText("Desconectar");
+		btnDesconectar.setIcon(FontIcon.of(MaterialDesignL.LOGOUT, 22, new Color(231, 76, 60)));
+		btnDesconectar.setContentAreaFilled(false);
+		btnDesconectar.setBorderPainted(false);
+		btnDesconectar.setFocusPainted(false);
+		btnDesconectar.setOpaque(false);
+		panel.add(btnDesconectar);
 		
 		lblUsuarioTitulo = new JLabel("Usuario:");
 		lblUsuarioTitulo.setFont(new Font("Raleway", Font.BOLD, 15));
@@ -140,13 +154,6 @@ public class VerPerfil extends JFrame {
 		lblTelefono2.setFont(new Font("Raleway", Font.PLAIN, 15));
 		lblTelefono2.setBounds(107, 244, 307, 20);
 		panel.add(lblTelefono2);
-	
-		btnDesconectar = new JButton("Desconectar");
-		btnDesconectar.setForeground(new Color(0, 0, 0));
-		btnDesconectar.setFont(fuenteBold);
-		btnDesconectar.setBackground(new Color(255, 255, 255));
-		btnDesconectar.setBounds(10, 275, 404, 38);
-		panel.add(btnDesconectar);
 		
 
 	}

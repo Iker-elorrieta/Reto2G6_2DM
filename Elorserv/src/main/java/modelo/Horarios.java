@@ -2,6 +2,8 @@ package modelo;
 // Generated 13 ene 2026, 8:47:05 by Hibernate Tools 6.5.1.Final
 
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -91,7 +93,7 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	public String getDia() {
-		return this.dia;
+		return this.dia.trim().toUpperCase();
 	}
 
 	public void setDia(String dia) {
@@ -137,6 +139,46 @@ public class Horarios implements java.io.Serializable {
 	public void setUpdatedAt(Timestamp updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+	
+	/**
+	 * Convierte un DayOfWeek en un string en español.
+	 */
+	private static String diaSemana(DayOfWeek day) {
+		switch (day) {
+		case MONDAY:
+			return "LUNES";
+		case TUESDAY:
+			return "MARTES";
+		case WEDNESDAY:
+			return "MIERCOLES";
+		case THURSDAY:
+			return "JUEVES";
+		case FRIDAY:
+			return "VIERNES";
+		case SATURDAY:
+			return "SABADO";
+		case SUNDAY:
+			return "DOMINGO";
+		default:
+			return "";
+		}
+	}
+
+	/**
+	 * Comprueba si un horario coincide con la fecha/hora de una reunión.
+	 */
+	public boolean coincide(Timestamp fechaReunion) {
+		LocalDateTime fechaR = fechaReunion.toLocalDateTime();
+		String diaReunion = diaSemana(fechaR.getDayOfWeek());
+		if (!getDia().equals(diaReunion)) {
+			return false;
+		}
+		return (7+ hora) == (fechaR.getHour());
+	}
+	
+	/**
+	 * Devuelve los horarios de un usuario determinando su rol (alumno/profesor).
+	 */
 	public static List<Horarios> getHorariosByUserId(Integer userId) {
 		Users user = new Users(userId).getUsuarioPorID();
 		switch (user.getTipos().getName()) {
@@ -148,6 +190,9 @@ public class Horarios implements java.io.Serializable {
 				throw new IllegalArgumentException("Rol no reconocido");
 		}
 	}
+	/**
+	 * Recupera los horarios de un alumno consultando sus matriculaciones.
+	 */
 	public static List<Horarios> getHorariosByAlumnoId(Integer alumnoId) {
 		if (alumnoId == null) {
 			throw new IllegalArgumentException("El id del alumno no puede ser nulo");
@@ -165,6 +210,9 @@ public class Horarios implements java.io.Serializable {
 			return q.list();
 		}
 	}
+	/**
+	 * Recupera los horarios de un profesor por su id.
+	 */
 	private static List<Horarios> getHorariosByProfesorId(Integer userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("El id del usuario no puede ser nulo");
@@ -178,6 +226,9 @@ public class Horarios implements java.io.Serializable {
 			return q.list();
 		}
 	}
+	/**
+	 * Guarda un nuevo horario en la base de datos validando que usuario y módulo existan.
+	 */
 	public Horarios crearHorario() {
 		if (getUsers() == null || getUsers().getId() == null) {
 			throw new IllegalArgumentException("Usuario obligatorio para crear horario");
@@ -200,8 +251,7 @@ public class Horarios implements java.io.Serializable {
 			setUpdatedAt(now);
 			session.persist(this);
 			tx.commit();
-			Horarios horarioCreado = session.get(Horarios.class, getId());
-			return new Horarios(horarioCreado);
+			return this;
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();

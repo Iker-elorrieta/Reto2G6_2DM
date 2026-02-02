@@ -84,6 +84,9 @@ public class Horarios implements java.io.Serializable {
 		this.hora = hora;
 	}
 
+	/**
+	 * Devuelve el nombre del aula limpiando prefijos tipo "Aula" (insensible a mayúsculas).
+	  */
 	public String getAula() {
 		if (this.aula == null) {
 			return null;
@@ -119,6 +122,9 @@ public class Horarios implements java.io.Serializable {
 		this.updatedAt = updatedAt;
 	}
 
+	/**
+	 * Solicita al servidor la lista de horarios disponibles.
+	 */
 	public static ArrayList<Horarios> getHorarios(Cliente cliente) {
 		Object response;
 		try {
@@ -142,6 +148,9 @@ public class Horarios implements java.io.Serializable {
 		}
 		return new ArrayList<>();
 	}
+	/**
+	 * Solicita al servidor los horarios de un usuario concreto por su id.
+	 */
 	public static ArrayList<Horarios> getHorariosporUsuario(Cliente cliente, int usuario) {
 		ArrayList<Object> datos = new ArrayList<>();
 		datos.add(usuario);
@@ -168,11 +177,18 @@ public class Horarios implements java.io.Serializable {
 		return new ArrayList<>();
 	}
 	
+	/**
+	 * Devuelve la hora del horario en formato "HH:00". El valor se calcula aplicando
+	 * un desfase de 7 horas a hora y se normaliza al rango 00-23.
+	  */
 	public String getHoraStr() {
 		int horaNormalizada = Math.max(0, Math.min(23, 7+hora));
 		return String.format("%02d:00", horaNormalizada);
 	}
 	
+	/**
+	 * Construye un texto breve para usar como tooltip con el módulo y, opcionalmente, el aula.
+	 */
 	public String getTooltip() {
 		String modulo = getModulos().getNombre().trim();
 		String aula = getAula();
@@ -183,12 +199,18 @@ public class Horarios implements java.io.Serializable {
 		return sb.toString();
 	}
 	
+	/**
+	 * Devuelve una representación (posible HTML) del módulo, aula y ciclo.
+	*/
 	public String getModuloHtml(boolean recortarNombre, boolean envolverHtml) {
 		String modulo = recortarNombre ? getNombreModuloCorto() : getModulos().getNombre().trim();
 		String contenido = getDescripcion(modulo);
 		return envolverHtml ? "<html><div style='line-height:1.2;'>" + contenido + "</div></html>" :contenido ;
 	}
 
+	/**
+	 * Construye la cadena descriptiva interna (sin envolver externamente) con módulo, aula y ciclo.
+	 */
 	private String getDescripcion(String modulo) {
 		String aula = (getAula() != null) ? getAula().trim() : null;
 		String ciclo = (getModulos() != null && getModulos().getCiclos() != null)
@@ -211,6 +233,10 @@ public class Horarios implements java.io.Serializable {
 
 
 
+	/**
+	 * Devuelve una versión corta del nombre del módulo recortada a {@code MAX_MODULO_LENGTH}
+	 * añadiendo "..." si se ha recortado.
+	 */
 	private String getNombreModuloCorto() {
 		String limpio = getModulos().getNombre().trim();
 		if (limpio != null && limpio.length() > MAX_MODULO_LENGTH && MAX_MODULO_LENGTH > 3) {
@@ -220,6 +246,9 @@ public class Horarios implements java.io.Serializable {
 	}
 
 	
+	/**
+	 * Convierte el nombre del día a una columna para la vista (Lunes=1 ... Viernes=5).o
+	 */
 	public int obtenerColumnaDia() {
 		switch (dia.trim().toUpperCase()) {
 		case "LUNES":
@@ -239,6 +268,9 @@ public class Horarios implements java.io.Serializable {
 	}
 
 
+	/**
+	 * Extrae el primer objeto Horario de una lista MEZCLADA.
+	 */
 	public static Horarios getPrimerHorarioDesdeLista(List<?> valores) {
 		if (valores == null) {
 			return null;

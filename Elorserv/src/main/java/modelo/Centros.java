@@ -65,6 +65,9 @@ public class Centros implements Serializable {
 	}
 
 
+	/**
+	 * Lee y parsea el fichero JSON con los centros (archivo en resources) y devuelve la lista.
+	 */
 	@JsonIgnore
 	public static ArrayList<Centros> getAllCentros(){
 		ArrayList<Centros> listaCentros = new ArrayList<>();
@@ -80,6 +83,9 @@ public class Centros implements Serializable {
 		
 		return listaCentros;
 	}
+	/**
+	 * Busca en el JSON de centros y devuelve el Centro coincidente con este CCEN.
+	 */
 	@JsonIgnore
 	public Centros getCentroById(){
 		if(this.CCEN == null) {
@@ -105,5 +111,5 @@ public class Centros implements Serializable {
 		return centro;
 	}
 
-    
+
 }
