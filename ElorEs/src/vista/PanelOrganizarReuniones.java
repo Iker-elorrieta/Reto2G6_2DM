@@ -35,7 +35,6 @@ public class PanelOrganizarReuniones extends JPanel {
 
 	private JButton btnAceptar;
 	private JButton btnRechazar;
-	private static final Color COLOR_PENDIENTE = new Color(255, 224, 130);
 
 	public PanelOrganizarReuniones() {
 		setLayout(null);
