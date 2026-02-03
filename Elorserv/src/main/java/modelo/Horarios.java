@@ -236,12 +236,22 @@ public class Horarios implements java.io.Serializable {
 		if (getModulos() == null || getModulos().getId() == null) {
 			throw new IllegalArgumentException("Módulo obligatorio para crear horario");
 		}
+				setId(null);
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		Transaction tx = null;
 		try (Session session = sesion.openSession()) {
 			tx = session.beginTransaction();
-			Users usuario = new Users(getUsers().getId()).getUsuarioPorID();
+			// Usar la sesión actual en lugar de abrir nuevas sesiones
+			Users usuario = session.get(Users.class, getUsers().getId());
 			Modulos modulo = session.get(Modulos.class, getModulos().getId());
+			
+			if (usuario == null) {
+				throw new IllegalArgumentException("No se encontró el usuario con ID: " + getUsers().getId());
+			}
+			if (modulo == null) {
+				throw new IllegalArgumentException("No se encontró el módulo con ID: " + getModulos().getId());
+			}
+			
 			setUsers(usuario);
 			setModulos(modulo);
 			Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -251,12 +261,17 @@ public class Horarios implements java.io.Serializable {
 			setUpdatedAt(now);
 			session.persist(this);
 			tx.commit();
-			return this;
-		} catch (Exception e) {
+			return new Horarios(this);
+		} catch (IllegalArgumentException e) {
 			if (tx != null) {
 				tx.rollback();
 			}
 			throw e;
+		} catch (Exception e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			throw new RuntimeException("Error al crear el horario: " + e.getMessage(), e);
 		}
 	}
 }

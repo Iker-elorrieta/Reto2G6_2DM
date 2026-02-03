@@ -297,23 +297,23 @@ public class Users implements java.io.Serializable {
 	 */
 	public Users getUsuarioUsernameContraseña(String tipoObligatorio) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users where username = ?1 and password = ?2";
+			// Si se especifica un rol obligatorio, añadir la condición
+			if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+				hql += " and tipos.name = :tipo";
+			}
 
-		String hql = "from Users where username = ?1 and password = ?2";
-		// Si se especifica un rol obligatorio, añadir la condición
-		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
-			hql += " and tipos.name = :tipo";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			// Asignar parámetros cifrados (clave SERVIDOR -> DB)
+			q.setParameter(1, cifrar(username, TIPO_SERVIDOR));
+			q.setParameter(2, cifrar(password, TIPO_SERVIDOR));
+			if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+				q.setParameter("tipo", tipoObligatorio);
+			}
+			Users resultado = q.uniqueResult();
+			return resultado != null ? new Users(resultado) : null;
 		}
-
-		Query<Users> q = session.createQuery(hql, Users.class);
-		// Asignar parámetros cifrados (clave SERVIDOR -> DB)
-		q.setParameter(1, cifrar(username, TIPO_SERVIDOR));
-		q.setParameter(2, cifrar(password, TIPO_SERVIDOR));
-		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
-			q.setParameter("tipo", tipoObligatorio);
-		}
-		Users resultado = q.uniqueResult();
-		return resultado != null ? new Users(resultado) : null;
 	}
 
 	/**
@@ -322,9 +322,10 @@ public class Users implements java.io.Serializable {
 	@JsonIgnore
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		Users user = session.get(Users.class, getId());
-		return new Users(user);
+		try (Session session = sesion.openSession()) {
+			Users user = session.get(Users.class, getId());
+			return new Users(user);
+		}
 	}
 
 	/**
@@ -333,15 +334,16 @@ public class Users implements java.io.Serializable {
 	@JsonIgnore
 	public static List<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users where tipos.name = :nombre";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter("nombre", nombre);
-		List<Users> usuarios = new ArrayList<Users>();
-		for (Users usuario : q.list()) {
-			usuarios.add(new Users(usuario));
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users where tipos.name = :nombre";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			q.setParameter("nombre", nombre);
+			List<Users> usuarios = new ArrayList<Users>();
+			for (Users usuario : q.list()) {
+				usuarios.add(new Users(usuario));
+			}
+			return usuarios;
 		}
-		return usuarios;
 	}
 
 	/**
@@ -349,14 +351,15 @@ public class Users implements java.io.Serializable {
 	 */
 	public static List<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		List<Users> usuarios = new ArrayList<Users>();
-		for (Users usuario : q.list()) {
-			usuarios.add(new Users(usuario));
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			List<Users> usuarios = new ArrayList<Users>();
+			for (Users usuario : q.list()) {
+				usuarios.add(new Users(usuario));
+			}
+			return usuarios;
 		}
-		return usuarios;
 	}
 
 	/**
