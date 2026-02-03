@@ -184,6 +184,8 @@ public class TablaHorario extends JPanel {
 			// Si no hay reunión, devolver solo el HTML del módulo
 			if (primerReunion == null) {
 				return primerHorario.getModuloHtml(mostrarModuloCompleto, false);
+			} else if (primerHorario == null) {
+				return primerReunion.getDescripcionHtml(false, false);
 			}
 			// Si hay ambos, construir un bloque HTML con módulo arriba y reunión abajo
 			String moduloContenido = primerHorario.getModuloHtml(mostrarModuloCompleto, false);

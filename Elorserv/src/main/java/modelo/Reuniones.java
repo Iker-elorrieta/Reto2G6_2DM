@@ -463,7 +463,7 @@ public class Reuniones implements java.io.Serializable {
 			reunion.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(reunion);
 			tx.commit();
-			return this;
+			return new Reuniones(reunion);
 		} catch (Exception e) {
 			if (tx != null) {
 				tx.rollback();
