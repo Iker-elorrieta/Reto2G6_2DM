@@ -425,7 +425,6 @@ public class Reuniones implements java.io.Serializable {
 			
 			session.persist(this);
 			tx.commit();
-			// Devolver una copia para evitar problemas de lazy loading
 			return new Reuniones(this);
 		} catch (IllegalArgumentException e) {
 			if (tx != null) {
