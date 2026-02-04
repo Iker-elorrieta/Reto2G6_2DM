@@ -26,7 +26,10 @@ public class Users implements java.io.Serializable {
 	private static final String AES_TRANSFORMATION = "AES/ECB/PKCS5Padding";
 	private static final int AES_KEY_LENGTH = 16;
 	private static final String ENV_KEY = System.getenv().getOrDefault("ELOR_AES_KEY", "ELORG6RETO2");
-
+	private static final String CLIENT_ENV_KEY = System.getenv().getOrDefault("ELOR_CLIENT_AES_KEY", "CLNTS3CR3T202601");
+	public static final String TIPO_CLIENTE = "CLIENTE";
+	public static final String TIPO_SERVIDOR = "SERVIDOR";
+	
 	private static final long serialVersionUID = 1L;
 	private Integer id;
 	private Tipos tipos;
@@ -104,11 +107,11 @@ public class Users implements java.io.Serializable {
 	public Users(Users otro) {
 	    this.id = otro.getId();
 	    this.email = otro.getEmail();
-	    this.username = descifrar(otro.getUsername()); 
+	    this.username = descifrar(otro.getUsername(), TIPO_SERVIDOR); 
 	    this.password = otro.getPassword();
 	    this.nombre = otro.getNombre();
 	    this.apellidos = otro.getApellidos();
-	    this.dni = otro.getDni();
+		this.dni = otro.getDni();
 	    this.direccion = otro.getDireccion();
 	    this.telefono1 = otro.getTelefono1();
 	    this.telefono2 = otro.getTelefono2();
@@ -262,14 +265,10 @@ public class Users implements java.io.Serializable {
 		this.reunionesesForProfesorId = reunionesesForProfesorId;
 	}
 
-	@Override
-	public String toString() {
-		return "Users [id=" + id + ", tipos=" + tipos + ", email=" + email + ", username=" + username + ", password="
-				+ password + ", nombre=" + nombre + ", apellidos=" + apellidos + ", dni=" + dni + ", direccion="
-				+ direccion + ", telefono1=" + telefono1 + ", telefono2=" + telefono2 + ", argazkiaUrl=" + argazkiaUrl
-				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
-	}
-
+	/**
+	 * Valida las credenciales del usuario actual y devuelve el usuario si existen.
+	 * Si se especifica un tipoObligatorio, también valida que el usuario tenga ese rol.
+	*/
 	public Users iniciarSesion(String tipoObligatorio) {
 		if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
 			throw new IllegalArgumentException("Usuario o contraseña incorrectos");
@@ -292,61 +291,80 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Busca en la base de datos un usuario que coincida con el username y password actuales.
+	 * Si tipoObligatorio está definido, añade esa condición a la consulta.
+	 */
 	public Users getUsuarioUsernameContraseña(String tipoObligatorio) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users where username = ?1 and password = ?2";
+			// Si se especifica un rol obligatorio, añadir la condición
+			if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+				hql += " and tipos.name = :tipo";
+			}
 
-		String hql = "from Users where username = ?1 and password = ?2";
-		// Si se especifica un rol obligatorio, añadir la condición
-		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
-			hql += " and tipos.name = :tipo";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			// Asignar parámetros cifrados (clave SERVIDOR -> DB)
+			q.setParameter(1, cifrar(username, TIPO_SERVIDOR));
+			q.setParameter(2, cifrar(password, TIPO_SERVIDOR));
+			if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
+				q.setParameter("tipo", tipoObligatorio);
+			}
+			Users resultado = q.uniqueResult();
+			return resultado != null ? new Users(resultado) : null;
 		}
-
-		Query<Users> q = session.createQuery(hql, Users.class);
-		// Asignar parámetros cifrados
-		q.setParameter(1, cifrar(username));
-		q.setParameter(2, cifrar(password));
-		if (tipoObligatorio != null && !tipoObligatorio.isBlank()) {
-			q.setParameter("tipo", tipoObligatorio);
-		}
-		Users resultado = q.uniqueResult();
-		return resultado != null ? new Users(resultado) : null;
 	}
 
+	/**
+	 * Recupera la información del usuario desde la base de datos por su id y devuelve una copia.
+	 */
 	@JsonIgnore
 	public Users getUsuarioPorID() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		Users user = session.get(Users.class, getId());
-		return new Users(user);
+		try (Session session = sesion.openSession()) {
+			Users user = session.get(Users.class, getId());
+			return new Users(user);
+		}
 	}
 
+	/**
+	 * Recupera todos los usuarios que tienen el tipo/rol especificado.
+	 */
 	@JsonIgnore
 	public static List<Users> getUsersByTipo(String nombre) {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users where tipos.name = :nombre";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		q.setParameter("nombre", nombre);
-		List<Users> usuarios = new ArrayList<Users>();
-		for (Users usuario : q.list()) {
-			usuarios.add(new Users(usuario));
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users where tipos.name = :nombre";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			q.setParameter("nombre", nombre);
+			List<Users> usuarios = new ArrayList<Users>();
+			for (Users usuario : q.list()) {
+				usuarios.add(new Users(usuario));
+			}
+			return usuarios;
 		}
-		return usuarios;
 	}
 
+	/**
+	 * Recupera todos los usuarios de la base de datos.
+	 */
 	public static List<Users> getAllUsuarios() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
-		Session session = sesion.openSession();
-		String hql = "from Users";
-		Query<Users> q = session.createQuery(hql, Users.class);
-		List<Users> usuarios = new ArrayList<Users>();
-		for (Users usuario : q.list()) {
-			usuarios.add(new Users(usuario));
+		try (Session session = sesion.openSession()) {
+			String hql = "from Users";
+			Query<Users> q = session.createQuery(hql, Users.class);
+			List<Users> usuarios = new ArrayList<Users>();
+			for (Users usuario : q.list()) {
+				usuarios.add(new Users(usuario));
+			}
+			return usuarios;
 		}
-		return usuarios;
 	}
 
+	/**
+	 * Devuelve la lista de alumnos asociados a este profesor según las matrículas y horarios.
+	 */
 	@JsonIgnore
 	public List<Users> getAlumnosbyProfesorID() {
 		if (getId() == null) {
@@ -372,15 +390,19 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Crea un nuevo usuario en la base de datos.
+	 * Normaliza y cifra el username y la contraseña, y establece timestamps.
+	 */
 	public Users crearUsuario() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
 			Transaction tx = session.beginTransaction();
 			String usernameNormalizado = getUsername().trim().toLowerCase();
 			asegurarUsernameDisponible(usernameNormalizado, null);
-			// Cifrado simétrico
-			setUsername(cifrar(usernameNormalizado));
-			setPassword(cifrar(getPassword()));
+			// Cifrado simétrico (clave SERVIDOR -> DB)
+			setUsername(cifrar(usernameNormalizado, TIPO_SERVIDOR));
+			setPassword(cifrar(getPassword(), TIPO_SERVIDOR));
 			setId(null);
 
 			// Timestamps
@@ -397,6 +419,10 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Actualiza un usuario existente en la base de datos con los datos de este objeto.
+	 * Verifica disponibilidad de username y mantiene el tipo asociado si se proporciona.
+	 */
 	public Users actualizarUsuario() {
 		if (getId() == null) {
 			throw new IllegalArgumentException("Id obligatorio para actualizar usuario");
@@ -415,8 +441,8 @@ public class Users implements java.io.Serializable {
 				existente.setTipos(tipoGestionado);
 			}
 			existente.setEmail(getEmail());
-			existente.setUsername(cifrar(getUsername()));
-			existente.setUsername(cifrar(usernameNormalizado));
+			existente.setUsername(cifrar(getUsername(), TIPO_SERVIDOR));
+			existente.setUsername(cifrar(usernameNormalizado, TIPO_SERVIDOR));
 			existente.setNombre(getNombre());
 			existente.setApellidos(getApellidos());
 			existente.setDni(getDni());
@@ -434,6 +460,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Cambia la contraseña del usuario actual.
+	 * */
 	public Users cambiarPassword(String nuevaPassword) {
 		if (getId() == null) {
 			throw new IllegalArgumentException("Id obligatorio para cambiar la contraseña");
@@ -448,7 +477,7 @@ public class Users implements java.io.Serializable {
 			if (existente == null) {
 				throw new RuntimeException("Usuario no encontrado con id: " + getId());
 			}
-			existente.setPassword(cifrar(nuevaPassword));
+				existente.setPassword(cifrar(nuevaPassword, TIPO_SERVIDOR));
 			existente.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 			session.merge(existente);
 			tx.commit();
@@ -458,6 +487,9 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Elimina el usuario de la base de datos identificado por este objeto.
+	 */
 	public void borrarUsuario() {
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
 		try (Session session = sesion.openSession()) {
@@ -481,12 +513,18 @@ public class Users implements java.io.Serializable {
 
 	}
 
+	/**
+	 * Lanza una excepción si el username ya está registrado en la base de datos.
+	 */
 	private static void asegurarUsernameDisponible(String username, Integer excluirId) {
 		if (usernameExiste(username, excluirId)) {
 			throw new IllegalArgumentException("El nombre de usuario ya está en uso");
 		}
 	}
 
+	/**
+	 * Comprueba si un username ya existe en la base de datos.
+	*/
 	public static boolean usernameExiste(String username, Integer excluirId) {
 		String usernameNormalizado = username.trim().toLowerCase();
 		SessionFactory sesion = HibernateUtil.getSessionFactory();
@@ -496,7 +534,7 @@ public class Users implements java.io.Serializable {
 				hql = hql + " and u <> :excluir";
 			}
 			Query<Long> q = session.createQuery(hql.toString(), Long.class);
-			q.setParameter("username", cifrar(usernameNormalizado));
+			q.setParameter("username", cifrar(usernameNormalizado, TIPO_SERVIDOR));
 			if (excluirId != null) {
 				Users u = session.get(Users.class, excluirId);
 				q.setParameter("excluir", u);
@@ -507,13 +545,15 @@ public class Users implements java.io.Serializable {
 	}
 
 
-	public static String cifrar(String valor) {
-		if (valor == null) {
-			return null;
-		}
+	/**
+	 * Cifra usando el tipo indicado: "CLIENTE" o "SERVIDOR".
+	 */
+	public static String cifrar(String valor, String tipo) {
+		if (valor == null) return null;
+		String clave = TIPO_CLIENTE.equalsIgnoreCase(tipo) ? CLIENT_ENV_KEY : ENV_KEY;
 		try {
 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
-			cipher.init(Cipher.ENCRYPT_MODE, key());
+			cipher.init(Cipher.ENCRYPT_MODE, keyFromString(clave));
 			byte[] cifrado = cipher.doFinal(valor.getBytes(StandardCharsets.UTF_8));
 			return Base64.getEncoder().encodeToString(cifrado);
 		} catch (Exception e) {
@@ -521,13 +561,15 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
-	public static String descifrar(String valor) {
-		if (valor == null) {
-			return null;
-		}
+	/**
+	 * Descifra usando el tipo indicado: "CLIENTE" o "SERVIDOR".
+	 */
+	public static String descifrar(String valor, String tipo) {
+		if (valor == null) return null;
+		String clave = TIPO_CLIENTE.equalsIgnoreCase(tipo) ? CLIENT_ENV_KEY : ENV_KEY;
 		try {
 			Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
-			cipher.init(Cipher.DECRYPT_MODE, key());
+			cipher.init(Cipher.DECRYPT_MODE, keyFromString(clave));
 			byte[] decodificado = Base64.getDecoder().decode(valor);
 			byte[] descifrado = cipher.doFinal(decodificado);
 			return new String(descifrado, StandardCharsets.UTF_8);
@@ -536,9 +578,13 @@ public class Users implements java.io.Serializable {
 		}
 	}
 
+
+	/**
+	 * Genera la clave AES a partir de la variable de entorno de configuración (clave concreta).
+	 */
 	@JsonIgnore
-	private static SecretKeySpec key() {
-		byte[] keyBytes = ENV_KEY.getBytes(StandardCharsets.UTF_8);
+	private static SecretKeySpec keyFromString(String clave) {
+		byte[] keyBytes = clave.getBytes(StandardCharsets.UTF_8);
 		byte[] normalized = new byte[AES_KEY_LENGTH];
 		for (int i = 0; i < AES_KEY_LENGTH; i++) {
 			normalized[i] = i < keyBytes.length ? keyBytes[i] : 0;

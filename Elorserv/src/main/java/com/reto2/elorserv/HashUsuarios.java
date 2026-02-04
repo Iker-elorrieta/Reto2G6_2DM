@@ -19,8 +19,8 @@ public class HashUsuarios {
 		String hql = "from Users";
 		List<Users> u = session.createQuery(hql, Users.class).list();
 		for (Users usuario : u) {
-			usuario.setUsername(Users.cifrar(usuario.getUsername()));
-			usuario.setPassword(Users.cifrar(usuario.getPassword()));
+			usuario.setUsername(Users.cifrar(usuario.getUsername(), Users.TIPO_SERVIDOR));
+			usuario.setPassword(Users.cifrar(usuario.getPassword(), Users.TIPO_SERVIDOR));
 			session.merge(usuario);
 		}
 		tx.commit();

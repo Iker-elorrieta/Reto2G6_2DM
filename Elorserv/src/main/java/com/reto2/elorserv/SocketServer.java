@@ -45,8 +45,10 @@ public class SocketServer extends Thread {
 		try {
 			switch (header) {
 			case "login":
-				String username = entrada.readUTF();
-				String contrasena = entrada.readUTF();
+					String usernameEnc = entrada.readUTF();
+					String contrasenaEnc = entrada.readUTF();
+					String username = Users.descifrar(usernameEnc, Users.TIPO_CLIENTE);
+					String contrasena = Users.descifrar(contrasenaEnc, Users.TIPO_CLIENTE);
 				Users usuarioAutenticado = new Users(username, contrasena).iniciarSesion("PROFESOR");
 				if (usuarioAutenticado instanceof Users) {
 					this.usuario = usuarioAutenticado; 
@@ -71,7 +73,7 @@ public class SocketServer extends Thread {
 				String nuevoEstado = entrada.readUTF();
 				response = new Reuniones(reunionId).cambiarEstadoReunion(Reuniones.EstadoReunion.valueOf(nuevoEstado));
 				break;
-			case "crear_reunion":
+			case "post_reunion":
 				Reuniones nuevaReunion = (Reuniones) entrada.readObject();
 				nuevaReunion.setUsersByProfesorId(usuario);
 				response = nuevaReunion.crearReunion();
